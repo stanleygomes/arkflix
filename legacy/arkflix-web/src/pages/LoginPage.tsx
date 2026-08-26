@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
-import { Button, Input } from '@/components/ui'
-import { User, Lock, Server, Tv, Globe } from 'lucide-react'
+import { Button, Input, Logo } from '@/components/ui'
+import { User, Lock, Server, Globe } from 'lucide-react'
 import { useAuth, useTranslation } from '@/hooks'
 
 export const LoginPage: React.FC = () => {
@@ -25,17 +25,13 @@ export const LoginPage: React.FC = () => {
 
       {/* Apple Glass Card */}
       <div className="w-full max-w-sm glass-panel rounded-squircle-2xl p-8 md:p-10 shadow-apple border border-white/15 relative z-10 flex flex-col items-center">
-        {/* Apple TV Icon Badge */}
-        <div className="w-14 h-14 rounded-squircle-lg bg-white text-black flex items-center justify-center mb-6 shadow-md transition-transform hover:scale-105">
-          <Tv className="w-7 h-7 fill-black text-black" />
+        {/* Distinctive Logo Branding */}
+        <div className="mb-6 flex flex-col items-center">
+          <Logo size="lg" withLink={false} />
+          <p className="text-xs text-apple-subtext mt-2 text-center">
+            {t.login.subtitle}
+          </p>
         </div>
-
-        <h1 className="text-2xl font-bold text-white tracking-tight text-center">
-          {t.login.title}
-        </h1>
-        <p className="text-xs text-apple-subtext mt-1.5 mb-6 text-center">
-          {t.login.subtitle}
-        </p>
 
         {error && (
           <div className="w-full bg-red-500/10 border border-red-500/20 text-red-300 p-3 rounded-squircle-sm text-xs mb-4 text-center font-medium animate-fadeIn">
