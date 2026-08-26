@@ -1,8 +1,8 @@
 import React from 'react'
-import { Play, Pause, Volume2, VolumeX, Maximize, Minimize, RotateCcw, RotateCw, Subtitles } from 'lucide-react'
+import { Play, Pause, Volume2, VolumeX, Maximize, Minimize, RotateCcw, RotateCw, Subtitles, Cast } from 'lucide-react'
 import { Slider } from '@/components/ui'
 import { MediaStream } from '@/types/jellyfin'
-import { useTranslation } from '@/hooks'
+import { useTranslation, useChromecast } from '@/hooks'
 
 interface VideoControlsProps {
   isPlaying: boolean
@@ -50,6 +50,7 @@ export const VideoControls: React.FC<VideoControlsProps> = ({
   onSelectSubtitle,
 }) => {
   const { t } = useTranslation()
+  const chromecast = useChromecast()
   const [showAudioMenu, setShowAudioMenu] = React.useState(false)
 
   const formatTime = (seconds: number) => {
@@ -61,6 +62,16 @@ export const VideoControls: React.FC<VideoControlsProps> = ({
       return `${hrs}:${mins < 10 ? '0' : ''}${mins}:${secs < 10 ? '0' : ''}${secs}`
     }
     return `${mins}:${secs < 10 ? '0' : ''}${secs}`
+  }
+
+  const handleCastClick = () => {
+    if (window.cast?.framework) {
+      try {
+        window.cast.framework.CastContext.getInstance().requestSession()
+      } catch (err) {
+        console.log('Cast request error:', err)
+      }
+    }
   }
 
   return (
@@ -83,7 +94,7 @@ export const VideoControls: React.FC<VideoControlsProps> = ({
         <div className="flex items-center gap-5">
           <button
             onClick={onTogglePlay}
-            className="w-10 h-10 rounded-full bg-white text-black flex items-center justify-center hover:bg-white/90 active:scale-90 transition-all shadow-md"
+            className="w-10 h-10 rounded-full bg-white text-black flex items-center justify-center hover:bg-white/90 active:scale-90 transition-all shadow-md cursor-pointer"
             title={isPlaying ? t.player.pauseTooltip : t.player.playTooltip}
           >
             {isPlaying ? (
@@ -95,7 +106,7 @@ export const VideoControls: React.FC<VideoControlsProps> = ({
 
           <button
             onClick={() => onSkip(-10)}
-            className="p-2 rounded-full text-white/80 hover:text-white hover:bg-white/10 active:scale-95 transition-all"
+            className="p-2 rounded-full text-white/80 hover:text-white hover:bg-white/10 active:scale-95 transition-all cursor-pointer"
             title={t.player.rewindTooltip}
           >
             <RotateCcw className="w-4 h-4" />
@@ -103,7 +114,7 @@ export const VideoControls: React.FC<VideoControlsProps> = ({
 
           <button
             onClick={() => onSkip(10)}
-            className="p-2 rounded-full text-white/80 hover:text-white hover:bg-white/10 active:scale-95 transition-all"
+            className="p-2 rounded-full text-white/80 hover:text-white hover:bg-white/10 active:scale-95 transition-all cursor-pointer"
             title={t.player.forwardTooltip}
           >
             <RotateCw className="w-4 h-4" />
@@ -113,7 +124,7 @@ export const VideoControls: React.FC<VideoControlsProps> = ({
           <div className="flex items-center gap-2 group/volume">
             <button
               onClick={onToggleMute}
-              className="p-2 rounded-full text-white/80 hover:text-white hover:bg-white/10 transition-colors"
+              className="p-2 rounded-full text-white/80 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
             >
               {isMuted || volume === 0 ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
             </button>
@@ -145,7 +156,7 @@ export const VideoControls: React.FC<VideoControlsProps> = ({
             <div className="relative">
               <button
                 onClick={() => setShowAudioMenu(!showAudioMenu)}
-                className={`p-2 rounded-full transition-all ${
+                className={`p-2 rounded-full transition-all cursor-pointer ${
                   showAudioMenu
                     ? 'bg-white/20 text-white'
                     : 'text-white/80 hover:text-white hover:bg-white/10'
@@ -169,7 +180,7 @@ export const VideoControls: React.FC<VideoControlsProps> = ({
                               onSelectAudio?.(audio.Index)
                               setShowAudioMenu(false)
                             }}
-                            className={`w-full text-left px-2.5 py-1.5 rounded-squircle-sm transition-all ${
+                            className={`w-full text-left px-2.5 py-1.5 rounded-squircle-sm transition-all cursor-pointer ${
                               selectedAudioIndex === audio.Index
                                 ? 'bg-white text-black font-semibold shadow-sm'
                                 : 'hover:bg-white/10 text-white/80'
@@ -192,7 +203,7 @@ export const VideoControls: React.FC<VideoControlsProps> = ({
                             onSelectSubtitle?.(-1)
                             setShowAudioMenu(false)
                           }}
-                          className={`w-full text-left px-2.5 py-1.5 rounded-squircle-sm transition-all ${
+                          className={`w-full text-left px-2.5 py-1.5 rounded-squircle-sm transition-all cursor-pointer ${
                             selectedSubtitleIndex === -1
                               ? 'bg-white text-black font-semibold shadow-sm'
                               : 'hover:bg-white/10 text-white/80'
@@ -207,7 +218,7 @@ export const VideoControls: React.FC<VideoControlsProps> = ({
                               onSelectSubtitle?.(sub.Index)
                               setShowAudioMenu(false)
                             }}
-                            className={`w-full text-left px-2.5 py-1.5 rounded-squircle-sm transition-all ${
+                            className={`w-full text-left px-2.5 py-1.5 rounded-squircle-sm transition-all cursor-pointer ${
                               selectedSubtitleIndex === sub.Index
                                 ? 'bg-white text-black font-semibold shadow-sm'
                                 : 'hover:bg-white/10 text-white/80'
@@ -224,17 +235,24 @@ export const VideoControls: React.FC<VideoControlsProps> = ({
             </div>
           )}
 
-          {/* Google Cast Launcher */}
-          <div className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-white/10 transition-colors">
-            {React.createElement('google-cast-launcher', {
-              class: 'w-4 h-4 cursor-pointer opacity-70 hover:opacity-100 transition-opacity',
-            })}
+          {/* Google Cast Launcher in Player */}
+          <div
+            onClick={handleCastClick}
+            title={chromecast.isConnected ? `Conectado a ${chromecast.deviceName}` : 'Transmitir via Google Cast'}
+            className="relative w-9 h-9 flex items-center justify-center rounded-full hover:bg-white/10 transition-colors cursor-pointer"
+          >
+            <Cast className={`w-5 h-5 transition-colors ${chromecast.isConnected ? 'text-apple-accent stroke-[2.5]' : 'text-white/80'}`} />
+            <div className="absolute inset-0 opacity-0 overflow-hidden flex items-center justify-center cursor-pointer">
+              {React.createElement('google-cast-launcher', {
+                class: 'w-full h-full cursor-pointer',
+              })}
+            </div>
           </div>
 
           {/* Fullscreen Button */}
           <button
             onClick={onToggleFullscreen}
-            className="p-2 rounded-full text-white/80 hover:text-white hover:bg-white/10 transition-all"
+            className="p-2 rounded-full text-white/80 hover:text-white hover:bg-white/10 transition-all cursor-pointer"
             title={isFullscreen ? t.player.exitFullscreen : t.player.fullscreen}
           >
             {isFullscreen ? <Minimize className="w-5 h-5" /> : <Maximize className="w-5 h-5" />}

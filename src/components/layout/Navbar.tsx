@@ -1,8 +1,8 @@
 import React from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
-import { Search, User } from 'lucide-react'
+import { Search, User, Cast } from 'lucide-react'
 import { useAuthStore } from '@/stores/authStore'
-import { useTranslation } from '@/hooks'
+import { useTranslation, useChromecast } from '@/hooks'
 import { getUserAvatarUrl } from '@/services/api'
 import { Logo } from '@/components/ui'
 import { cn } from '@/lib/utils'
@@ -14,6 +14,7 @@ export const Navbar: React.FC = () => {
   const [avatarError, setAvatarError] = React.useState(false)
   const { user } = useAuthStore()
   const { t } = useTranslation()
+  const chromecast = useChromecast()
   const navigate = useNavigate()
   const location = useLocation()
 
@@ -32,6 +33,16 @@ export const Navbar: React.FC = () => {
     if (searchQuery.trim()) {
       navigate(`/search?q=${encodeURIComponent(searchQuery)}`)
       setShowSearch(false)
+    }
+  }
+
+  const handleCastClick = () => {
+    if (window.cast?.framework) {
+      try {
+        window.cast.framework.CastContext.getInstance().requestSession()
+      } catch (err) {
+        console.log('Cast session request:', err)
+      }
     }
   }
 
@@ -138,19 +149,24 @@ export const Navbar: React.FC = () => {
           )}
         </div>
 
-        {/* Google Cast Button Launcher */}
+        {/* Google Cast Button Launcher (with Fallback Icon and overlay) */}
         <div
+          onClick={handleCastClick}
+          title={chromecast.isConnected ? `Conectado a ${chromecast.deviceName}` : 'Transmitir via Google Cast'}
           className={cn(
-            'w-9 h-9 flex items-center justify-center p-1 rounded-full transition-all hover:scale-105 active:scale-95',
-            isProfilePage ? 'hover:bg-black/5' : 'hover:bg-white/15'
+            'relative w-9 h-9 flex items-center justify-center p-1 rounded-full transition-all hover:scale-105 active:scale-95 cursor-pointer',
+            isProfilePage ? 'hover:bg-black/5 text-[#1D1D1F]' : 'hover:bg-white/15 text-white/90'
           )}
         >
-          {React.createElement('google-cast-launcher', {
-            class: cn(
-              'w-5 h-5 cursor-pointer transition-opacity',
-              isProfilePage ? 'opacity-90 hover:opacity-100 invert' : 'opacity-85 hover:opacity-100'
-            ),
-          })}
+          {/* Always visible Lucide Cast Icon */}
+          <Cast className={cn('w-5 h-5 transition-colors', chromecast.isConnected ? 'text-apple-accent stroke-[2.5]' : '')} />
+
+          {/* Native Web Component Overlay */}
+          <div className="absolute inset-0 opacity-0 cursor-pointer overflow-hidden flex items-center justify-center">
+            {React.createElement('google-cast-launcher', {
+              class: 'w-full h-full cursor-pointer',
+            })}
+          </div>
         </div>
 
         {/* User Profile Avatar */}

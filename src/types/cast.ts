@@ -53,6 +53,7 @@ declare global {
           getInstance: () => {
             setOptions: (options: { receiverApplicationId: string; autoJoinPolicy: any }) => void
             getCurrentSession: () => CastSession | null
+            requestSession: () => Promise<any>
             addEventListener: (eventType: string, eventHandler: (event: any) => void) => void
             removeEventListener: (eventType: string, eventHandler: (event: any) => void) => void
           }
