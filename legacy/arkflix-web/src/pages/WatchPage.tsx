@@ -4,6 +4,7 @@ import { ArrowLeft, Play, Pause, Volume2, VolumeX, Maximize } from 'lucide-react
 import Hls from 'hls.js'
 import { useAuthStore } from '@/stores/authStore'
 import { jellyfinService } from '@/services/jellyfin'
+import { Slider } from '@/components/ui'
 import { useQuery } from '@tanstack/react-query'
 
 export const WatchPage: React.FC = () => {
@@ -128,14 +129,12 @@ export const WatchPage: React.FC = () => {
           showControls ? 'opacity-100' : 'opacity-0 pointer-events-none'
         }`}
       >
-        {/* Progress Bar */}
-        <input
-          type="range"
+        {/* Reusable Slider for progress */}
+        <Slider
           min={0}
           max={duration || 100}
           value={currentTime}
           onChange={handleSeek}
-          className="w-full h-1.5 bg-white/20 accent-netflix-red rounded-lg appearance-none cursor-pointer hover:h-2 transition-all"
         />
 
         <div className="flex items-center justify-between text-white">

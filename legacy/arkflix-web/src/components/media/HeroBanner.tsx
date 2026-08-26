@@ -2,28 +2,21 @@ import React from 'react'
 import { Play, Info } from 'lucide-react'
 import { MediaItem } from '@/types/jellyfin'
 import { getImageUrl } from '@/services/api'
-import { Button } from '@/components/ui/Button'
+import { Button, HeroBannerSkeleton } from '@/components/ui'
 import { useModalStore } from '@/stores/modalStore'
 import { useNavigate } from 'react-router-dom'
 
 interface HeroBannerProps {
   item?: MediaItem
+  isLoading?: boolean
 }
 
-export const HeroBanner: React.FC<HeroBannerProps> = ({ item }) => {
+export const HeroBanner: React.FC<HeroBannerProps> = ({ item, isLoading }) => {
   const { openModal } = useModalStore()
   const navigate = useNavigate()
 
-  if (!item) {
-    return (
-      <div className="relative h-[65vh] md:h-[80vh] w-full bg-netflix-dark animate-pulse flex items-end pb-24 px-4 md:px-12">
-        <div className="space-y-4 max-w-xl">
-          <div className="h-10 bg-white/10 rounded w-3/4"></div>
-          <div className="h-4 bg-white/10 rounded w-full"></div>
-          <div className="h-4 bg-white/10 rounded w-2/3"></div>
-        </div>
-      </div>
-    )
+  if (isLoading || !item) {
+    return <HeroBannerSkeleton />
   }
 
   const backdropUrl = getImageUrl(item.Id, 'Backdrop', { fillWidth: 1920, quality: 85 })

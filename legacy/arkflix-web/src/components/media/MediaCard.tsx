@@ -2,6 +2,7 @@ import React from 'react'
 import { Play, ChevronDown } from 'lucide-react'
 import { MediaItem } from '@/types/jellyfin'
 import { getImageUrl } from '@/services/api'
+import { Badge, RatingBadge } from '@/components/ui'
 import { useModalStore } from '@/stores/modalStore'
 import { useNavigate } from 'react-router-dom'
 
@@ -28,7 +29,7 @@ export const MediaCard: React.FC<MediaCardProps> = ({ item }) => {
         className="w-full h-full object-cover transition-opacity duration-300 group-hover:opacity-90"
       />
 
-      {/* Progress Bar (para itens em 'Continuar Assistindo') */}
+      {/* Progress Bar */}
       {progressPercent > 0 && (
         <div className="absolute bottom-0 left-0 right-0 h-1.5 bg-black/60 z-10">
           <div
@@ -45,12 +46,10 @@ export const MediaCard: React.FC<MediaCardProps> = ({ item }) => {
         <div className="flex items-center gap-2 text-[11px] text-gray-300 my-1">
           {item.ProductionYear && <span>{item.ProductionYear}</span>}
           {item.OfficialRating && (
-            <span className="border border-gray-400 px-1 py-0.5 rounded text-[9px] uppercase">
-              {item.OfficialRating}
-            </span>
+            <Badge variant="rating">{item.OfficialRating}</Badge>
           )}
           {item.CommunityRating && (
-            <span className="text-green-400 font-semibold">★ {item.CommunityRating.toFixed(1)}</span>
+            <RatingBadge rating={item.CommunityRating} />
           )}
         </div>
 

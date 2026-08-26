@@ -2,6 +2,7 @@ import React from 'react'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { MediaItem } from '@/types/jellyfin'
 import { MediaCard } from './MediaCard'
+import { MediaCardSkeleton, Skeleton } from '@/components/ui'
 
 interface MediaRowProps {
   title: string
@@ -23,13 +24,10 @@ export const MediaRow: React.FC<MediaRowProps> = ({ title, items, isLoading }) =
   if (isLoading) {
     return (
       <div className="my-6 px-4 md:px-12 space-y-3">
-        <div className="h-6 w-48 bg-white/10 rounded animate-pulse"></div>
+        <Skeleton className="h-6 w-48" />
         <div className="flex gap-3 overflow-hidden">
           {Array.from({ length: 6 }).map((_, i) => (
-            <div
-              key={i}
-              className="flex-none w-[160px] sm:w-[200px] md:w-[240px] aspect-[2/3] bg-netflix-dark rounded animate-pulse"
-            />
+            <MediaCardSkeleton key={i} />
           ))}
         </div>
       </div>
