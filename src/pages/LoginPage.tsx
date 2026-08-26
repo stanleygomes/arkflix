@@ -1,19 +1,19 @@
 import React, { useState } from 'react'
 import { Button, Input, Logo } from '@/components/ui'
-import { User, Lock, Server, Globe } from 'lucide-react'
+import { User, Lock, Server } from 'lucide-react'
 import { useAuth, useTranslation } from '@/hooks'
 
 export const LoginPage: React.FC = () => {
   const { serverUrl, login, isLoading, error } = useAuth()
   const { t } = useTranslation()
 
-  const [customServerUrl, setCustomServerUrl] = useState(serverUrl)
-  const [username, setUsername] = useState('nono')
-  const [password, setPassword] = useState('BR#jf2026')
-  const [showServerInput, setShowServerInput] = useState(false)
+  const [customServerUrl, setCustomServerUrl] = useState(serverUrl || '')
+  const [username, setUsername] = useState('')
+  const [password, setPassword] = useState('')
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (!customServerUrl.trim()) return
     await login(username, password, customServerUrl)
   }
 
@@ -40,38 +40,18 @@ export const LoginPage: React.FC = () => {
         )}
 
         <form onSubmit={handleLogin} className="w-full space-y-4">
-          {/* Server URL Input */}
-          <div>
-            <div className="flex items-center justify-between mb-1.5 px-1">
-              <label className="text-xs font-medium text-[#6E6E73]">{t.login.serverLabel}</label>
-              <button
-                type="button"
-                onClick={() => setShowServerInput(!showServerInput)}
-                className="text-[11px] text-[#0071E3] hover:underline font-medium"
-              >
-                {showServerInput ? t.login.hideServer : t.login.changeServer}
-              </button>
-            </div>
-
-            {showServerInput ? (
-              <Input
-                type="text"
-                value={customServerUrl}
-                onChange={(e) => setCustomServerUrl(e.target.value)}
-                placeholder={t.login.serverPlaceholder}
-                icon={<Server className="w-4 h-4 text-[#86868B]" />}
-                className="bg-white text-black border-black/10 focus:bg-white focus:ring-blue-500/20"
-                required
-              />
-            ) : (
-              <div
-                onClick={() => setShowServerInput(true)}
-                className="flex items-center gap-2 px-3.5 py-2.5 bg-black/[0.03] border border-black/10 rounded-squircle text-xs text-[#6E6E73] hover:bg-black/[0.06] cursor-pointer transition-colors"
-              >
-                <Globe className="w-3.5 h-3.5 text-[#0071E3]" />
-                <span className="truncate text-[#1D1D1F] font-mono text-[11px] font-medium">{customServerUrl}</span>
-              </div>
-            )}
+          {/* Server URL Input (Always explicit and editable by user) */}
+          <div className="space-y-1.5">
+            <Input
+              type="text"
+              label={t.login.serverLabel}
+              value={customServerUrl}
+              onChange={(e) => setCustomServerUrl(e.target.value)}
+              placeholder="https://seu-servidor-jellyfin.com"
+              icon={<Server className="w-4 h-4 text-[#86868B]" />}
+              className="bg-white text-black border-black/10 focus:bg-white focus:ring-blue-500/20"
+              required
+            />
           </div>
 
           <div className="space-y-1.5">
