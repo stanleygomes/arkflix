@@ -14,26 +14,14 @@ export const HomePage: React.FC = () => {
   const { data: favoritesData, isLoading: loadingFavorites } = useFavorites(24)
   const favoriteItems = favoritesData?.Items || []
 
-  // Recém Adicionados (Novidades)
+  // 3ª Sessão: Novidades / Adicionados Recentemente
   const { data: latestItems, isLoading: loadingLatest } = useLatestItems(undefined, 20)
 
-  // Filmes
+  // 4ª Sessão: Filmes em Destaque
   const { data: moviesData, isLoading: loadingMovies } = useMovies({ limit: 24, sortBy: 'DateCreated' })
 
-  // Séries
+  // 5ª Sessão: Séries Populares
   const { data: seriesData, isLoading: loadingSeries } = useSeries({ limit: 24, sortBy: 'DateCreated' })
-
-  // Filmes Melhor Avaliados
-  const { data: topRatedMovies, isLoading: loadingTopMovies } = useMovies({
-    limit: 20,
-    sortBy: 'CommunityRating',
-  })
-
-  // Séries Mais Populares / Melhor Avaliadas
-  const { data: topRatedSeries, isLoading: loadingTopSeries } = useSeries({
-    limit: 20,
-    sortBy: 'CommunityRating',
-  })
 
   // Monta lista de destaques rotativos combinando filmes e séries recentes
   const featuredList = [
@@ -51,9 +39,9 @@ export const HomePage: React.FC = () => {
       {/* Rotativo Dinâmico de Destaques (Hero Carousel da API) */}
       <FeaturedCarousel items={featuredList} isLoading={isHeroLoading} autoRotateInterval={7000} />
 
-      {/* SESSÕES DA HOME */}
+      {/* SESSÕES DA HOME ORDENADAS */}
       <div className="-mt-4 sm:-mt-6 md:-mt-8 relative z-10 space-y-2 sm:space-y-4">
-        {/* 1ª SESSÃO: CONTINUAR ASSISTINDO */}
+        {/* 1ª SESSÃO OBRIGATÓRIA: CONTINUAR ASSISTINDO */}
         {resumeItems && resumeItems.length > 0 && (
           <MediaRow
             title={t.home.continueWatching}
@@ -62,7 +50,7 @@ export const HomePage: React.FC = () => {
           />
         )}
 
-        {/* 2ª SESSÃO: MINHA LISTA (FAVORITOS) */}
+        {/* 2ª SESSÃO: MINHA LISTA (Logo abaixo de Continuar Assistindo) */}
         {favoriteItems && favoriteItems.length > 0 && (
           <MediaRow
             title={t.home.myList}
@@ -91,24 +79,6 @@ export const HomePage: React.FC = () => {
           items={seriesData?.Items || []}
           isLoading={loadingSeries}
         />
-
-        {/* 6ª SESSÃO: FILMES MELHOR AVALIADOS (TOP CRÍTICA) */}
-        {topRatedMovies?.Items && topRatedMovies.Items.length > 0 && (
-          <MediaRow
-            title="Filmes Aclamados pela Crítica"
-            items={topRatedMovies.Items}
-            isLoading={loadingTopMovies}
-          />
-        )}
-
-        {/* 7ª SESSÃO: SÉRIES EM ALTA */}
-        {topRatedSeries?.Items && topRatedSeries.Items.length > 0 && (
-          <MediaRow
-            title="Séries Mais Assistidas"
-            items={topRatedSeries.Items}
-            isLoading={loadingTopSeries}
-          />
-        )}
       </div>
 
       {/* Media Details Modal */}
