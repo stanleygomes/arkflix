@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Play, Info, ChevronLeft, ChevronRight } from 'lucide-react'
+import { Play, Info, ChevronLeft, ChevronRight, Plus, Check } from 'lucide-react'
 import { MediaItem } from '@/types/jellyfin'
 import { getImageUrl } from '@/services/api'
 import { Button, HeroBannerSkeleton, RatingBadge } from '@/components/ui'
-import { useTranslation } from '@/hooks'
+import { useTranslation, useToggleFavorite } from '@/hooks'
 import { useNavigate } from 'react-router-dom'
 
 interface FeaturedCarouselProps {
@@ -20,6 +20,7 @@ export const FeaturedCarousel: React.FC<FeaturedCarouselProps> = ({
 }) => {
   const { t } = useTranslation()
   const navigate = useNavigate()
+  const toggleFavorite = useToggleFavorite()
 
   const [currentIndex, setCurrentIndex] = useState(0)
   const [isPaused, setIsPaused] = useState(false)
@@ -45,6 +46,7 @@ export const FeaturedCarousel: React.FC<FeaturedCarouselProps> = ({
   const backdropUrl = getImageUrl(currentItem.Id, 'Backdrop', { fillWidth: 1280, quality: 85 })
   const hasLogo = currentItem.ImageTags?.Logo
   const logoUrl = hasLogo ? getImageUrl(currentItem.Id, 'Logo', { fillWidth: 500, quality: 90 }) : null
+  const isFavorite = !!currentItem.UserData?.IsFavorite
 
   const handlePrev = () => {
     setCurrentIndex((prev) => (prev === 0 ? featuredItems.length - 1 : prev - 1))
@@ -152,6 +154,23 @@ export const FeaturedCarousel: React.FC<FeaturedCarouselProps> = ({
           <Button
             variant="glass"
             size="md"
+            onClick={() => toggleFavorite.mutate({ itemId: currentItem.Id, isFavorite })}
+            className="font-medium text-white flex-1 sm:flex-none text-xs sm:text-sm py-2 sm:py-2.5"
+          >
+            {isFavorite ? (
+              <>
+                <Check className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-emerald-400 mr-1.5 stroke-[3]" /> Na Lista
+              </>
+            ) : (
+              <>
+                <Plus className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1.5" /> Minha Lista
+              </>
+            )}
+          </Button>
+
+          <Button
+            variant="glass"
+            size="md"
             onClick={() => navigate(`/title/${currentItem.Id}`)}
             className="font-medium text-white flex-1 sm:flex-none text-xs sm:text-sm py-2 sm:py-2.5"
           >
@@ -160,7 +179,7 @@ export const FeaturedCarousel: React.FC<FeaturedCarouselProps> = ({
         </div>
       </div>
 
-      {/* Carousel Navigation Indicators (Pill Dots) & Arrows (z-30 positioned above rows) */}
+      {/* Carousel Navigation Indicators (Pill Dots) & Arrows */}
       <div className="absolute bottom-6 sm:bottom-8 md:bottom-12 right-4 sm:right-6 md:right-14 z-30 flex items-center gap-2 sm:gap-3 pointer-events-auto">
         {/* Previous */}
         <button

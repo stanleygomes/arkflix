@@ -1,20 +1,20 @@
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { jellyfinService } from '@/services/jellyfin'
 import { useAuthStore } from '@/stores/authStore'
 
-// Hook: User libraries / views
+// Hook: User Libraries (Views)
 export function useUserLibraries() {
   const { user } = useAuthStore()
   const userId = user?.Id || ''
 
   return useQuery({
-    queryKey: ['libraries', userId],
+    queryKey: ['userLibraries', userId],
     queryFn: () => jellyfinService.getUserLibraries(userId),
     enabled: !!userId,
   })
 }
 
-// Hook: Items from a specific Library / Folder (ParentId)
+// Hook: Items from a specific library
 export function useLibraryItems(parentId?: string, params: { sortBy?: string; sortOrder?: 'Ascending' | 'Descending'; limit?: number } = {}) {
   const { user } = useAuthStore()
   const userId = user?.Id || ''
@@ -32,7 +32,7 @@ export function useLibraryItems(parentId?: string, params: { sortBy?: string; so
   })
 }
 
-// Hook: Continue Watching (Resume Items)
+// Hook: Resume / Continue Watching
 export function useResumeItems(limit = 12) {
   const { user } = useAuthStore()
   const userId = user?.Id || ''
@@ -44,7 +44,7 @@ export function useResumeItems(limit = 12) {
   })
 }
 
-// Hook: Latest items
+// Hook: Latest Items
 export function useLatestItems(parentId?: string, limit = 16) {
   const { user } = useAuthStore()
   const userId = user?.Id || ''
@@ -89,6 +89,44 @@ export function useSeries(params: { limit?: number; sortBy?: string; sortOrder?:
         limit: params.limit || 16,
       }),
     enabled: !!userId,
+  })
+}
+
+// Hook: Favorite Items (Minha Lista)
+export function useFavorites(limit = 40) {
+  const { user } = useAuthStore()
+  const userId = user?.Id || ''
+
+  return useQuery({
+    queryKey: ['favorites', userId, limit],
+    queryFn: () => jellyfinService.getFavoriteItems(userId, limit),
+    enabled: !!userId,
+  })
+}
+
+// Hook: Toggle Favorite Mutation (Optimistic update & cache invalidation)
+export function useToggleFavorite() {
+  const { user } = useAuthStore()
+  const userId = user?.Id || ''
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async ({ itemId, isFavorite }: { itemId: string; isFavorite: boolean }) => {
+      if (!userId) return
+      if (isFavorite) {
+        return jellyfinService.unmarkFavorite(userId, itemId)
+      } else {
+        return jellyfinService.markFavorite(userId, itemId)
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['favorites'] })
+      queryClient.invalidateQueries({ queryKey: ['itemDetails'] })
+      queryClient.invalidateQueries({ queryKey: ['movies'] })
+      queryClient.invalidateQueries({ queryKey: ['series'] })
+      queryClient.invalidateQueries({ queryKey: ['latestItems'] })
+      queryClient.invalidateQueries({ queryKey: ['resumeItems'] })
+    },
   })
 }
 

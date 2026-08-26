@@ -2,13 +2,17 @@ import React from 'react'
 import { FeaturedCarousel } from '@/components/media/FeaturedCarousel'
 import { MediaRow } from '@/components/media/MediaRow'
 import { DetailModal } from '@/components/media/DetailModal'
-import { useResumeItems, useLatestItems, useMovies, useSeries, useTranslation } from '@/hooks'
+import { useResumeItems, useLatestItems, useMovies, useSeries, useFavorites, useTranslation } from '@/hooks'
 
 export const HomePage: React.FC = () => {
   const { t } = useTranslation()
 
-  // 1ª Sessão Obrigatória: Continuar Assistindo (Resume Items)
+  // 1ª Sessão: Continuar Assistindo (Resume Items)
   const { data: resumeItems, isLoading: loadingResume } = useResumeItems(16)
+
+  // 2ª Sessão: Minha Lista (Favoritos)
+  const { data: favoritesData, isLoading: loadingFavorites } = useFavorites(24)
+  const favoriteItems = favoritesData?.Items || []
 
   // Recém Adicionados (Novidades)
   const { data: latestItems, isLoading: loadingLatest } = useLatestItems(undefined, 20)
@@ -47,9 +51,9 @@ export const HomePage: React.FC = () => {
       {/* Rotativo Dinâmico de Destaques (Hero Carousel da API) */}
       <FeaturedCarousel items={featuredList} isLoading={isHeroLoading} autoRotateInterval={7000} />
 
-      {/* SESSÕES DA HOME - margem ajustada sem sobreposição aos botões do carousel */}
+      {/* SESSÕES DA HOME */}
       <div className="-mt-4 sm:-mt-6 md:-mt-8 relative z-10 space-y-2 sm:space-y-4">
-        {/* 1ª SESSÃO OBRIGATÓRIA: CONTINUAR ASSISTINDO */}
+        {/* 1ª SESSÃO: CONTINUAR ASSISTINDO */}
         {resumeItems && resumeItems.length > 0 && (
           <MediaRow
             title={t.home.continueWatching}
@@ -58,28 +62,37 @@ export const HomePage: React.FC = () => {
           />
         )}
 
-        {/* 2ª SESSÃO: NOVIDADES / RECÉM ADICIONADOS */}
+        {/* 2ª SESSÃO: MINHA LISTA (FAVORITOS) */}
+        {favoriteItems && favoriteItems.length > 0 && (
+          <MediaRow
+            title={t.home.myList}
+            items={favoriteItems}
+            isLoading={loadingFavorites}
+          />
+        )}
+
+        {/* 3ª SESSÃO: NOVIDADES / RECÉM ADICIONADOS */}
         <MediaRow
           title={t.home.recentlyAdded}
           items={latestItems || []}
           isLoading={loadingLatest}
         />
 
-        {/* 3ª SESSÃO: FILMES EM DESTAQUE */}
+        {/* 4ª SESSÃO: FILMES EM DESTAQUE */}
         <MediaRow
           title={t.home.featuredMovies}
           items={moviesData?.Items || []}
           isLoading={loadingMovies}
         />
 
-        {/* 4ª SESSÃO: SÉRIES POPULARES */}
+        {/* 5ª SESSÃO: SÉRIES POPULARES */}
         <MediaRow
           title={t.home.popularSeries}
           items={seriesData?.Items || []}
           isLoading={loadingSeries}
         />
 
-        {/* 5ª SESSÃO: FILMES MELHOR AVALIADOS (TOP CRÍTICA) */}
+        {/* 6ª SESSÃO: FILMES MELHOR AVALIADOS (TOP CRÍTICA) */}
         {topRatedMovies?.Items && topRatedMovies.Items.length > 0 && (
           <MediaRow
             title="Filmes Aclamados pela Crítica"
@@ -88,7 +101,7 @@ export const HomePage: React.FC = () => {
           />
         )}
 
-        {/* 6ª SESSÃO: SÉRIES EM ALTA */}
+        {/* 7ª SESSÃO: SÉRIES EM ALTA */}
         {topRatedSeries?.Items && topRatedSeries.Items.length > 0 && (
           <MediaRow
             title="Séries Mais Assistidas"

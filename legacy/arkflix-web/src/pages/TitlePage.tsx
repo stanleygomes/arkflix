@@ -2,17 +2,19 @@ import React, { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { getImageUrl } from '@/services/api'
 import { Button, Select, Badge, RatingBadge, AppleSpinner } from '@/components/ui'
-import { useSeasons, useEpisodes, useItemDetails, useTranslation } from '@/hooks'
-import { Play, Clock, Calendar, User, ArrowLeft } from 'lucide-react'
+import { useSeasons, useEpisodes, useItemDetails, useTranslation, useToggleFavorite } from '@/hooks'
+import { Play, Clock, Calendar, User, ArrowLeft, Plus, Check } from 'lucide-react'
 
 export const TitlePage: React.FC = () => {
   const { id } = useParams<{ id: string }>()
   const { t } = useTranslation()
   const navigate = useNavigate()
+  const toggleFavorite = useToggleFavorite()
   const [selectedSeasonId, setSelectedSeasonId] = useState<string | null>(null)
 
   const { data: item, isLoading } = useItemDetails(id)
   const isSeries = item?.Type === 'Series'
+  const isFavorite = !!item?.UserData?.IsFavorite
 
   // Fetch seasons for series
   const { data: seasons } = useSeasons(item?.Id, isSeries && !!item?.Id)
@@ -99,7 +101,7 @@ export const TitlePage: React.FC = () => {
         <div className="absolute top-20 sm:top-24 left-4 sm:left-6 md:left-14 z-20">
           <button
             onClick={() => navigate(-1)}
-            className="flex items-center gap-2 px-3.5 py-2 rounded-full bg-black/60 hover:bg-black/85 backdrop-blur-xl border border-white/20 text-white text-xs font-semibold transition-all hover:scale-105 active:scale-95 shadow-apple"
+            className="flex items-center gap-2 px-3.5 py-2 rounded-full bg-black/60 hover:bg-black/85 backdrop-blur-xl border border-white/20 text-white text-xs font-semibold transition-all hover:scale-105 active:scale-95 shadow-apple cursor-pointer"
           >
             <ArrowLeft className="w-4 h-4" />
             <span>Voltar</span>
@@ -126,7 +128,7 @@ export const TitlePage: React.FC = () => {
             </p>
           )}
 
-          {/* Action Buttons */}
+          {/* Action Buttons: Assistir + Minha Lista */}
           <div className="flex items-center gap-3 pt-2">
             <Button
               variant="primary"
@@ -135,6 +137,23 @@ export const TitlePage: React.FC = () => {
               className="font-semibold shadow-apple text-xs sm:text-base py-2.5 sm:py-3.5 px-6 sm:px-8"
             >
               <Play className="w-4 h-4 fill-black text-black mr-1.5" /> {t.common.watch}
+            </Button>
+
+            <Button
+              variant="glass"
+              size="lg"
+              onClick={() => toggleFavorite.mutate({ itemId: item.Id, isFavorite })}
+              className="font-medium text-white text-xs sm:text-base py-2.5 sm:py-3.5 px-5 sm:px-6 shadow-apple"
+            >
+              {isFavorite ? (
+                <>
+                  <Check className="w-4 h-4 text-emerald-400 mr-2 stroke-[3]" /> Na Minha Lista
+                </>
+              ) : (
+                <>
+                  <Plus className="w-4 h-4 mr-2" /> Minha Lista
+                </>
+              )}
             </Button>
           </div>
         </div>
