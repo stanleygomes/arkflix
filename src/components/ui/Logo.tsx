@@ -22,22 +22,22 @@ export const Logo: React.FC<LogoProps> = ({
     sm: {
       text: 'text-lg font-bold tracking-tight',
       icon: 'w-7 h-7',
-      iconInner: 'w-3.5 h-3.5',
+      iconInner: 'w-4 h-4',
     },
     md: {
       text: 'text-2xl md:text-3xl font-extrabold tracking-tight',
       icon: 'w-10 h-10 md:w-11 md:h-11',
-      iconInner: 'w-5 h-5 md:w-5.5 md:h-5.5',
+      iconInner: 'w-6 h-6',
     },
     lg: {
       text: 'text-3xl md:text-4xl font-extrabold tracking-tight',
       icon: 'w-12 h-12 md:w-14 md:h-14',
-      iconInner: 'w-6 h-6',
+      iconInner: 'w-7 h-7',
     },
     xl: {
       text: 'text-4xl md:text-5xl font-extrabold tracking-tight',
       icon: 'w-16 h-16',
-      iconInner: 'w-7 h-7',
+      iconInner: 'w-8 h-8',
     },
   }
 
@@ -50,7 +50,7 @@ export const Logo: React.FC<LogoProps> = ({
       transition={{ type: 'spring', stiffness: 400, damping: 25 }}
       className={cn('inline-flex items-center gap-3 select-none cursor-pointer group', className)}
     >
-      {/* Icon Squircle (Enlarged & Prominent) */}
+      {/* Icon Squircle with Popcorn Bucket Artwork */}
       <div
         className={cn(
           'rounded-squircle flex items-center justify-center shadow-md relative overflow-hidden transition-all duration-300',
@@ -65,11 +65,14 @@ export const Logo: React.FC<LogoProps> = ({
           fill="currentColor"
           className={cn(isLight ? 'text-white' : 'text-black', sizeMap[size].iconInner)}
         >
-          <path d="M4 4.5A2.5 2.5 0 0 1 6.5 2h11A2.5 2.5 0 0 1 20 4.5v15a2.5 2.5 0 0 1-2.5 2.5h-11A2.5 2.5 0 0 1 4 19.5v-15ZM8 4H6.5A.5.5 0 0 0 6 4.5V6h2V4Zm0 4H6v2h2V8Zm0 4H6v2h2v-2Zm0 4H6v2h2v-2Zm0 4H6.5a.5.5 0 0 0 .5-.5V20H6v-.5h2v.5Zm10-16h-1.5V6H18V4.5a.5.5 0 0 0-.5-.5Zm0 4h-2v2h2V8Zm0 4h-2v2h2v-2Zm0 4h-2v2h2v-2Zm0 4h-2v2h1.5a.5.5 0 0 0 .5-.5V20Zm-7.5-14a.5.5 0 0 0-.5.5v13a.5.5 0 0 0 .75.43l10-6.5a.5.5 0 0 0 0-.86l-10-6.5a.5.5 0 0 0-.25-.07Z" />
+          {/* Popcorn Fluffs Top */}
+          <path d="M7 6.5a2.2 2.2 0 0 1 2.2-2.2c.4 0 .76.11 1.08.31a2.3 2.3 0 0 1 3.44 0A2.2 2.2 0 0 1 14.8 4.3a2.2 2.2 0 0 1 2.2 2.2c0 .48-.15.93-.41 1.3A2.3 2.3 0 0 1 18 10a2.3 2.3 0 0 1-2.3 2.3H8.3A2.3 2.3 0 0 1 6 10c0-.85.46-1.6 1.15-1.99A2.2 2.2 0 0 1 7 6.5Z" />
+          {/* Popcorn Bucket Base */}
+          <path d="M6.6 11.5h10.8l-1.3 9.4a1.8 1.8 0 0 1-1.78 1.6H9.68a1.8 1.8 0 0 1-1.78-1.6L6.6 11.5Zm3.2 2v6m4.4-6v6" fillRule="evenodd" stroke={isLight ? '#000000' : '#FFFFFF'} strokeWidth="1.2" strokeLinecap="round" />
         </svg>
       </div>
 
-      {/* Typography with 100% Crisp High-Contrast & Accessibility */}
+      {/* Typography */}
       <div className="flex items-baseline font-sans">
         <span className={cn(isLight ? 'text-[#1D1D1F]' : 'text-white', sizeMap[size].text)}>
           Ark<span className={isLight ? 'font-medium text-[#6E6E73]' : 'font-light text-[#86868B]'}>flix</span>
