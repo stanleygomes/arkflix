@@ -23,20 +23,22 @@ export const HomePage: React.FC = () => {
   // 5ª Sessão: Séries Populares
   const { data: seriesData, isLoading: loadingSeries } = useSeries({ limit: 24, sortBy: 'DateCreated' })
 
-  // Monta lista de destaques rotativos combinando filmes e séries recentes
-  const featuredList = [
-    ...(latestItems || []),
-    ...(moviesData?.Items || []),
-    ...(seriesData?.Items || []),
-  ].filter(
-    (item, index, self) => index === self.findIndex((t) => t.Id === item.Id)
-  )
+  // Destaques Rotativos no Hero Banner:
+  // Se o usuário tiver itens em "Minha Lista", eles são os destaques principais.
+  // Caso a lista esteja vazia, usa os títulos recentes com imagem como fallback.
+  const featuredList = favoriteItems.length > 0
+    ? favoriteItems
+    : [
+        ...(latestItems || []),
+        ...(moviesData?.Items || []),
+        ...(seriesData?.Items || []),
+      ].filter((item, index, self) => index === self.findIndex((t) => t.Id === item.Id))
 
-  const isHeroLoading = loadingLatest && loadingMovies
+  const isHeroLoading = loadingFavorites && loadingLatest
 
   return (
     <div className="pb-24">
-      {/* Rotativo Dinâmico de Destaques (Hero Carousel da API) */}
+      {/* Rotativo Dinâmico de Destaques (Hero Carousel alimentado por Minha Lista) */}
       <FeaturedCarousel items={featuredList} isLoading={isHeroLoading} autoRotateInterval={7000} />
 
       {/* SESSÕES DA HOME ORDENADAS */}
