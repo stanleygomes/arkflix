@@ -43,6 +43,15 @@ apiClient.interceptors.request.use((config) => {
   return config
 })
 
+// Helper to construct user avatar URL
+export function getUserAvatarUrl(userId: string, tag?: string): string {
+  const params = new URLSearchParams()
+  params.append('fillWidth', '200')
+  params.append('quality', '85')
+  if (tag) params.append('tag', tag)
+  return `${getServerUrl()}/Users/${userId}/Images/Primary?${params.toString()}`
+}
+
 // Helper to construct image URLs with dynamic server url
 export function getImageUrl(
   itemId: string,

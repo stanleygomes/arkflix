@@ -1,7 +1,8 @@
 import React, { useState } from 'react'
 import { useAuth, useTheme, useTranslation } from '@/hooks'
 import { Button, Input, Tabs } from '@/components/ui'
-import { Plus, Moon, Sun, Laptop, Trash2, Check, Server, LogOut } from 'lucide-react'
+import { getUserAvatarUrl } from '@/services/api'
+import { Plus, Moon, Sun, Laptop, Trash2, Check, Server, LogOut, User } from 'lucide-react'
 import { ThemeMode } from '@/stores/themeStore'
 
 export const ProfilePage: React.FC = () => {
@@ -14,6 +15,7 @@ export const ProfilePage: React.FC = () => {
   const [newPassword, setNewPassword] = useState('')
   const [addError, setAddError] = useState('')
   const [isAdding, setIsAdding] = useState(false)
+  const [imgErrors, setImgErrors] = useState<Record<string, boolean>>({})
 
   const handleAddProfile = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -31,6 +33,10 @@ export const ProfilePage: React.FC = () => {
     }
   }
 
+  const handleImgError = (profileId: string) => {
+    setImgErrors((prev) => ({ ...prev, [profileId]: true }))
+  }
+
   const themeTabs = [
     { id: 'dark', label: t.profile.dark, icon: <Moon className="w-3.5 h-3.5" /> },
     { id: 'light', label: t.profile.light, icon: <Sun className="w-3.5 h-3.5" /> },
@@ -41,17 +47,17 @@ export const ProfilePage: React.FC = () => {
     <div className="min-h-screen pt-24 pb-20 px-6 md:px-14 max-w-4xl mx-auto space-y-10 animate-fadeIn">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-extrabold text-white tracking-tight">{t.profile.title}</h1>
+        <h1 className="text-3xl font-extrabold text-apple-text tracking-tight">{t.profile.title}</h1>
         <p className="text-xs text-apple-subtext mt-1">
           {t.profile.subtitle}
         </p>
       </div>
 
       {/* Section 1: Perfis Cadastrados */}
-      <div className="glass-panel p-6 md:p-8 rounded-squircle-xl space-y-6 border border-white/10 shadow-apple">
+      <div className="glass-panel p-6 md:p-8 rounded-squircle-xl space-y-6 shadow-apple">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-base font-bold text-white tracking-tight">{t.profile.whoIsWatching}</h2>
+            <h2 className="text-base font-bold text-apple-text tracking-tight">{t.profile.whoIsWatching}</h2>
             <p className="text-xs text-apple-subtext">{t.profile.whoIsWatchingDesc}</p>
           </div>
 
@@ -69,24 +75,38 @@ export const ProfilePage: React.FC = () => {
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
           {profiles.map((profile) => {
             const isCurrent = profile.id === user?.Id
+            const avatarUrl = getUserAvatarUrl(profile.id, profile.primaryImageTag)
+            const hasImgError = imgErrors[profile.id]
+
             return (
               <div
                 key={profile.id}
                 onClick={() => !isCurrent && switchProfile(profile.id)}
                 className={`relative group flex flex-col items-center p-4 rounded-squircle transition-all duration-300 cursor-pointer ${
                   isCurrent
-                    ? 'bg-white/15 border-2 border-apple-accent shadow-sm'
-                    : 'bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 hover:scale-105'
+                    ? 'bg-apple-accent/15 border-2 border-apple-accent shadow-sm'
+                    : 'bg-black/5 dark:bg-white/[0.04] hover:bg-black/10 dark:hover:bg-white/[0.08] border border-black/10 dark:border-white/10 hover:scale-105'
                 }`}
               >
-                {/* Profile Avatar */}
-                <div
-                  className={`w-16 h-16 rounded-full bg-gradient-to-tr ${profile.avatarColor} flex items-center justify-center text-xl font-bold text-white shadow-md mb-2.5`}
-                >
-                  {profile.name.charAt(0).toUpperCase()}
+                {/* Profile Avatar Image or Fallback */}
+                <div className="relative w-16 h-16 rounded-full overflow-hidden mb-2.5 shadow-md border border-white/20">
+                  {!hasImgError ? (
+                    <img
+                      src={avatarUrl}
+                      alt={profile.name}
+                      onError={() => handleImgError(profile.id)}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div
+                      className={`w-full h-full bg-gradient-to-tr ${profile.avatarColor} flex items-center justify-center text-xl font-bold text-white`}
+                    >
+                      {profile.name.charAt(0).toUpperCase()}
+                    </div>
+                  )}
                 </div>
 
-                <span className="text-xs font-semibold text-white truncate max-w-[120px]">
+                <span className="text-xs font-semibold text-apple-text truncate max-w-[120px]">
                   {profile.name}
                 </span>
 
@@ -118,9 +138,9 @@ export const ProfilePage: React.FC = () => {
         {showAddProfile && (
           <form
             onSubmit={handleAddProfile}
-            className="p-5 rounded-squircle bg-white/[0.03] border border-white/10 space-y-4 animate-fadeIn"
+            className="p-5 rounded-squircle bg-black/5 dark:bg-white/[0.03] border border-black/10 dark:border-white/10 space-y-4 animate-fadeIn"
           >
-            <h3 className="text-xs font-bold text-white uppercase tracking-wider">
+            <h3 className="text-xs font-bold text-apple-text uppercase tracking-wider">
               {t.profile.connectNewProfile}
             </h3>
 
@@ -168,9 +188,9 @@ export const ProfilePage: React.FC = () => {
       </div>
 
       {/* Section 2: Aparência (Modo Escuro / Claro / Auto) */}
-      <div className="glass-panel p-6 md:p-8 rounded-squircle-xl space-y-4 border border-white/10 shadow-apple">
+      <div className="glass-panel p-6 md:p-8 rounded-squircle-xl space-y-4 shadow-apple">
         <div>
-          <h2 className="text-base font-bold text-white tracking-tight">{t.profile.appearanceTitle}</h2>
+          <h2 className="text-base font-bold text-apple-text tracking-tight">{t.profile.appearanceTitle}</h2>
           <p className="text-xs text-apple-subtext">
             {t.profile.appearanceDesc}
           </p>
@@ -186,11 +206,11 @@ export const ProfilePage: React.FC = () => {
       </div>
 
       {/* Section 3: Servidor Conectado & Logout */}
-      <div className="glass-panel p-6 md:p-8 rounded-squircle-xl space-y-4 border border-white/10 shadow-apple flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+      <div className="glass-panel p-6 md:p-8 rounded-squircle-xl space-y-4 shadow-apple flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div className="space-y-1">
           <div className="flex items-center gap-2">
             <Server className="w-4 h-4 text-apple-accent" />
-            <h3 className="text-sm font-semibold text-white">{t.profile.serverTitle}</h3>
+            <h3 className="text-sm font-semibold text-apple-text">{t.profile.serverTitle}</h3>
           </div>
           <p className="text-xs text-apple-subtext font-mono">{serverUrl}</p>
         </div>

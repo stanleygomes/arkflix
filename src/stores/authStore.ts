@@ -6,6 +6,7 @@ export interface ProfileAccount {
   id: string
   name: string
   avatarColor: string
+  primaryImageTag?: string
   token: string
   serverId: string
 }
@@ -59,6 +60,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       id: user.Id,
       name: user.Name,
       avatarColor: existingIndex >= 0 ? profiles[existingIndex].avatarColor : color,
+      primaryImageTag: user.PrimaryImageTag,
       token,
       serverId,
     }
@@ -81,6 +83,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     const userObj: JellyfinUser = {
       Id: profile.id,
       Name: profile.name,
+      PrimaryImageTag: profile.primaryImageTag,
       ServerId: profile.serverId,
     }
 
