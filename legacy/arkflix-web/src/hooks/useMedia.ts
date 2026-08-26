@@ -14,6 +14,24 @@ export function useUserLibraries() {
   })
 }
 
+// Hook: Items from a specific Library / Folder (ParentId)
+export function useLibraryItems(parentId?: string, params: { sortBy?: string; sortOrder?: 'Ascending' | 'Descending'; limit?: number } = {}) {
+  const { user } = useAuthStore()
+  const userId = user?.Id || ''
+
+  return useQuery({
+    queryKey: ['libraryItems', userId, parentId, params],
+    queryFn: () =>
+      jellyfinService.getItems(userId, {
+        parentId,
+        sortBy: params.sortBy || 'DateCreated',
+        sortOrder: params.sortOrder || 'Descending',
+        limit: params.limit || 60,
+      }),
+    enabled: !!userId && !!parentId,
+  })
+}
+
 // Hook: Continue Watching (Resume Items)
 export function useResumeItems(limit = 12) {
   const { user } = useAuthStore()
