@@ -6,10 +6,10 @@
   /* Apple Light Mode Palette */
   --apple-bg: #F5F5F7;
   --apple-card: rgba(255, 255, 255, 0.85);
-  --apple-glass: rgba(255, 255, 255, 0.7);
+  --apple-glass: rgba(255, 255, 255, 0.75);
   --apple-glass-border: rgba(0, 0, 0, 0.08);
-  --apple-glass-hover: rgba(0, 0, 0, 0.05);
-  --apple-subtext: #86868B;
+  --apple-glass-hover: rgba(0, 0, 0, 0.04);
+  --apple-subtext: #6E6E73;
   --apple-text: #1D1D1F;
 }
 
@@ -17,7 +17,7 @@ html.dark {
   /* Apple Dark Mode Palette */
   --apple-bg: #000000;
   --apple-card: rgba(28, 28, 30, 0.65);
-  --apple-glass: rgba(255, 255, 255, 0.08);
+  --apple-glass: rgba(28, 28, 30, 0.7);
   --apple-glass-border: rgba(255, 255, 255, 0.12);
   --apple-glass-hover: rgba(255, 255, 255, 0.16);
   --apple-subtext: #86868B;
@@ -29,8 +29,8 @@ html.dark {
     @apply box-border tracking-[-0.015em];
   }
   body {
-    background-color: var(--apple-bg);
-    color: var(--apple-text);
+    background-color: var(--apple-bg) !important;
+    color: var(--apple-text) !important;
     @apply min-h-screen m-0 p-0 font-sans antialiased transition-colors duration-300;
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
   }

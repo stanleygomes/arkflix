@@ -19,7 +19,7 @@ export const Tabs: React.FC<TabsProps> = ({ tabs, activeTab, onChange, className
   return (
     <div
       className={cn(
-        'inline-flex items-center p-1 bg-[#1C1C1E]/80 backdrop-blur-xl border border-white/10 rounded-full select-none overflow-x-auto no-scrollbar',
+        'inline-flex items-center p-1 bg-black/5 dark:bg-[#1C1C1E]/80 backdrop-blur-xl border border-black/10 dark:border-white/10 rounded-full select-none overflow-x-auto no-scrollbar',
         className
       )}
     >
@@ -31,7 +31,9 @@ export const Tabs: React.FC<TabsProps> = ({ tabs, activeTab, onChange, className
             onClick={() => onChange(tab.id)}
             className={cn(
               'relative flex items-center gap-2 px-4 py-1.5 text-xs font-semibold rounded-full transition-colors duration-200 whitespace-nowrap z-10',
-              isActive ? 'text-white' : 'text-apple-subtext hover:text-white'
+              isActive
+                ? 'text-black dark:text-white'
+                : 'text-apple-subtext hover:text-apple-text'
             )}
           >
             {/* Sliding Pill Background with Apple Spring Physics */}
@@ -43,7 +45,7 @@ export const Tabs: React.FC<TabsProps> = ({ tabs, activeTab, onChange, className
                   stiffness: 450,
                   damping: 35,
                 }}
-                className="absolute inset-0 bg-white/20 rounded-full shadow-sm -z-10 border border-white/10"
+                className="absolute inset-0 bg-white dark:bg-white/20 rounded-full shadow-sm -z-10 border border-black/10 dark:border-white/10"
               />
             )}
             {tab.icon && <span className="w-3.5 h-3.5">{tab.icon}</span>}
