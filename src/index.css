@@ -4,28 +4,62 @@
 
 @layer base {
   * {
-    @apply box-border;
+    @apply box-border tracking-[-0.015em];
   }
   body {
-    @apply bg-netflix-black text-netflix-lightGray min-h-screen m-0 p-0;
+    @apply bg-apple-bg text-apple-text min-h-screen m-0 p-0 font-sans antialiased;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
   }
 }
 
-/* Custom Scrollbar */
+/* Apple iOS Glassmorphism Utility Classes */
+.glass-panel {
+  background: rgba(30, 30, 32, 0.7);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.glass-nav {
+  background: rgba(10, 10, 12, 0.75);
+  backdrop-filter: blur(30px);
+  -webkit-backdrop-filter: blur(30px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.glass-card {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.glass-card-hover {
+  transition: all 0.35s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.glass-card-hover:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.2);
+  transform: translateY(-4px) scale(1.02);
+  box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.6);
+}
+
+/* Minimalist Apple Scrollbars */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #141414;
+  background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #333333;
-  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 9999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #555555;
+  background: rgba(255, 255, 255, 0.35);
 }

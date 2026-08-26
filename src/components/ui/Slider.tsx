@@ -21,7 +21,7 @@ export const Slider: React.FC<SliderProps> = ({
   const percentage = ((value - min) / (max - min)) * 100
 
   return (
-    <div className={cn('relative w-full flex items-center group py-1.5', className)}>
+    <div className={cn('relative w-full flex items-center group py-2', className)}>
       <input
         type="range"
         min={min}
@@ -29,9 +29,9 @@ export const Slider: React.FC<SliderProps> = ({
         step={step}
         value={value}
         onChange={onChange}
-        className="w-full h-1.5 bg-white/20 accent-netflix-red rounded-lg appearance-none cursor-pointer group-hover:h-2 transition-all focus:outline-none"
+        className="w-full h-1.5 bg-white/20 accent-white rounded-full appearance-none cursor-pointer group-hover:h-2 transition-all focus:outline-none"
         style={{
-          background: `linear-gradient(to right, #E50914 ${percentage}%, rgba(255, 255, 255, 0.2) ${percentage}%)`,
+          background: `linear-gradient(to right, #FFFFFF ${percentage}%, rgba(255, 255, 255, 0.15) ${percentage}%)`,
         }}
         {...props}
       />

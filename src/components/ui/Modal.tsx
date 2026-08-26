@@ -43,12 +43,12 @@ export const Modal: React.FC<ModalProps> = ({
 
   return (
     <div
-      className="fixed inset-0 z-50 overflow-y-auto bg-black/80 flex justify-center items-start pt-10 pb-16 px-4 backdrop-blur-sm animate-fadeIn"
+      className="fixed inset-0 z-50 overflow-y-auto bg-black/60 flex justify-center items-start pt-12 pb-16 px-4 backdrop-blur-2xl transition-all duration-300 animate-fadeIn"
       onClick={onClose}
     >
       <div
         className={cn(
-          'relative w-full bg-netflix-dark rounded-lg overflow-hidden shadow-2xl border border-white/10 text-white',
+          'relative w-full bg-[#1C1C1E]/90 rounded-squircle-2xl overflow-hidden shadow-apple border border-white/15 text-white backdrop-blur-2xl transition-transform duration-300 scale-100',
           maxWidths[maxWidth],
           className
         )}
@@ -56,10 +56,10 @@ export const Modal: React.FC<ModalProps> = ({
       >
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 z-20 w-9 h-9 rounded-full bg-netflix-black/80 text-white flex items-center justify-center hover:bg-white hover:text-black transition-colors"
+          className="absolute top-4 right-4 z-20 w-8 h-8 rounded-full bg-white/15 text-white flex items-center justify-center hover:bg-white/25 active:scale-95 transition-all backdrop-blur-lg border border-white/10"
           aria-label="Fechar"
         >
-          <X className="w-5 h-5" />
+          <X className="w-4 h-4" />
         </button>
 
         {children}

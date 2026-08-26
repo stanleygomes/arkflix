@@ -1,5 +1,5 @@
 import React from 'react'
-import { Cast, Play, Pause, RotateCcw, RotateCw, LogOut } from 'lucide-react'
+import { Play, Pause, RotateCcw, RotateCw, LogOut } from 'lucide-react'
 import { Slider, Button } from '@/components/ui'
 import { MediaItem } from '@/types/jellyfin'
 import { getImageUrl } from '@/services/api'
@@ -37,35 +37,33 @@ export const CastRemoteView: React.FC<CastRemoteViewProps> = ({
   }
 
   return (
-    <div className="relative w-full h-full flex flex-col items-center justify-between p-8 md:p-16 bg-netflix-black text-white select-none">
-      {/* Background with blur */}
+    <div className="relative w-full h-full flex flex-col items-center justify-between p-8 md:p-14 bg-apple-bg text-white select-none overflow-hidden">
+      {/* Background Ambient Blur */}
       {backdropUrl && (
         <div
-          className="absolute inset-0 bg-cover bg-center opacity-20 filter blur-xl scale-105"
+          className="absolute inset-0 bg-cover bg-center opacity-30 filter blur-2xl scale-110 pointer-events-none"
           style={{ backgroundImage: `url(${backdropUrl})` }}
         />
       )}
-      <div className="absolute inset-0 bg-black/60" />
+      <div className="absolute inset-0 bg-black/65 pointer-events-none" />
 
-      {/* Top Header: Cast Status */}
-      <div className="relative z-10 flex items-center justify-between w-full max-w-3xl">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-netflix-red/20 text-netflix-red flex items-center justify-center animate-pulse">
-            <Cast className="w-5 h-5" />
-          </div>
+      {/* Top Header: Cast Status Badge */}
+      <div className="relative z-10 flex items-center justify-between w-full max-w-2xl">
+        <div className="flex items-center gap-3 bg-white/10 backdrop-blur-xl px-4 py-2 rounded-full border border-white/10">
+          <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
           <div>
-            <h4 className="text-sm font-semibold text-white">Transmitindo no Chromecast</h4>
-            <p className="text-xs text-netflix-gray">{deviceName || 'Dispositivo Google Cast'}</p>
+            <h4 className="text-xs font-semibold text-white">Transmitindo via AirPlay / Cast</h4>
+            <p className="text-[10px] text-apple-subtext">{deviceName || 'Dispositivo Apple TV / Cast'}</p>
           </div>
         </div>
 
         <Button
-          variant="secondary"
+          variant="glass"
           size="sm"
           onClick={onDisconnect}
-          className="text-xs border border-white/20"
+          className="text-xs text-red-300 hover:text-red-200"
         >
-          <LogOut className="w-4 h-4 mr-1" /> Desconectar
+          <LogOut className="w-3.5 h-3.5 mr-1" /> Desconectar
         </Button>
       </div>
 
@@ -75,15 +73,17 @@ export const CastRemoteView: React.FC<CastRemoteViewProps> = ({
           <img
             src={getImageUrl(item.Id, 'Primary', { fillWidth: 300, quality: 85 })}
             alt={item.Name}
-            className="w-40 md:w-56 aspect-[2/3] object-cover rounded-lg shadow-2xl border border-white/10"
+            className="w-40 md:w-52 aspect-[2/3] object-cover rounded-squircle-lg shadow-apple border border-white/15"
           />
         )}
-        <h2 className="text-xl md:text-3xl font-black text-white">{item?.Name || 'Mídia em Reprodução'}</h2>
-        {item?.SeriesName && <p className="text-sm text-netflix-gray">{item.SeriesName}</p>}
+        <div className="space-y-1">
+          <h2 className="text-2xl md:text-3xl font-extrabold text-white tracking-tight">{item?.Name || 'Em Reprodução'}</h2>
+          {item?.SeriesName && <p className="text-xs text-apple-subtext">{item.SeriesName}</p>}
+        </div>
       </div>
 
-      {/* Bottom Controls */}
-      <div className="relative z-10 w-full max-w-3xl space-y-4 bg-netflix-dark/80 p-6 rounded-xl border border-white/10 backdrop-blur-md">
+      {/* Bottom Apple Glass Control Card */}
+      <div className="relative z-10 w-full max-w-2xl space-y-4 glass-panel p-6 rounded-squircle-xl border border-white/15 shadow-apple">
         <Slider
           min={0}
           max={duration || 100}
@@ -91,33 +91,37 @@ export const CastRemoteView: React.FC<CastRemoteViewProps> = ({
           onChange={(e) => onSeek(Number(e.target.value))}
         />
 
-        <div className="flex items-center justify-between text-xs text-gray-400">
+        <div className="flex items-center justify-between text-[11px] text-apple-subtext font-medium">
           <span>{formatTime(currentTime)}</span>
           <span>{formatTime(duration)}</span>
         </div>
 
-        <div className="flex items-center justify-center gap-6 pt-2">
+        <div className="flex items-center justify-center gap-8 pt-1">
           <button
             onClick={() => onSkip(-10)}
-            className="p-2 text-white/80 hover:text-white transition-colors"
+            className="p-2.5 text-white/80 hover:text-white hover:bg-white/10 rounded-full active:scale-95 transition-all"
             title="Voltar 10s"
           >
-            <RotateCcw className="w-6 h-6" />
+            <RotateCcw className="w-5 h-5" />
           </button>
 
           <button
             onClick={onTogglePlay}
-            className="w-14 h-14 rounded-full bg-netflix-red text-white flex items-center justify-center hover:bg-red-700 transition-transform active:scale-95 shadow-lg"
+            className="w-14 h-14 rounded-full bg-white text-black flex items-center justify-center hover:bg-white/90 active:scale-95 transition-all shadow-md"
           >
-            {isPlaying ? <Pause className="w-6 h-6 fill-white" /> : <Play className="w-6 h-6 fill-white ml-0.5" />}
+            {isPlaying ? (
+              <Pause className="w-6 h-6 fill-black text-black" />
+            ) : (
+              <Play className="w-6 h-6 fill-black text-black ml-0.5" />
+            )}
           </button>
 
           <button
             onClick={() => onSkip(10)}
-            className="p-2 text-white/80 hover:text-white transition-colors"
+            className="p-2.5 text-white/80 hover:text-white hover:bg-white/10 rounded-full active:scale-95 transition-all"
             title="Avançar 10s"
           >
-            <RotateCw className="w-6 h-6" />
+            <RotateCw className="w-5 h-5" />
           </button>
         </div>
       </div>

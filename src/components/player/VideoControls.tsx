@@ -63,12 +63,12 @@ export const VideoControls: React.FC<VideoControlsProps> = ({
 
   return (
     <div
-      className={`absolute inset-x-0 bottom-0 px-6 md:px-12 py-6 bg-gradient-to-t from-black/95 via-black/60 to-transparent transition-opacity duration-300 flex flex-col gap-3 z-30 select-none ${
-        showControls ? 'opacity-100' : 'opacity-0 pointer-events-none'
+      className={`absolute inset-x-0 bottom-0 px-6 md:px-14 py-8 bg-gradient-to-t from-black/95 via-black/40 to-transparent transition-all duration-300 flex flex-col gap-4 z-30 select-none ${
+        showControls ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'
       }`}
       onClick={(e) => e.stopPropagation()}
     >
-      {/* Progress Bar Slider */}
+      {/* Apple Minimalist Progress Slider */}
       <Slider
         min={0}
         max={duration || 100}
@@ -77,36 +77,43 @@ export const VideoControls: React.FC<VideoControlsProps> = ({
       />
 
       <div className="flex items-center justify-between text-white">
-        {/* Left: Play/Pause, Skip, Volume, Time */}
-        <div className="flex items-center gap-4">
+        {/* Left: Play/Pause, Skip 10s, Volume, Time */}
+        <div className="flex items-center gap-5">
           <button
             onClick={onTogglePlay}
-            className="p-1 hover:text-netflix-red transition-transform active:scale-90"
+            className="w-10 h-10 rounded-full bg-white text-black flex items-center justify-center hover:bg-white/90 active:scale-90 transition-all shadow-md"
             title={isPlaying ? 'Pausar (Espaço)' : 'Reproduzir (Espaço)'}
           >
-            {isPlaying ? <Pause className="w-7 h-7 fill-white" /> : <Play className="w-7 h-7 fill-white" />}
+            {isPlaying ? (
+              <Pause className="w-5 h-5 fill-black text-black" />
+            ) : (
+              <Play className="w-5 h-5 fill-black text-black ml-0.5" />
+            )}
           </button>
 
           <button
             onClick={() => onSkip(-10)}
-            className="p-1 hover:text-white/80 transition-transform active:scale-90"
+            className="p-2 rounded-full text-white/80 hover:text-white hover:bg-white/10 active:scale-95 transition-all"
             title="Voltar 10s"
           >
-            <RotateCcw className="w-5 h-5" />
+            <RotateCcw className="w-4 h-4" />
           </button>
 
           <button
             onClick={() => onSkip(10)}
-            className="p-1 hover:text-white/80 transition-transform active:scale-90"
+            className="p-2 rounded-full text-white/80 hover:text-white hover:bg-white/10 active:scale-95 transition-all"
             title="Avançar 10s"
           >
-            <RotateCw className="w-5 h-5" />
+            <RotateCw className="w-4 h-4" />
           </button>
 
           {/* Volume Control */}
           <div className="flex items-center gap-2 group/volume">
-            <button onClick={onToggleMute} className="p-1 hover:text-white/80">
-              {isMuted || volume === 0 ? <VolumeX className="w-6 h-6" /> : <Volume2 className="w-6 h-6" />}
+            <button
+              onClick={onToggleMute}
+              className="p-2 rounded-full text-white/80 hover:text-white hover:bg-white/10 transition-colors"
+            >
+              {isMuted || volume === 0 ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
             </button>
             <div className="w-0 overflow-hidden group-hover/volume:w-20 transition-all duration-300">
               <Slider
@@ -119,35 +126,39 @@ export const VideoControls: React.FC<VideoControlsProps> = ({
             </div>
           </div>
 
-          <span className="text-xs font-medium text-gray-300">
+          <span className="text-xs font-medium text-apple-subtext">
             {formatTime(currentTime)} / {formatTime(duration)}
           </span>
         </div>
 
         {/* Center: Title */}
-        <div className="hidden lg:block text-sm font-semibold text-gray-200 truncate max-w-md">
+        <div className="hidden lg:block text-xs font-semibold text-white/90 tracking-tight truncate max-w-md">
           {title}
         </div>
 
         {/* Right: Subtitles/Audio Menu, Cast Launcher, Fullscreen */}
-        <div className="flex items-center gap-4 relative">
+        <div className="flex items-center gap-3 relative">
           {/* Audio & Subtitles Selector */}
           {(audioStreams.length > 0 || subtitleStreams.length > 0) && (
             <div className="relative">
               <button
                 onClick={() => setShowAudioMenu(!showAudioMenu)}
-                className={`p-1 transition-colors ${showAudioMenu ? 'text-netflix-red' : 'hover:text-gray-300'}`}
+                className={`p-2 rounded-full transition-all ${
+                  showAudioMenu
+                    ? 'bg-white/20 text-white'
+                    : 'text-white/80 hover:text-white hover:bg-white/10'
+                }`}
                 title="Áudio e Legendas"
               >
-                <Subtitles className="w-6 h-6" />
+                <Subtitles className="w-5 h-5" />
               </button>
 
               {showAudioMenu && (
-                <div className="absolute right-0 bottom-full mb-3 w-64 bg-netflix-dark/95 border border-white/20 rounded-lg p-4 shadow-2xl backdrop-blur-md text-xs space-y-4">
+                <div className="absolute right-0 bottom-full mb-3 w-64 glass-panel rounded-squircle-lg p-4 shadow-apple backdrop-blur-2xl text-xs space-y-4 animate-fadeIn">
                   {/* Audio tracks */}
                   {audioStreams.length > 0 && (
                     <div>
-                      <h5 className="font-bold text-gray-400 mb-2 uppercase tracking-wider">Áudio</h5>
+                      <h5 className="font-semibold text-apple-subtext mb-2 text-[11px]">ÁUDIO</h5>
                       <div className="space-y-1">
                         {audioStreams.map((audio) => (
                           <button
@@ -156,10 +167,10 @@ export const VideoControls: React.FC<VideoControlsProps> = ({
                               onSelectAudio?.(audio.Index)
                               setShowAudioMenu(false)
                             }}
-                            className={`w-full text-left px-2 py-1.5 rounded transition-colors ${
+                            className={`w-full text-left px-2.5 py-1.5 rounded-squircle-sm transition-all ${
                               selectedAudioIndex === audio.Index
-                                ? 'bg-netflix-red text-white font-bold'
-                                : 'hover:bg-white/10 text-gray-300'
+                                ? 'bg-white text-black font-semibold shadow-sm'
+                                : 'hover:bg-white/10 text-white/80'
                             }`}
                           >
                             {audio.DisplayTitle || audio.Language || `Faixa ${audio.Index}`}
@@ -172,17 +183,17 @@ export const VideoControls: React.FC<VideoControlsProps> = ({
                   {/* Subtitle tracks */}
                   {subtitleStreams.length > 0 && (
                     <div>
-                      <h5 className="font-bold text-gray-400 mb-2 uppercase tracking-wider">Legendas</h5>
+                      <h5 className="font-semibold text-apple-subtext mb-2 text-[11px]">LEGENDAS</h5>
                       <div className="space-y-1 max-h-36 overflow-y-auto">
                         <button
                           onClick={() => {
                             onSelectSubtitle?.(-1)
                             setShowAudioMenu(false)
                           }}
-                          className={`w-full text-left px-2 py-1.5 rounded transition-colors ${
+                          className={`w-full text-left px-2.5 py-1.5 rounded-squircle-sm transition-all ${
                             selectedSubtitleIndex === -1
-                              ? 'bg-netflix-red text-white font-bold'
-                              : 'hover:bg-white/10 text-gray-300'
+                              ? 'bg-white text-black font-semibold shadow-sm'
+                              : 'hover:bg-white/10 text-white/80'
                           }`}
                         >
                           Desativada
@@ -194,10 +205,10 @@ export const VideoControls: React.FC<VideoControlsProps> = ({
                               onSelectSubtitle?.(sub.Index)
                               setShowAudioMenu(false)
                             }}
-                            className={`w-full text-left px-2 py-1.5 rounded transition-colors ${
+                            className={`w-full text-left px-2.5 py-1.5 rounded-squircle-sm transition-all ${
                               selectedSubtitleIndex === sub.Index
-                                ? 'bg-netflix-red text-white font-bold'
-                                : 'hover:bg-white/10 text-gray-300'
+                                ? 'bg-white text-black font-semibold shadow-sm'
+                                : 'hover:bg-white/10 text-white/80'
                             }`}
                           >
                             {sub.DisplayTitle || sub.Language || `Legenda ${sub.Index}`}
@@ -212,19 +223,19 @@ export const VideoControls: React.FC<VideoControlsProps> = ({
           )}
 
           {/* Google Cast Launcher */}
-          <div className="w-6 h-6 flex items-center justify-center">
+          <div className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-white/10 transition-colors">
             {React.createElement('google-cast-launcher', {
-              class: 'w-6 h-6 cursor-pointer opacity-80 hover:opacity-100 transition-opacity',
+              class: 'w-4 h-4 cursor-pointer opacity-70 hover:opacity-100 transition-opacity',
             })}
           </div>
 
           {/* Fullscreen Button */}
           <button
             onClick={onToggleFullscreen}
-            className="p-1 hover:text-gray-300 transition-colors"
+            className="p-2 rounded-full text-white/80 hover:text-white hover:bg-white/10 transition-all"
             title={isFullscreen ? 'Sair da tela cheia (F)' : 'Tela cheia (F)'}
           >
-            {isFullscreen ? <Minimize className="w-6 h-6" /> : <Maximize className="w-6 h-6" />}
+            {isFullscreen ? <Minimize className="w-5 h-5" /> : <Maximize className="w-5 h-5" />}
           </button>
         </div>
       </div>
