@@ -1,8 +1,9 @@
 import React from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
-import { Search, Bell, User, LogOut, Tv, Settings } from 'lucide-react'
+import { Search, Bell, User, LogOut, Settings } from 'lucide-react'
 import { useAuthStore } from '@/stores/authStore'
 import { useTranslation } from '@/hooks'
+import { Logo } from '@/components/ui'
 import { cn } from '@/lib/utils'
 
 export const Navbar: React.FC = () => {
@@ -40,20 +41,15 @@ export const Navbar: React.FC = () => {
   return (
     <header
       className={cn(
-        'fixed top-0 left-0 right-0 z-50 transition-all duration-500 px-6 md:px-14 py-3 flex items-center justify-between',
+        'fixed top-0 left-0 right-0 z-50 transition-all duration-500 px-6 md:px-14 py-3.5 flex items-center justify-between',
         isScrolled
           ? 'glass-nav py-2.5 shadow-apple'
-          : 'bg-gradient-to-b from-black/80 via-black/30 to-transparent'
+          : 'bg-gradient-to-b from-black/85 via-black/30 to-transparent'
       )}
     >
-      {/* Left: Brand Logo & Apple TV-style Top Nav */}
+      {/* Left: Distinctive Arkflix Brand Logo & Nav Tabs */}
       <div className="flex items-center gap-10">
-        <Link to="/" className="flex items-center gap-2 group">
-          <div className="w-8 h-8 rounded-squircle bg-white text-black flex items-center justify-center font-bold text-sm shadow-sm transition-transform group-hover:scale-105">
-            <Tv className="w-4 h-4 fill-black text-black" />
-          </div>
-          <span className="font-semibold text-lg tracking-tight text-white">{t.common.appName}</span>
-        </Link>
+        <Logo size="md" />
 
         {/* Apple TV Navigation Pill Tabs */}
         <nav className="hidden md:flex items-center gap-1 bg-white/[0.06] backdrop-blur-xl p-1 rounded-full border border-white/10">

@@ -30,6 +30,11 @@ export default {
           '"SF Pro Text"',
           'Helvetica Neue',
           'sans-serif'
+        ],
+        brand: [
+          'Syne',
+          'Montserrat',
+          'sans-serif'
         ]
       },
       borderRadius: {
