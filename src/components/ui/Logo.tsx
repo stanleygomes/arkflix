@@ -20,24 +20,24 @@ export const Logo: React.FC<LogoProps> = ({
 }) => {
   const sizeMap = {
     sm: {
-      text: 'text-base font-semibold tracking-tight',
-      icon: 'w-6 h-6',
-      iconInner: 'w-3 h-3',
+      text: 'text-lg font-bold tracking-tight',
+      icon: 'w-7 h-7',
+      iconInner: 'w-3.5 h-3.5',
     },
     md: {
-      text: 'text-lg md:text-xl font-bold tracking-tight',
-      icon: 'w-8 h-8',
-      iconInner: 'w-4 h-4',
+      text: 'text-2xl md:text-3xl font-extrabold tracking-tight',
+      icon: 'w-10 h-10 md:w-11 md:h-11',
+      iconInner: 'w-5 h-5 md:w-5.5 md:h-5.5',
     },
     lg: {
-      text: 'text-2xl md:text-3xl font-extrabold tracking-tight',
-      icon: 'w-10 h-10',
-      iconInner: 'w-5 h-5',
+      text: 'text-3xl md:text-4xl font-extrabold tracking-tight',
+      icon: 'w-12 h-12 md:w-14 md:h-14',
+      iconInner: 'w-6 h-6',
     },
     xl: {
-      text: 'text-3xl md:text-4xl font-extrabold tracking-tight',
-      icon: 'w-14 h-14',
-      iconInner: 'w-6 h-6',
+      text: 'text-4xl md:text-5xl font-extrabold tracking-tight',
+      icon: 'w-16 h-16',
+      iconInner: 'w-7 h-7',
     },
   }
 
@@ -45,16 +45,18 @@ export const Logo: React.FC<LogoProps> = ({
 
   const content = (
     <motion.div
-      whileHover={animated ? { scale: 1.02 } : undefined}
-      whileTap={animated ? { scale: 0.98 } : undefined}
+      whileHover={animated ? { scale: 1.03 } : undefined}
+      whileTap={animated ? { scale: 0.97 } : undefined}
       transition={{ type: 'spring', stiffness: 400, damping: 25 }}
-      className={cn('inline-flex items-center gap-2.5 select-none cursor-pointer group', className)}
+      className={cn('inline-flex items-center gap-3 select-none cursor-pointer group', className)}
     >
-      {/* Icon */}
+      {/* Icon Squircle (Enlarged & Prominent) */}
       <div
         className={cn(
-          'rounded-squircle flex items-center justify-center shadow-sm relative overflow-hidden transition-all duration-300',
-          isLight ? 'bg-black text-white shadow-md' : 'bg-white text-black group-hover:shadow-[0_0_15px_rgba(255,255,255,0.35)]',
+          'rounded-squircle flex items-center justify-center shadow-md relative overflow-hidden transition-all duration-300',
+          isLight
+            ? 'bg-black text-white shadow-lg'
+            : 'bg-white text-black shadow-apple group-hover:shadow-[0_0_20px_rgba(255,255,255,0.45)]',
           sizeMap[size].icon
         )}
       >
@@ -67,10 +69,10 @@ export const Logo: React.FC<LogoProps> = ({
         </svg>
       </div>
 
-      {/* Typography with 100% Crisp Contrast */}
-      <div className="flex items-center font-sans">
-        <span className={cn(isLight ? 'text-[#1D1D1F] font-bold' : 'text-[#F5F5F7] font-bold', sizeMap[size].text)}>
-          Ark<span className={isLight ? 'font-normal text-[#6E6E73]' : 'font-light text-[#86868B]'}>flix</span>
+      {/* Typography with 100% Crisp High-Contrast & Accessibility */}
+      <div className="flex items-baseline font-sans">
+        <span className={cn(isLight ? 'text-[#1D1D1F]' : 'text-white', sizeMap[size].text)}>
+          Ark<span className={isLight ? 'font-medium text-[#6E6E73]' : 'font-light text-[#86868B]'}>flix</span>
         </span>
       </div>
     </motion.div>
