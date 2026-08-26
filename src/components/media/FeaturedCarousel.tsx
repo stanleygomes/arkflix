@@ -4,7 +4,6 @@ import { Play, Info, ChevronLeft, ChevronRight } from 'lucide-react'
 import { MediaItem } from '@/types/jellyfin'
 import { getImageUrl } from '@/services/api'
 import { Button, HeroBannerSkeleton, RatingBadge } from '@/components/ui'
-import { useModalStore } from '@/stores/modalStore'
 import { useTranslation } from '@/hooks'
 import { useNavigate } from 'react-router-dom'
 
@@ -19,7 +18,6 @@ export const FeaturedCarousel: React.FC<FeaturedCarouselProps> = ({
   isLoading,
   autoRotateInterval = 8000,
 }) => {
-  const { openModal } = useModalStore()
   const { t } = useTranslation()
   const navigate = useNavigate()
 
@@ -154,7 +152,7 @@ export const FeaturedCarousel: React.FC<FeaturedCarouselProps> = ({
           <Button
             variant="glass"
             size="md"
-            onClick={() => openModal(currentItem)}
+            onClick={() => navigate(`/title/${currentItem.Id}`)}
             className="font-medium text-white flex-1 sm:flex-none text-xs sm:text-sm py-2 sm:py-2.5"
           >
             <Info className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1 text-apple-subtext" /> {t.common.details}
