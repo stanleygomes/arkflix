@@ -48,7 +48,7 @@ export const Modal: React.FC<ModalProps> = ({
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.25, ease: 'easeOut' }}
-          className="fixed inset-0 z-50 overflow-y-auto bg-black/60 flex justify-center items-start pt-12 pb-16 px-4 backdrop-blur-2xl"
+          className="fixed inset-0 z-50 overflow-y-auto bg-black/75 flex justify-center items-start pt-20 pb-20 px-4 backdrop-blur-2xl"
           onClick={onClose}
         >
           <motion.div
@@ -62,7 +62,7 @@ export const Modal: React.FC<ModalProps> = ({
               mass: 0.85,
             }}
             className={cn(
-              'relative w-full bg-[#1C1C1E]/90 rounded-squircle-2xl overflow-hidden shadow-apple border border-white/15 text-white backdrop-blur-2xl will-change-transform',
+              'relative w-full bg-[#1C1C1E] rounded-squircle-2xl overflow-hidden shadow-2xl border border-white/15 text-white will-change-transform my-auto',
               maxWidths[maxWidth],
               className
             )}
@@ -73,7 +73,7 @@ export const Modal: React.FC<ModalProps> = ({
               whileHover={{ scale: 1.08 }}
               transition={{ type: 'spring', stiffness: 500, damping: 25 }}
               onClick={onClose}
-              className="absolute top-4 right-4 z-20 w-8 h-8 rounded-full bg-white/15 text-white flex items-center justify-center hover:bg-white/25 transition-colors backdrop-blur-lg border border-white/10"
+              className="absolute top-4 right-4 z-30 w-8 h-8 rounded-full bg-black/60 text-white flex items-center justify-center hover:bg-black/80 transition-colors backdrop-blur-lg border border-white/20 shadow-md"
               aria-label="Fechar"
             >
               <X className="w-4 h-4" />
