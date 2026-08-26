@@ -2,13 +2,11 @@ import React, { useState } from 'react'
 import { useAuth, useTranslation } from '@/hooks'
 import { Button, Input } from '@/components/ui'
 import { getUserAvatarUrl } from '@/services/api'
-import { Plus, Trash2, Check, Server, LogOut, ArrowLeft } from 'lucide-react'
-import { useNavigate } from 'react-router-dom'
+import { Plus, Trash2, Check, Server, LogOut } from 'lucide-react'
 
 export const ProfilePage: React.FC = () => {
   const { user, profiles, switchProfile, removeProfile, login, serverUrl, logout } = useAuth()
   const { t } = useTranslation()
-  const navigate = useNavigate()
 
   const [showAddProfile, setShowAddProfile] = useState(false)
   const [newUsername, setNewUsername] = useState('')
@@ -38,32 +36,23 @@ export const ProfilePage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[#F5F5F7] text-[#1D1D1F] pt-24 pb-20 px-6 md:px-14 selection:bg-blue-500/20">
-      <div className="max-w-4xl mx-auto space-y-10 animate-fadeIn">
-        {/* Header com botão voltar */}
-        <div className="flex items-center justify-between">
-          <div>
-            <div className="flex items-center gap-3 mb-1">
-              <button
-                onClick={() => navigate('/')}
-                className="p-2 -ml-2 rounded-full hover:bg-black/5 text-[#6E6E73] hover:text-[#1D1D1F] transition-colors"
-                title="Voltar ao início"
-              >
-                <ArrowLeft className="w-5 h-5" />
-              </button>
-              <h1 className="text-3xl font-extrabold text-[#1D1D1F] tracking-tight">{t.profile.title}</h1>
-            </div>
-            <p className="text-xs text-[#6E6E73] pl-1">
-              {t.profile.subtitle}
-            </p>
-          </div>
+    <div className="min-h-screen bg-[#F5F5F7] text-[#1D1D1F] pt-20 sm:pt-24 pb-20 px-4 sm:px-6 md:px-14 selection:bg-blue-500/20">
+      <div className="max-w-4xl mx-auto space-y-6 sm:space-y-10 animate-fadeIn">
+        {/* Header da Página */}
+        <div>
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-[#1D1D1F] tracking-tight leading-tight">
+            {t.profile.title}
+          </h1>
+          <p className="text-xs text-[#6E6E73] mt-1">
+            {t.profile.subtitle}
+          </p>
         </div>
 
         {/* Section 1: Perfis Cadastrados */}
-        <div className="apple-light-card p-6 md:p-8 rounded-squircle-xl space-y-6">
+        <div className="apple-light-card p-5 sm:p-6 md:p-8 rounded-squircle-xl space-y-6">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-base font-bold text-[#1D1D1F] tracking-tight">{t.profile.whoIsWatching}</h2>
+              <h2 className="text-sm sm:text-base font-bold text-[#1D1D1F] tracking-tight">{t.profile.whoIsWatching}</h2>
               <p className="text-xs text-[#6E6E73]">{t.profile.whoIsWatchingDesc}</p>
             </div>
 
@@ -78,7 +67,7 @@ export const ProfilePage: React.FC = () => {
           </div>
 
           {/* Profiles Grid */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 sm:gap-4">
             {profiles.map((profile) => {
               const isCurrent = profile.id === user?.Id
               const avatarUrl = getUserAvatarUrl(profile.id, profile.primaryImageTag)
@@ -197,7 +186,7 @@ export const ProfilePage: React.FC = () => {
         </div>
 
         {/* Section 2: Servidor Conectado & Logout */}
-        <div className="apple-light-card p-6 md:p-8 rounded-squircle-xl space-y-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div className="apple-light-card p-5 sm:p-6 md:p-8 rounded-squircle-xl space-y-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div className="space-y-1">
             <div className="flex items-center gap-2">
               <Server className="w-4 h-4 text-[#0071E3]" />
