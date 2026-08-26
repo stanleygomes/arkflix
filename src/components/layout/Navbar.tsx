@@ -46,7 +46,7 @@ export const Navbar: React.FC = () => {
   return (
     <header
       className={cn(
-        'fixed top-0 left-0 right-0 z-50 transition-all duration-300 px-6 md:px-14 py-3.5 flex items-center justify-between',
+        'fixed top-0 left-0 right-0 z-40 transition-all duration-300 px-6 md:px-14 py-3.5 flex items-center justify-between',
         isProfilePage
           ? isScrolled
             ? 'bg-white/80 backdrop-blur-2xl border-b border-black/[0.08] shadow-sm py-2.5'
@@ -94,7 +94,7 @@ export const Navbar: React.FC = () => {
       </div>
 
       {/* Right: Search, Cast, Profile Direct Link */}
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-5">
         {/* Search Bar */}
         <div className="relative flex items-center">
           {showSearch ? (
@@ -140,7 +140,7 @@ export const Navbar: React.FC = () => {
         {/* Google Cast Button Launcher */}
         <div
           className={cn(
-            'w-7 h-7 flex items-center justify-center p-1 rounded-full transition-colors',
+            'w-8 h-8 flex items-center justify-center p-1 rounded-full transition-colors',
             isProfilePage ? 'hover:bg-black/5' : 'hover:bg-white/10'
           )}
         >
@@ -152,7 +152,7 @@ export const Navbar: React.FC = () => {
           })}
         </div>
 
-        {/* Direct Link to Profile & Settings */}
+        {/* User Profile Avatar (Enlarged with prominence) */}
         <Link
           to="/profile"
           title="Perfis e Configurações"
@@ -160,8 +160,8 @@ export const Navbar: React.FC = () => {
         >
           <div
             className={cn(
-              'w-8 h-8 rounded-full overflow-hidden shadow-sm transition-transform group-hover:scale-105 bg-gradient-to-tr from-blue-500 to-indigo-600 flex items-center justify-center border',
-              isProfilePage ? 'border-black/15 ring-2 ring-blue-500/30' : 'border-white/20'
+              'w-10 h-10 rounded-full overflow-hidden shadow-md transition-all duration-300 group-hover:scale-110 bg-gradient-to-tr from-blue-500 to-indigo-600 flex items-center justify-center border-2',
+              isProfilePage ? 'border-[#0071E3] ring-4 ring-blue-500/20' : 'border-white/30 group-hover:border-white'
             )}
           >
             {userAvatarUrl && !avatarError ? (
@@ -172,8 +172,8 @@ export const Navbar: React.FC = () => {
                 className="w-full h-full object-cover"
               />
             ) : (
-              <span className="text-xs font-semibold text-white">
-                {user?.Name?.charAt(0).toUpperCase() || <User className="w-3.5 h-3.5" />}
+              <span className="text-sm font-bold text-white">
+                {user?.Name?.charAt(0).toUpperCase() || <User className="w-4 h-4" />}
               </span>
             )}
           </div>
