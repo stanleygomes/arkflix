@@ -58,13 +58,13 @@ export const Navbar: React.FC = () => {
   return (
     <header
       className={cn(
-        'fixed top-0 left-0 right-0 z-40 transition-all duration-300 px-6 sm:px-10 md:px-16 py-4 md:py-5 flex items-center justify-between',
+        'fixed top-0 left-0 right-0 z-40 transition-all duration-300 px-4 sm:px-10 md:px-16 pt-[max(env(safe-area-inset-top,0px)+0.75rem,0.85rem)] pb-3 md:py-5 flex items-center justify-between',
         isProfilePage
           ? isScrolled
-            ? 'bg-white/90 backdrop-blur-2xl border-b border-black/[0.08] shadow-sm py-3.5'
+            ? 'bg-white/90 backdrop-blur-2xl border-b border-black/[0.08] shadow-sm'
             : 'bg-[#F5F5F7]'
           : isScrolled
-            ? 'glass-nav py-3.5 shadow-apple'
+            ? 'glass-nav shadow-apple'
             : 'bg-gradient-to-b from-black/95 via-black/50 to-transparent'
       )}
     >
