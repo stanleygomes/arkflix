@@ -17,9 +17,11 @@ export const Navbar: React.FC = () => {
   const navigate = useNavigate()
   const location = useLocation()
 
+  const isProfilePage = location.pathname === '/profile'
+
   React.useEffect(() => {
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 30)
+      setIsScrolled(window.scrollY > 20)
     }
     window.addEventListener('scroll', handleScroll)
     return () => window.removeEventListener('scroll', handleScroll)
@@ -44,18 +46,29 @@ export const Navbar: React.FC = () => {
   return (
     <header
       className={cn(
-        'fixed top-0 left-0 right-0 z-50 transition-all duration-500 px-6 md:px-14 py-3.5 flex items-center justify-between',
-        isScrolled
-          ? 'glass-nav py-2.5 shadow-apple'
-          : 'bg-gradient-to-b from-black/60 via-black/20 to-transparent dark:from-black/85 dark:via-black/30'
+        'fixed top-0 left-0 right-0 z-50 transition-all duration-300 px-6 md:px-14 py-3.5 flex items-center justify-between',
+        isProfilePage
+          ? isScrolled
+            ? 'bg-white/80 backdrop-blur-2xl border-b border-black/[0.08] shadow-sm py-2.5'
+            : 'bg-[#F5F5F7]'
+          : isScrolled
+            ? 'glass-nav py-2.5 shadow-apple'
+            : 'bg-gradient-to-b from-black/85 via-black/35 to-transparent'
       )}
     >
       {/* Left: Distinctive Arkflix Brand Logo & Nav Tabs */}
       <div className="flex items-center gap-10">
-        <Logo size="md" />
+        <Logo size="md" theme={isProfilePage ? 'light' : 'dark'} />
 
         {/* Apple TV Navigation Pill Tabs */}
-        <nav className="hidden md:flex items-center gap-1 bg-black/5 dark:bg-white/[0.06] backdrop-blur-xl p-1 rounded-full border border-black/10 dark:border-white/10">
+        <nav
+          className={cn(
+            'hidden md:flex items-center gap-1 backdrop-blur-xl p-1 rounded-full border transition-colors',
+            isProfilePage
+              ? 'bg-black/[0.04] border-black/10'
+              : 'bg-white/[0.06] border-white/10'
+          )}
+        >
           {navLinks.map((link) => {
             const isActive = location.pathname === link.path
             return (
@@ -64,9 +77,13 @@ export const Navbar: React.FC = () => {
                 to={link.path}
                 className={cn(
                   'px-4 py-1.5 text-xs font-semibold rounded-full transition-all duration-300',
-                  isActive
-                    ? 'bg-white dark:bg-white/20 text-black dark:text-white shadow-sm'
-                    : 'text-apple-subtext hover:text-apple-text hover:bg-black/5 dark:hover:bg-white/5'
+                  isProfilePage
+                    ? isActive
+                      ? 'bg-white text-black shadow-sm'
+                      : 'text-[#6E6E73] hover:text-[#1D1D1F] hover:bg-black/[0.04]'
+                    : isActive
+                      ? 'bg-white/20 text-white shadow-sm'
+                      : 'text-apple-subtext hover:text-white hover:bg-white/5'
                 )}
               >
                 {link.label}
@@ -77,18 +94,29 @@ export const Navbar: React.FC = () => {
       </div>
 
       {/* Right: Search, Cast, Profile Direct Link */}
-      <div className="flex items-center gap-4 text-apple-text">
-        {/* Apple Glass Search Bar */}
+      <div className="flex items-center gap-4">
+        {/* Search Bar */}
         <div className="relative flex items-center">
           {showSearch ? (
-            <form onSubmit={handleSearchSubmit} className="flex items-center bg-black/5 dark:bg-white/10 backdrop-blur-xl border border-black/10 dark:border-white/15 px-3 py-1.5 rounded-full transition-all duration-300">
-              <Search className="w-3.5 h-3.5 text-apple-subtext mr-2" />
+            <form
+              onSubmit={handleSearchSubmit}
+              className={cn(
+                'flex items-center backdrop-blur-xl border px-3 py-1.5 rounded-full transition-all duration-300',
+                isProfilePage
+                  ? 'bg-white border-black/15 shadow-sm'
+                  : 'bg-white/10 border-white/15'
+              )}
+            >
+              <Search className={cn('w-3.5 h-3.5 mr-2', isProfilePage ? 'text-[#86868B]' : 'text-apple-subtext')} />
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder={t.nav.searchPlaceholder}
-                className="bg-transparent text-xs text-apple-text placeholder-apple-subtext focus:outline-none w-36 md:w-56"
+                className={cn(
+                  'bg-transparent text-xs placeholder-apple-subtext focus:outline-none w-36 md:w-56',
+                  isProfilePage ? 'text-black placeholder-[#86868B]' : 'text-white'
+                )}
                 autoFocus
                 onBlur={() => !searchQuery && setShowSearch(false)}
               />
@@ -97,7 +125,12 @@ export const Navbar: React.FC = () => {
             <button
               onClick={() => setShowSearch(true)}
               aria-label="Buscar"
-              className="p-2 rounded-full hover:bg-black/5 dark:hover:bg-white/10 text-apple-subtext hover:text-apple-text transition-all"
+              className={cn(
+                'p-2 rounded-full transition-all',
+                isProfilePage
+                  ? 'text-[#6E6E73] hover:text-[#1D1D1F] hover:bg-black/5'
+                  : 'text-apple-subtext hover:text-white hover:bg-white/10'
+              )}
             >
               <Search className="w-4 h-4" />
             </button>
@@ -105,9 +138,17 @@ export const Navbar: React.FC = () => {
         </div>
 
         {/* Google Cast Button Launcher */}
-        <div className="w-7 h-7 flex items-center justify-center p-1 rounded-full hover:bg-black/5 dark:hover:bg-white/10 transition-colors">
+        <div
+          className={cn(
+            'w-7 h-7 flex items-center justify-center p-1 rounded-full transition-colors',
+            isProfilePage ? 'hover:bg-black/5' : 'hover:bg-white/10'
+          )}
+        >
           {React.createElement('google-cast-launcher', {
-            class: 'w-4 h-4 cursor-pointer opacity-70 hover:opacity-100 transition-opacity',
+            class: cn(
+              'w-4 h-4 cursor-pointer transition-opacity',
+              isProfilePage ? 'opacity-80 hover:opacity-100 invert' : 'opacity-70 hover:opacity-100'
+            ),
           })}
         </div>
 
@@ -117,7 +158,12 @@ export const Navbar: React.FC = () => {
           title="Perfis e Configurações"
           className="flex items-center gap-2 cursor-pointer focus:outline-none group"
         >
-          <div className="w-8 h-8 rounded-full overflow-hidden border border-black/15 dark:border-white/20 shadow-sm transition-transform group-hover:scale-105 bg-gradient-to-tr from-blue-500 to-indigo-600 flex items-center justify-center">
+          <div
+            className={cn(
+              'w-8 h-8 rounded-full overflow-hidden shadow-sm transition-transform group-hover:scale-105 bg-gradient-to-tr from-blue-500 to-indigo-600 flex items-center justify-center border',
+              isProfilePage ? 'border-black/15 ring-2 ring-blue-500/30' : 'border-white/20'
+            )}
+          >
             {userAvatarUrl && !avatarError ? (
               <img
                 src={userAvatarUrl}
