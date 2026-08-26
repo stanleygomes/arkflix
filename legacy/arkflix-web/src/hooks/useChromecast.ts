@@ -5,8 +5,6 @@ import { getImageUrl } from '@/services/api'
 import { jellyfinService } from '@/services/jellyfin'
 import { useAuthStore } from '@/stores/authStore'
 
-const CAST_APP_ID = import.meta.env.VITE_JELLYFIN_CAST_APP_ID || 'F007D354'
-
 export function useChromecast() {
   const {
     isAvailable,
@@ -33,8 +31,9 @@ export function useChromecast() {
         setAvailable(true)
         const context = window.cast.framework.CastContext.getInstance()
 
+        // Use Google Default Media Receiver App ID ('CC1AD845') which plays MP4/HLS directly
         context.setOptions({
-          receiverApplicationId: CAST_APP_ID,
+          receiverApplicationId: 'CC1AD845',
           autoJoinPolicy: window.chrome?.cast?.AutoJoinPolicy.ORIGIN_SCOPED,
         })
 
@@ -60,6 +59,7 @@ export function useChromecast() {
               }
             } else if (event.sessionState === SessionState.SESSION_ENDED) {
               setCastSession(null)
+              setMediaSession(null)
             }
           }
         )
@@ -139,6 +139,8 @@ export function useChromecast() {
     isAvailable,
     isConnected,
     deviceName,
+    castSession,
+    mediaSession,
     isRemotePlaying,
     remoteCurrentTime,
     remoteDuration,
