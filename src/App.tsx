@@ -5,6 +5,7 @@ import { MainLayout } from '@/components/layout/MainLayout'
 import { HomePage } from '@/pages/HomePage'
 import { LoginPage } from '@/pages/LoginPage'
 import { WatchPage } from '@/pages/WatchPage'
+import { ProfilePage } from '@/pages/ProfilePage'
 import { useAuthStore } from '@/stores/authStore'
 
 const queryClient = new QueryClient({
@@ -38,6 +39,7 @@ export function App() {
             }
           >
             <Route index element={<HomePage />} />
+            <Route path="profile" element={<ProfilePage />} />
           </Route>
 
           <Route
