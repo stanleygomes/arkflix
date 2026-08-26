@@ -25,9 +25,9 @@ export const LoginPage: React.FC = () => {
 
       {/* Apple Clean White Glass Card */}
       <div className="w-full max-w-sm apple-light-card rounded-squircle-2xl p-8 md:p-10 relative z-10 flex flex-col items-center">
-        {/* Distinctive Logo Branding */}
+        {/* Distinctive Logo Branding with crisp dark contrast for white theme */}
         <div className="mb-6 flex flex-col items-center">
-          <Logo size="lg" withLink={false} />
+          <Logo size="lg" theme="light" withLink={false} />
           <p className="text-xs text-[#6E6E73] mt-2 text-center">
             {t.login.subtitle}
           </p>
