@@ -3,11 +3,12 @@ import { useModalStore } from '@/stores/modalStore'
 import { getImageUrl } from '@/services/api'
 import { Button, Modal, Select, Badge, RatingBadge } from '@/components/ui'
 import { useNavigate } from 'react-router-dom'
-import { useSeasons, useEpisodes } from '@/hooks'
+import { useSeasons, useEpisodes, useTranslation } from '@/hooks'
 import { Play } from 'lucide-react'
 
 export const DetailModal: React.FC = () => {
   const { isOpen, selectedItem, closeModal } = useModalStore()
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const [selectedSeasonId, setSelectedSeasonId] = useState<string | null>(null)
 
@@ -76,7 +77,7 @@ export const DetailModal: React.FC = () => {
               }}
               className="font-semibold shadow-apple"
             >
-              <Play className="w-4 h-4 fill-black text-black mr-1" /> Assistir
+              <Play className="w-4 h-4 fill-black text-black mr-1" /> {t.common.watch}
             </Button>
           </div>
         </div>
@@ -98,21 +99,21 @@ export const DetailModal: React.FC = () => {
             </div>
 
             <p className="text-sm md:text-base text-[#F5F5F7] leading-relaxed font-normal">
-              {selectedItem.Overview || 'Sem sinopse disponível para este título.'}
+              {selectedItem.Overview || t.common.noOverview}
             </p>
           </div>
 
           <div className="space-y-2 text-xs bg-white/[0.04] p-4 rounded-squircle border border-white/10">
             {selectedItem.Genres && selectedItem.Genres.length > 0 && (
               <div>
-                <span className="text-apple-subtext">Gêneros: </span>
+                <span className="text-apple-subtext">{t.common.genres}: </span>
                 <span className="text-[#F5F5F7] font-medium">{selectedItem.Genres.join(', ')}</span>
               </div>
             )}
             <div>
-              <span className="text-apple-subtext">Tipo: </span>
+              <span className="text-apple-subtext">{t.common.type}: </span>
               <span className="text-[#F5F5F7] font-medium">
-                {selectedItem.Type === 'Series' ? 'Série' : 'Filme'}
+                {selectedItem.Type === 'Series' ? t.common.series : t.common.movie}
               </span>
             </div>
           </div>
@@ -122,7 +123,7 @@ export const DetailModal: React.FC = () => {
         {isSeries && (
           <div className="pt-6 border-t border-white/10 space-y-5">
             <div className="flex items-center justify-between">
-              <h3 className="text-lg font-bold text-white tracking-tight">Episódios</h3>
+              <h3 className="text-lg font-bold text-white tracking-tight">{t.common.episodes}</h3>
               {seasonOptions.length > 1 && (
                 <div className="w-48">
                   <Select

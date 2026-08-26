@@ -1,11 +1,12 @@
 import React from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { VideoPlayer } from '@/components/player'
-import { useItemDetails, usePlaybackInfo } from '@/hooks'
+import { useItemDetails, usePlaybackInfo, useTranslation } from '@/hooks'
 import { AppleSpinner } from '@/components/ui'
 
 export const WatchPage: React.FC = () => {
   const { id } = useParams<{ id: string }>()
+  const { t } = useTranslation()
   const navigate = useNavigate()
 
   // Chamadas desacopladas via Hooks
@@ -23,12 +24,12 @@ export const WatchPage: React.FC = () => {
   if (!item) {
     return (
       <div className="w-screen h-screen bg-black flex flex-col items-center justify-center text-white space-y-4">
-        <p className="text-sm text-apple-subtext">Mídia indisponível ou não encontrada.</p>
+        <p className="text-sm text-apple-subtext">{t.common.unavailable}</p>
         <button
           onClick={() => navigate('/')}
           className="text-apple-accent hover:underline text-xs"
         >
-          Voltar para o início
+          {t.common.backToHome}
         </button>
       </div>
     )
