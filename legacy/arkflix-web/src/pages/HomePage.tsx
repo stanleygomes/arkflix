@@ -1,5 +1,5 @@
 import React from 'react'
-import { HeroBanner } from '@/components/media/HeroBanner'
+import { FeaturedCarousel } from '@/components/media/FeaturedCarousel'
 import { MediaRow } from '@/components/media/MediaRow'
 import { DetailModal } from '@/components/media/DetailModal'
 import { useResumeItems, useLatestItems, useMovies, useSeries, useTranslation } from '@/hooks'
@@ -7,31 +7,95 @@ import { useResumeItems, useLatestItems, useMovies, useSeries, useTranslation } 
 export const HomePage: React.FC = () => {
   const { t } = useTranslation()
 
-  // Chamadas desacopladas via Hooks
-  const { data: resumeItems, isLoading: loadingResume } = useResumeItems(12)
-  const { data: latestItems, isLoading: loadingLatest } = useLatestItems(undefined, 16)
-  const { data: moviesData, isLoading: loadingMovies } = useMovies({ limit: 16 })
-  const { data: seriesData, isLoading: loadingSeries } = useSeries({ limit: 16 })
+  // 1ª Sessão Obrigatória: Continuar Assistindo (Resume Items)
+  const { data: resumeItems, isLoading: loadingResume } = useResumeItems(16)
 
-  const heroItem = latestItems?.[0] || moviesData?.Items?.[0]
+  // Recém Adicionados (Novidades)
+  const { data: latestItems, isLoading: loadingLatest } = useLatestItems(undefined, 20)
+
+  // Filmes
+  const { data: moviesData, isLoading: loadingMovies } = useMovies({ limit: 24, sortBy: 'DateCreated' })
+
+  // Séries
+  const { data: seriesData, isLoading: loadingSeries } = useSeries({ limit: 24, sortBy: 'DateCreated' })
+
+  // Filmes Melhor Avaliados
+  const { data: topRatedMovies, isLoading: loadingTopMovies } = useMovies({
+    limit: 20,
+    sortBy: 'CommunityRating',
+  })
+
+  // Séries Mais Populares / Melhor Avaliadas
+  const { data: topRatedSeries, isLoading: loadingTopSeries } = useSeries({
+    limit: 20,
+    sortBy: 'CommunityRating',
+  })
+
+  // Monta lista de destaques rotativos combinando filmes e séries recentes
+  const featuredList = [
+    ...(latestItems || []),
+    ...(moviesData?.Items || []),
+    ...(seriesData?.Items || []),
+  ].filter(
+    (item, index, self) => index === self.findIndex((t) => t.Id === item.Id)
+  )
+
   const isHeroLoading = loadingLatest && loadingMovies
 
   return (
-    <div className="pb-20">
-      {/* Hero Banner */}
-      <HeroBanner item={heroItem} isLoading={isHeroLoading} />
+    <div className="pb-24">
+      {/* Rotativo Dinâmico de Destaques (Hero Carousel da API) */}
+      <FeaturedCarousel items={featuredList} isLoading={isHeroLoading} autoRotateInterval={7000} />
 
-      {/* Media Carousels */}
-      <div className="-mt-16 md:-mt-24 relative z-20 space-y-6">
+      {/* SESSÕES DA HOME */}
+      <div className="-mt-14 md:-mt-20 relative z-20 space-y-4">
+        {/* 1ª SESSÃO OBRIGATÓRIA: CONTINUAR ASSISTINDO */}
         {resumeItems && resumeItems.length > 0 && (
-          <MediaRow title={t.home.continueWatching} items={resumeItems} isLoading={loadingResume} />
+          <MediaRow
+            title={t.home.continueWatching}
+            items={resumeItems}
+            isLoading={loadingResume}
+          />
         )}
 
-        <MediaRow title={t.home.recentlyAdded} items={latestItems || []} isLoading={loadingLatest} />
+        {/* 2ª SESSÃO: NOVIDADES / RECÉM ADICIONADOS */}
+        <MediaRow
+          title={t.home.recentlyAdded}
+          items={latestItems || []}
+          isLoading={loadingLatest}
+        />
 
-        <MediaRow title={t.home.featuredMovies} items={moviesData?.Items || []} isLoading={loadingMovies} />
+        {/* 3ª SESSÃO: FILMES EM DESTAQUE */}
+        <MediaRow
+          title={t.home.featuredMovies}
+          items={moviesData?.Items || []}
+          isLoading={loadingMovies}
+        />
 
-        <MediaRow title={t.home.popularSeries} items={seriesData?.Items || []} isLoading={loadingSeries} />
+        {/* 4ª SESSÃO: SÉRIES POPULARES */}
+        <MediaRow
+          title={t.home.popularSeries}
+          items={seriesData?.Items || []}
+          isLoading={loadingSeries}
+        />
+
+        {/* 5ª SESSÃO: FILMES MELHOR AVALIADOS (TOP CRÍTICA) */}
+        {topRatedMovies?.Items && topRatedMovies.Items.length > 0 && (
+          <MediaRow
+            title="Filmes Aclamados pela Crítica"
+            items={topRatedMovies.Items}
+            isLoading={loadingTopMovies}
+          />
+        )}
+
+        {/* 6ª SESSÃO: SÉRIES EM ALTA */}
+        {topRatedSeries?.Items && topRatedSeries.Items.length > 0 && (
+          <MediaRow
+            title="Séries Mais Assistidas"
+            items={topRatedSeries.Items}
+            isLoading={loadingTopSeries}
+          />
+        )}
       </div>
 
       {/* Media Details Modal */}
