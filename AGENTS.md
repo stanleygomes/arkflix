@@ -20,7 +20,7 @@ src/
 │   └── ui/           # Button, Input, Select, Tabs, Badge, Modal, Slider, Skeleton, AppleSpinner, Logo
 ├── hooks/            # useMedia, useAuth, useChromecast, useTranslation
 ├── locales/          # pt-BR.ts (Typed dictionary)
-├── pages/            # HomePage, LoginPage, WatchPage, ProfilePage, MoviesPage, SeriesPage, MyListPage, SearchPage
+├── pages/            # HomePage, LoginPage, WatchPage, ProfilePage, MoviesPage, SeriesPage, SearchPage, TitlePage
 ├── services/         # api.ts (Axios + dynamic baseURL), jellyfin.ts (Pure API methods)
 ├── stores/           # authStore, castStore, modalStore, i18nStore
 └── types/            # TypeScript models (jellyfin.ts, cast.ts)

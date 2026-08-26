@@ -39,7 +39,6 @@ export const Navbar: React.FC = () => {
     { label: t.nav.home, path: '/' },
     { label: t.nav.movies, path: '/movies' },
     { label: t.nav.series, path: '/series' },
-    { label: t.nav.library, path: '/my-list' },
   ]
 
   const userAvatarUrl = user?.Id ? getUserAvatarUrl(user.Id, user.PrimaryImageTag) : ''
@@ -61,7 +60,7 @@ export const Navbar: React.FC = () => {
       <div className="flex items-center gap-8 lg:gap-12">
         <Logo size="md" theme={isProfilePage ? 'light' : 'dark'} />
 
-        {/* Apple TV Navigation Pill Tabs (Larger typography & touch targets) */}
+        {/* Apple TV Navigation Pill Tabs */}
         <nav
           className={cn(
             'hidden md:flex items-center gap-1.5 backdrop-blur-2xl p-1.5 rounded-full border transition-all shadow-sm',
@@ -94,7 +93,7 @@ export const Navbar: React.FC = () => {
         </nav>
       </div>
 
-      {/* Right: Search, Cast, Profile Direct Link (Tight, balanced spacing) */}
+      {/* Right: Search, Cast, Profile Direct Link */}
       <div className="flex items-center gap-3 md:gap-4">
         {/* Search Bar */}
         <div className="relative flex items-center">
@@ -153,7 +152,7 @@ export const Navbar: React.FC = () => {
           })}
         </div>
 
-        {/* User Profile Avatar (Prominent & High-Accessibility: 48px) */}
+        {/* User Profile Avatar */}
         <Link
           to="/profile"
           title="Perfis e Configurações"
