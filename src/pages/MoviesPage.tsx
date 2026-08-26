@@ -2,12 +2,15 @@ import React, { useState } from 'react'
 import { useMovies, useTranslation } from '@/hooks'
 import { MediaCard } from '@/components/media/MediaCard'
 import { DetailModal } from '@/components/media/DetailModal'
-import { Select, MediaCardSkeleton } from '@/components/ui'
-import { Film, Filter } from 'lucide-react'
+import { MediaCardSkeleton } from '@/components/ui'
+import { Film, Clock, Star, ArrowDownAZ, Calendar } from 'lucide-react'
+import { cn } from '@/lib/utils'
+
+type SortOption = 'DateCreated' | 'CommunityRating' | 'SortName' | 'PremiereDate'
 
 export const MoviesPage: React.FC = () => {
   const { t } = useTranslation()
-  const [sortBy, setSortBy] = useState<'DateCreated' | 'CommunityRating' | 'SortName' | 'PremiereDate'>('DateCreated')
+  const [sortBy, setSortBy] = useState<SortOption>('DateCreated')
 
   const { data: moviesData, isLoading } = useMovies({
     limit: 60,
@@ -17,39 +20,53 @@ export const MoviesPage: React.FC = () => {
 
   const movies = moviesData?.Items || []
 
+  const filterChips: { value: SortOption; label: string; icon: React.FC<{ className?: string }> }[] = [
+    { value: 'DateCreated', label: 'Recentes', icon: Clock },
+    { value: 'CommunityRating', label: 'Mais Votados', icon: Star },
+    { value: 'SortName', label: 'Ordem A-Z', icon: ArrowDownAZ },
+    { value: 'PremiereDate', label: 'Ano', icon: Calendar },
+  ]
+
   return (
-    <div className="min-h-screen pt-20 sm:pt-24 pb-20 px-4 sm:px-6 md:px-14 max-w-7xl mx-auto space-y-6 sm:space-y-8 animate-fadeIn">
-      {/* Page Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 border-b border-white/[0.08] pb-4 sm:pb-6">
-        <div className="flex items-center gap-3">
-          <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-squircle bg-white/10 flex items-center justify-center text-white border border-white/15">
-            <Film className="w-4 h-4 sm:w-5 sm:h-5" />
-          </div>
-          <div>
-            <h1 className="text-xl sm:text-2xl md:text-3xl font-extrabold text-white tracking-tight">{t.nav.movies}</h1>
-            <p className="text-[11px] sm:text-xs text-apple-subtext mt-0.5">Explore todos os filmes da sua biblioteca</p>
+    <div className="min-h-screen pt-20 sm:pt-24 pb-20 px-4 sm:px-6 md:px-14 max-w-7xl mx-auto space-y-5 sm:space-y-7 animate-fadeIn">
+      {/* Page Header - Apple iOS Styled */}
+      <div className="flex flex-col gap-4 border-b border-white/[0.08] pb-4 sm:pb-5">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-squircle bg-gradient-to-tr from-rose-500/20 to-orange-500/20 flex items-center justify-center text-rose-400 border border-rose-500/30 shadow-sm flex-none">
+              <Film className="w-5 h-5" />
+            </div>
+            <div>
+              <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight leading-none">{t.nav.movies}</h1>
+              <p className="text-xs text-apple-subtext mt-1">
+                {isLoading ? 'Carregando acervo...' : `${movies.length} títulos disponíveis`}
+              </p>
+            </div>
           </div>
         </div>
 
-        {/* Sort & Filter Controls */}
-        <div className="flex items-center gap-2.5 sm:gap-3 self-end sm:self-auto w-full sm:w-auto">
-          <div className="flex items-center gap-1.5 text-xs text-apple-subtext whitespace-nowrap">
-            <Filter className="w-3.5 h-3.5" />
-            <span>Ordenar:</span>
-          </div>
+        {/* Apple Horizontal Segmented Filter Chips for Mobile & Desktop */}
+        <div className="flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar -mx-4 px-4 sm:mx-0 sm:px-0">
+          {filterChips.map((chip) => {
+            const isActive = sortBy === chip.value
+            const Icon = chip.icon
 
-          <div className="w-full sm:w-48">
-            <Select
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value as any)}
-              options={[
-                { value: 'DateCreated', label: 'Recentes' },
-                { value: 'CommunityRating', label: 'Melhor Avaliados' },
-                { value: 'SortName', label: 'Ordem A-Z' },
-                { value: 'PremiereDate', label: 'Ano de Lançamento' },
-              ]}
-            />
-          </div>
+            return (
+              <button
+                key={chip.value}
+                onClick={() => setSortBy(chip.value)}
+                className={cn(
+                  'flex items-center gap-1.5 px-3.5 py-1.5 sm:py-2 rounded-full text-xs font-semibold whitespace-nowrap transition-all duration-200 cursor-pointer flex-none border active:scale-95',
+                  isActive
+                    ? 'bg-white text-black border-white shadow-apple font-bold'
+                    : 'bg-white/[0.06] text-apple-subtext hover:text-white hover:bg-white/10 border-white/10'
+                )}
+              >
+                <Icon className={cn('w-3.5 h-3.5', isActive ? 'text-black' : 'text-apple-subtext')} />
+                <span>{chip.label}</span>
+              </button>
+            )
+          })}
         </div>
       </div>
 
