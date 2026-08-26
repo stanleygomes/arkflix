@@ -9,7 +9,6 @@ import {
   ProfilePage,
   MoviesPage,
   SeriesPage,
-  LatestPage,
   MyListPage,
   SearchPage,
 } from '@/pages'
@@ -48,7 +47,6 @@ export function App() {
             <Route index element={<HomePage />} />
             <Route path="movies" element={<MoviesPage />} />
             <Route path="series" element={<SeriesPage />} />
-            <Route path="latest" element={<LatestPage />} />
             <Route path="my-list" element={<MyListPage />} />
             <Route path="search" element={<SearchPage />} />
             <Route path="profile" element={<ProfilePage />} />

@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import { useAuth, useTheme, useTranslation } from '@/hooks'
 import { Button, Input, Tabs } from '@/components/ui'
 import { getUserAvatarUrl } from '@/services/api'
-import { Plus, Moon, Sun, Laptop, Trash2, Check, Server, LogOut, User } from 'lucide-react'
+import { Plus, Moon, Sun, Laptop, Trash2, Check, Server, LogOut } from 'lucide-react'
 import { ThemeMode } from '@/stores/themeStore'
 
 export const ProfilePage: React.FC = () => {
