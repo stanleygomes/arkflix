@@ -140,42 +140,50 @@ export const FeaturedCarousel: React.FC<FeaturedCarouselProps> = ({
           </motion.div>
         </AnimatePresence>
 
-        {/* Action Buttons */}
-        <div className="flex items-center gap-2.5 sm:gap-3 pt-2">
+        {/* Action Buttons: Compact, aligned & well-proportioned */}
+        <div className="flex items-center gap-2 sm:gap-3 pt-2">
+          {/* 1. Main Watch Button */}
           <Button
             variant="primary"
             size="md"
             onClick={() => navigate(`/watch/${currentItem.Id}`)}
-            className="font-semibold shadow-apple flex-1 sm:flex-none text-xs sm:text-sm py-2 sm:py-2.5"
+            className="font-bold shadow-apple text-xs sm:text-sm py-2 sm:py-2.5 px-4 sm:px-6 flex-none"
           >
-            <Play className="w-3.5 h-3.5 sm:w-4 sm:h-4 fill-black text-black mr-1" /> {t.common.watch}
+            <Play className="w-4 h-4 fill-black text-black mr-1.5" /> {t.common.watch}
           </Button>
 
-          <Button
-            variant="glass"
-            size="md"
+          {/* 2. My List Quick Action */}
+          <button
             onClick={() => toggleFavorite.mutate({ itemId: currentItem.Id, isFavorite })}
-            className="font-medium text-white flex-1 sm:flex-none text-xs sm:text-sm py-2 sm:py-2.5"
+            className={`h-9 sm:h-10 px-3 sm:px-4 rounded-full border backdrop-blur-xl flex items-center justify-center gap-1.5 text-xs sm:text-sm font-semibold transition-all active:scale-95 cursor-pointer ${
+              isFavorite
+                ? 'bg-blue-500/20 text-apple-accent border-blue-500/35 hover:bg-red-500/20 hover:text-red-400 hover:border-red-500/40'
+                : 'bg-white/10 hover:bg-white/20 text-white border-white/15'
+            }`}
+            title={isFavorite ? 'Remover da Minha Lista' : 'Adicionar à Minha Lista'}
           >
             {isFavorite ? (
               <>
-                <Check className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-emerald-400 mr-1.5 stroke-[3]" /> Na Lista
+                <Check className="w-4 h-4 text-apple-accent stroke-[3]" />
+                <span>Na Lista</span>
               </>
             ) : (
               <>
-                <Plus className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1.5" /> Minha Lista
+                <Plus className="w-4 h-4" />
+                <span>Minha Lista</span>
               </>
             )}
-          </Button>
+          </button>
 
-          <Button
-            variant="glass"
-            size="md"
+          {/* 3. Details Button */}
+          <button
             onClick={() => navigate(`/title/${currentItem.Id}`)}
-            className="font-medium text-white flex-1 sm:flex-none text-xs sm:text-sm py-2 sm:py-2.5"
+            className="h-9 sm:h-10 px-3 sm:px-4 rounded-full bg-white/10 hover:bg-white/20 text-white border border-white/15 backdrop-blur-xl flex items-center justify-center gap-1.5 text-xs sm:text-sm font-semibold transition-all active:scale-95 cursor-pointer"
+            title="Ver detalhes"
           >
-            <Info className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1 text-apple-subtext" /> {t.common.details}
-          </Button>
+            <Info className="w-4 h-4 text-apple-subtext" />
+            <span>Detalhes</span>
+          </button>
         </div>
       </div>
 
