@@ -1,8 +1,9 @@
 import React from 'react'
-import { Play, Pause, RotateCcw, RotateCw, LogOut } from 'lucide-react'
 import { Slider, Button } from '@/components/ui'
 import { MediaItem } from '@/types/jellyfin'
 import { getImageUrl } from '@/services/api'
+import { useTranslation } from '@/hooks'
+import { Play, Pause, RotateCcw, RotateCw, LogOut } from 'lucide-react'
 
 interface CastRemoteViewProps {
   item?: MediaItem
@@ -27,6 +28,7 @@ export const CastRemoteView: React.FC<CastRemoteViewProps> = ({
   onSkip,
   onDisconnect,
 }) => {
+  const { t } = useTranslation()
   const backdropUrl = item ? getImageUrl(item.Id, 'Backdrop', { fillWidth: 1920, quality: 75 }) : ''
 
   const formatTime = (seconds: number) => {
@@ -52,8 +54,8 @@ export const CastRemoteView: React.FC<CastRemoteViewProps> = ({
         <div className="flex items-center gap-3 bg-white/10 backdrop-blur-xl px-4 py-2 rounded-full border border-white/10">
           <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
           <div>
-            <h4 className="text-xs font-semibold text-white">Transmitindo via AirPlay / Cast</h4>
-            <p className="text-[10px] text-apple-subtext">{deviceName || 'Dispositivo Apple TV / Cast'}</p>
+            <h4 className="text-xs font-semibold text-white">{t.player.castingAirplay}</h4>
+            <p className="text-[10px] text-apple-subtext">{deviceName || t.player.castDevice}</p>
           </div>
         </div>
 
@@ -63,7 +65,7 @@ export const CastRemoteView: React.FC<CastRemoteViewProps> = ({
           onClick={onDisconnect}
           className="text-xs text-red-300 hover:text-red-200"
         >
-          <LogOut className="w-3.5 h-3.5 mr-1" /> Desconectar
+          <LogOut className="w-3.5 h-3.5 mr-1" /> {t.common.disconnect}
         </Button>
       </div>
 
@@ -77,7 +79,7 @@ export const CastRemoteView: React.FC<CastRemoteViewProps> = ({
           />
         )}
         <div className="space-y-1">
-          <h2 className="text-2xl md:text-3xl font-extrabold text-white tracking-tight">{item?.Name || 'Em Reprodução'}</h2>
+          <h2 className="text-2xl md:text-3xl font-extrabold text-white tracking-tight">{item?.Name || t.player.playing}</h2>
           {item?.SeriesName && <p className="text-xs text-apple-subtext">{item.SeriesName}</p>}
         </div>
       </div>
@@ -100,7 +102,7 @@ export const CastRemoteView: React.FC<CastRemoteViewProps> = ({
           <button
             onClick={() => onSkip(-10)}
             className="p-2.5 text-white/80 hover:text-white hover:bg-white/10 rounded-full active:scale-95 transition-all"
-            title="Voltar 10s"
+            title={t.player.rewindTooltip}
           >
             <RotateCcw className="w-5 h-5" />
           </button>
@@ -119,7 +121,7 @@ export const CastRemoteView: React.FC<CastRemoteViewProps> = ({
           <button
             onClick={() => onSkip(10)}
             className="p-2.5 text-white/80 hover:text-white hover:bg-white/10 rounded-full active:scale-95 transition-all"
-            title="Avançar 10s"
+            title={t.player.forwardTooltip}
           >
             <RotateCw className="w-5 h-5" />
           </button>

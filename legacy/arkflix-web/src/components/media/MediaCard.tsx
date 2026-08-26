@@ -4,6 +4,7 @@ import { MediaItem } from '@/types/jellyfin'
 import { getImageUrl } from '@/services/api'
 import { Badge, RatingBadge } from '@/components/ui'
 import { useModalStore } from '@/stores/modalStore'
+import { useTranslation } from '@/hooks'
 import { useNavigate } from 'react-router-dom'
 
 interface MediaCardProps {
@@ -12,6 +13,7 @@ interface MediaCardProps {
 
 export const MediaCard: React.FC<MediaCardProps> = ({ item }) => {
   const { openModal } = useModalStore()
+  const { t } = useTranslation()
   const navigate = useNavigate()
 
   const imageUrl = getImageUrl(item.Id, 'Primary', { fillWidth: 400, quality: 85 })
@@ -57,7 +59,7 @@ export const MediaCard: React.FC<MediaCardProps> = ({ item }) => {
             }}
             className="flex-1 py-1.5 bg-white text-black text-xs font-semibold rounded-squircle-sm flex items-center justify-center gap-1 hover:bg-white/90 active:scale-95 transition-all shadow-sm"
           >
-            <Play className="w-3 h-3 fill-black text-black" /> Assistir
+            <Play className="w-3 h-3 fill-black text-black" /> {t.common.watch}
           </button>
         </div>
       </div>

@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { useAuth, useTheme } from '@/hooks'
+import { useAuth, useTheme, useTranslation } from '@/hooks'
 import { Button, Input, Tabs } from '@/components/ui'
 import { Plus, Moon, Sun, Laptop, Trash2, Check, Server, LogOut } from 'lucide-react'
 import { ThemeMode } from '@/stores/themeStore'
@@ -7,6 +7,7 @@ import { ThemeMode } from '@/stores/themeStore'
 export const ProfilePage: React.FC = () => {
   const { user, profiles, switchProfile, removeProfile, login, serverUrl, logout } = useAuth()
   const { theme, setTheme } = useTheme()
+  const { t } = useTranslation()
 
   const [showAddProfile, setShowAddProfile] = useState(false)
   const [newUsername, setNewUsername] = useState('')
@@ -31,18 +32,18 @@ export const ProfilePage: React.FC = () => {
   }
 
   const themeTabs = [
-    { id: 'dark', label: 'Escuro', icon: <Moon className="w-3.5 h-3.5" /> },
-    { id: 'light', label: 'Claro', icon: <Sun className="w-3.5 h-3.5" /> },
-    { id: 'auto', label: 'Automático', icon: <Laptop className="w-3.5 h-3.5" /> },
+    { id: 'dark', label: t.profile.dark, icon: <Moon className="w-3.5 h-3.5" /> },
+    { id: 'light', label: t.profile.light, icon: <Sun className="w-3.5 h-3.5" /> },
+    { id: 'auto', label: t.profile.auto, icon: <Laptop className="w-3.5 h-3.5" /> },
   ]
 
   return (
     <div className="min-h-screen pt-24 pb-20 px-6 md:px-14 max-w-4xl mx-auto space-y-10 animate-fadeIn">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-extrabold text-white tracking-tight">Configurações & Perfis</h1>
+        <h1 className="text-3xl font-extrabold text-white tracking-tight">{t.profile.title}</h1>
         <p className="text-xs text-apple-subtext mt-1">
-          Gerencie suas contas Jellyfin, aparência e preferências da interface
+          {t.profile.subtitle}
         </p>
       </div>
 
@@ -50,8 +51,8 @@ export const ProfilePage: React.FC = () => {
       <div className="glass-panel p-6 md:p-8 rounded-squircle-xl space-y-6 border border-white/10 shadow-apple">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-base font-bold text-white tracking-tight">Quem está assistindo?</h2>
-            <p className="text-xs text-apple-subtext">Alterne entre perfis salvos ou conecte um novo</p>
+            <h2 className="text-base font-bold text-white tracking-tight">{t.profile.whoIsWatching}</h2>
+            <p className="text-xs text-apple-subtext">{t.profile.whoIsWatchingDesc}</p>
           </div>
 
           <Button
@@ -60,7 +61,7 @@ export const ProfilePage: React.FC = () => {
             onClick={() => setShowAddProfile(!showAddProfile)}
             className="text-xs"
           >
-            <Plus className="w-3.5 h-3.5 mr-1" /> Adicionar Perfil
+            <Plus className="w-3.5 h-3.5 mr-1" /> {t.profile.addProfile}
           </Button>
         </div>
 
@@ -91,7 +92,7 @@ export const ProfilePage: React.FC = () => {
 
                 {isCurrent && (
                   <span className="mt-1 inline-flex items-center gap-1 text-[10px] text-emerald-400 font-bold bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
-                    <Check className="w-2.5 h-2.5" /> Ativo
+                    <Check className="w-2.5 h-2.5" /> {t.common.active}
                   </span>
                 )}
 
@@ -103,7 +104,7 @@ export const ProfilePage: React.FC = () => {
                       removeProfile(profile.id)
                     }}
                     className="absolute top-2 right-2 p-1.5 rounded-full bg-black/60 text-apple-subtext hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity"
-                    title="Remover perfil"
+                    title={t.profile.removeTitle}
                   >
                     <Trash2 className="w-3.5 h-3.5" />
                   </button>
@@ -120,23 +121,23 @@ export const ProfilePage: React.FC = () => {
             className="p-5 rounded-squircle bg-white/[0.03] border border-white/10 space-y-4 animate-fadeIn"
           >
             <h3 className="text-xs font-bold text-white uppercase tracking-wider">
-              Conectar Novo Perfil Jellyfin
+              {t.profile.connectNewProfile}
             </h3>
 
             {addError && <p className="text-xs text-red-400">{addError}</p>}
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <Input
-                label="Usuário"
-                placeholder="Nome do usuário"
+                label={t.login.usernameLabel}
+                placeholder={t.login.usernamePlaceholder}
                 value={newUsername}
                 onChange={(e) => setNewUsername(e.target.value)}
                 required
               />
               <Input
                 type="password"
-                label="Senha"
-                placeholder="Senha"
+                label={t.login.passwordLabel}
+                placeholder={t.login.passwordPlaceholder}
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
                 required
@@ -150,16 +151,16 @@ export const ProfilePage: React.FC = () => {
                 size="sm"
                 onClick={() => setShowAddProfile(false)}
               >
-                Cancelar
+                {t.common.cancel}
               </Button>
               <Button
                 type="submit"
                 variant="primary"
                 size="sm"
                 isLoading={isAdding}
-                loadingText="Adicionando..."
+                loadingText={t.profile.adding}
               >
-                Salvar Perfil
+                {t.profile.saveProfile}
               </Button>
             </div>
           </form>
@@ -169,9 +170,9 @@ export const ProfilePage: React.FC = () => {
       {/* Section 2: Aparência (Modo Escuro / Claro / Auto) */}
       <div className="glass-panel p-6 md:p-8 rounded-squircle-xl space-y-4 border border-white/10 shadow-apple">
         <div>
-          <h2 className="text-base font-bold text-white tracking-tight">Aparência</h2>
+          <h2 className="text-base font-bold text-white tracking-tight">{t.profile.appearanceTitle}</h2>
           <p className="text-xs text-apple-subtext">
-            Personalize a exibição visual do app (Dark, Light ou Sincronizado com o Sistema Operacional)
+            {t.profile.appearanceDesc}
           </p>
         </div>
 
@@ -189,7 +190,7 @@ export const ProfilePage: React.FC = () => {
         <div className="space-y-1">
           <div className="flex items-center gap-2">
             <Server className="w-4 h-4 text-apple-accent" />
-            <h3 className="text-sm font-semibold text-white">Servidor Jellyfin</h3>
+            <h3 className="text-sm font-semibold text-white">{t.profile.serverTitle}</h3>
           </div>
           <p className="text-xs text-apple-subtext font-mono">{serverUrl}</p>
         </div>
@@ -200,7 +201,7 @@ export const ProfilePage: React.FC = () => {
           onClick={logout}
           className="text-red-400 hover:text-red-300 border-red-500/20 hover:bg-red-500/10"
         >
-          <LogOut className="w-4 h-4 mr-1.5" /> Sair da Conta
+          <LogOut className="w-4 h-4 mr-1.5" /> {t.common.logout}
         </Button>
       </div>
     </div>

@@ -2,6 +2,7 @@ import React from 'react'
 import { Play, Pause, Volume2, VolumeX, Maximize, Minimize, RotateCcw, RotateCw, Subtitles } from 'lucide-react'
 import { Slider } from '@/components/ui'
 import { MediaStream } from '@/types/jellyfin'
+import { useTranslation } from '@/hooks'
 
 interface VideoControlsProps {
   isPlaying: boolean
@@ -48,6 +49,7 @@ export const VideoControls: React.FC<VideoControlsProps> = ({
   onSelectAudio,
   onSelectSubtitle,
 }) => {
+  const { t } = useTranslation()
   const [showAudioMenu, setShowAudioMenu] = React.useState(false)
 
   const formatTime = (seconds: number) => {
@@ -82,7 +84,7 @@ export const VideoControls: React.FC<VideoControlsProps> = ({
           <button
             onClick={onTogglePlay}
             className="w-10 h-10 rounded-full bg-white text-black flex items-center justify-center hover:bg-white/90 active:scale-90 transition-all shadow-md"
-            title={isPlaying ? 'Pausar (Espaço)' : 'Reproduzir (Espaço)'}
+            title={isPlaying ? t.player.pauseTooltip : t.player.playTooltip}
           >
             {isPlaying ? (
               <Pause className="w-5 h-5 fill-black text-black" />
@@ -94,7 +96,7 @@ export const VideoControls: React.FC<VideoControlsProps> = ({
           <button
             onClick={() => onSkip(-10)}
             className="p-2 rounded-full text-white/80 hover:text-white hover:bg-white/10 active:scale-95 transition-all"
-            title="Voltar 10s"
+            title={t.player.rewindTooltip}
           >
             <RotateCcw className="w-4 h-4" />
           </button>
@@ -102,7 +104,7 @@ export const VideoControls: React.FC<VideoControlsProps> = ({
           <button
             onClick={() => onSkip(10)}
             className="p-2 rounded-full text-white/80 hover:text-white hover:bg-white/10 active:scale-95 transition-all"
-            title="Avançar 10s"
+            title={t.player.forwardTooltip}
           >
             <RotateCw className="w-4 h-4" />
           </button>
@@ -148,7 +150,7 @@ export const VideoControls: React.FC<VideoControlsProps> = ({
                     ? 'bg-white/20 text-white'
                     : 'text-white/80 hover:text-white hover:bg-white/10'
                 }`}
-                title="Áudio e Legendas"
+                title={t.player.audioAndSubs}
               >
                 <Subtitles className="w-5 h-5" />
               </button>
@@ -158,7 +160,7 @@ export const VideoControls: React.FC<VideoControlsProps> = ({
                   {/* Audio tracks */}
                   {audioStreams.length > 0 && (
                     <div>
-                      <h5 className="font-semibold text-apple-subtext mb-2 text-[11px]">ÁUDIO</h5>
+                      <h5 className="font-semibold text-apple-subtext mb-2 text-[11px]">{t.player.audio}</h5>
                       <div className="space-y-1">
                         {audioStreams.map((audio) => (
                           <button
@@ -183,7 +185,7 @@ export const VideoControls: React.FC<VideoControlsProps> = ({
                   {/* Subtitle tracks */}
                   {subtitleStreams.length > 0 && (
                     <div>
-                      <h5 className="font-semibold text-apple-subtext mb-2 text-[11px]">LEGENDAS</h5>
+                      <h5 className="font-semibold text-apple-subtext mb-2 text-[11px]">{t.player.subtitles}</h5>
                       <div className="space-y-1 max-h-36 overflow-y-auto">
                         <button
                           onClick={() => {
@@ -196,7 +198,7 @@ export const VideoControls: React.FC<VideoControlsProps> = ({
                               : 'hover:bg-white/10 text-white/80'
                           }`}
                         >
-                          Desativada
+                          {t.player.subtitleDisabled}
                         </button>
                         {subtitleStreams.map((sub) => (
                           <button
@@ -233,7 +235,7 @@ export const VideoControls: React.FC<VideoControlsProps> = ({
           <button
             onClick={onToggleFullscreen}
             className="p-2 rounded-full text-white/80 hover:text-white hover:bg-white/10 transition-all"
-            title={isFullscreen ? 'Sair da tela cheia (F)' : 'Tela cheia (F)'}
+            title={isFullscreen ? t.player.exitFullscreen : t.player.fullscreen}
           >
             {isFullscreen ? <Minimize className="w-5 h-5" /> : <Maximize className="w-5 h-5" />}
           </button>

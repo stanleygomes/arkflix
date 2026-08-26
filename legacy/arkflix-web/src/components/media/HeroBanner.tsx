@@ -4,6 +4,7 @@ import { MediaItem } from '@/types/jellyfin'
 import { getImageUrl } from '@/services/api'
 import { Button, HeroBannerSkeleton } from '@/components/ui'
 import { useModalStore } from '@/stores/modalStore'
+import { useTranslation } from '@/hooks'
 import { useNavigate } from 'react-router-dom'
 
 interface HeroBannerProps {
@@ -13,6 +14,7 @@ interface HeroBannerProps {
 
 export const HeroBanner: React.FC<HeroBannerProps> = ({ item, isLoading }) => {
   const { openModal } = useModalStore()
+  const { t } = useTranslation()
   const navigate = useNavigate()
 
   if (isLoading || !item) {
@@ -62,7 +64,7 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({ item, isLoading }) => {
             <span className="text-amber-400 font-semibold">★ {item.CommunityRating.toFixed(1)}</span>
           )}
           <span className="text-white/40">•</span>
-          <span className="text-white/80">{item.Type === 'Series' ? 'Série' : 'Filme'}</span>
+          <span className="text-white/80">{item.Type === 'Series' ? t.common.series : t.common.movie}</span>
         </div>
 
         {item.Overview && (
@@ -79,7 +81,7 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({ item, isLoading }) => {
             onClick={() => navigate(`/watch/${item.Id}`)}
             className="font-semibold shadow-apple"
           >
-            <Play className="w-4 h-4 fill-black text-black mr-1" /> Assistir
+            <Play className="w-4 h-4 fill-black text-black mr-1" /> {t.common.watch}
           </Button>
 
           <Button
@@ -88,7 +90,7 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({ item, isLoading }) => {
             onClick={() => openModal(item)}
             className="font-medium text-white"
           >
-            <Info className="w-4 h-4 mr-1 text-apple-subtext" /> Detalhes
+            <Info className="w-4 h-4 mr-1 text-apple-subtext" /> {t.common.details}
           </Button>
         </div>
       </div>

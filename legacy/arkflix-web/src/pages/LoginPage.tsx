@@ -1,10 +1,11 @@
 import React, { useState } from 'react'
 import { Button, Input } from '@/components/ui'
 import { User, Lock, Server, Tv, Globe } from 'lucide-react'
-import { useAuth } from '@/hooks'
+import { useAuth, useTranslation } from '@/hooks'
 
 export const LoginPage: React.FC = () => {
   const { serverUrl, login, isLoading, error } = useAuth()
+  const { t } = useTranslation()
 
   const [customServerUrl, setCustomServerUrl] = useState(serverUrl)
   const [username, setUsername] = useState('nono')
@@ -30,10 +31,10 @@ export const LoginPage: React.FC = () => {
         </div>
 
         <h1 className="text-2xl font-bold text-white tracking-tight text-center">
-          Entrar no Arkflix
+          {t.login.title}
         </h1>
         <p className="text-xs text-apple-subtext mt-1.5 mb-6 text-center">
-          Conecte sua biblioteca Jellyfin
+          {t.login.subtitle}
         </p>
 
         {error && (
@@ -46,13 +47,13 @@ export const LoginPage: React.FC = () => {
           {/* Server URL Input */}
           <div>
             <div className="flex items-center justify-between mb-1.5 px-1">
-              <label className="text-xs font-medium text-apple-subtext">Servidor Jellyfin</label>
+              <label className="text-xs font-medium text-apple-subtext">{t.login.serverLabel}</label>
               <button
                 type="button"
                 onClick={() => setShowServerInput(!showServerInput)}
                 className="text-[11px] text-apple-accent hover:underline"
               >
-                {showServerInput ? 'Ocultar' : 'Alterar'}
+                {showServerInput ? t.login.hideServer : t.login.changeServer}
               </button>
             </div>
 
@@ -61,7 +62,7 @@ export const LoginPage: React.FC = () => {
                 type="text"
                 value={customServerUrl}
                 onChange={(e) => setCustomServerUrl(e.target.value)}
-                placeholder="https://seu-jellyfin.com"
+                placeholder={t.login.serverPlaceholder}
                 icon={<Server className="w-4 h-4" />}
                 required
               />
@@ -78,20 +79,20 @@ export const LoginPage: React.FC = () => {
 
           <Input
             type="text"
-            label="Usuário"
+            label={t.login.usernameLabel}
             value={username}
             onChange={(e) => setUsername(e.target.value)}
-            placeholder="Nome de usuário"
+            placeholder={t.login.usernamePlaceholder}
             icon={<User className="w-4 h-4" />}
             required
           />
 
           <Input
             type="password"
-            label="Senha"
+            label={t.login.passwordLabel}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            placeholder="Sua senha"
+            placeholder={t.login.passwordPlaceholder}
             icon={<Lock className="w-4 h-4" />}
             required
           />
@@ -101,10 +102,10 @@ export const LoginPage: React.FC = () => {
             variant="primary"
             size="lg"
             isLoading={isLoading}
-            loadingText="Conectando..."
+            loadingText={t.login.connecting}
             className="w-full font-semibold mt-3 shadow-sm"
           >
-            Conectar
+            {t.login.submitButton}
           </Button>
         </form>
       </div>
