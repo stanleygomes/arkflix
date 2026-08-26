@@ -14,8 +14,8 @@ Arkflix is an Apple iOS / tvOS HIG-styled Web Client for Jellyfin with Google Ca
 ```text
 src/
 ├── components/
-│   ├── layout/       # Navbar, MainLayout, PageTransition
-│   ├── media/        # HeroBanner, MediaCard, MediaRow, DetailModal
+│   ├── layout/       # Navbar, MainLayout, MobileTabBar, PageTransition
+│   ├── media/        # HeroBanner, MediaCard, MediaRow, DetailModal, FeaturedCarousel
 │   ├── player/       # VideoPlayer, VideoControls, CastRemoteView
 │   └── ui/           # Button, Input, Select, Tabs, Badge, Modal, Slider, Skeleton, AppleSpinner, Logo
 ├── hooks/            # useMedia, useAuth, useChromecast, useTranslation
@@ -27,9 +27,9 @@ src/
 ```
 
 ## 3. Key Conventions & Rules
-- **Server Persistence:** The Jellyfin server URL is dynamic and stored in `localStorage ('arkflix_server_url')`. Default: `https://ark-flix.duckdns.org`.
+- **Server Persistence:** The Jellyfin server URL is user-defined and dynamically stored in `localStorage ('arkflix_server_url')`. No hardcoded fallback.
 - **Authentication & Headers:** All API requests must include `X-Emby-Authorization` and `X-Emby-Token` via Axios interceptors.
 - **Profiles:** Support multi-user accounts saved in `localStorage ('arkflix_profiles')` with instant profile switching.
 - **Theme Convention:** Core platform runs on Apple Dark `#000000` mode. Login and Profile pages use clean Apple White theme.
 - **Video Player:** Dual mode (local HLS/HTML5 video and remote Chromecast controller `CastRemoteView`). Must report playback progress (`/Sessions/Playing/Progress`) every 10s.
-- **Git Workflow:** Always commit changes atomically in dedicated feature branches before opening PRs to `master`.
+- **Git Workflow:** Always commit changes atomically in dedicated feature branches or master before pushing.
