@@ -1,4 +1,4 @@
-import { apiClient } from './api'
+import { apiClient, getServerUrl } from './api'
 import { AuthenticationResult, MediaItem, MediaLibrary, PlaybackInfo } from '@/types/jellyfin'
 
 export const jellyfinService = {
@@ -96,7 +96,7 @@ export const jellyfinService = {
 
   // Direct Stream URL
   getStreamUrl(itemId: string, token: string): string {
-    return `${apiClient.defaults.baseURL}/Videos/${itemId}/stream.mp4?Static=true&MediaSourceId=${itemId}&api_key=${token}`
+    return `${getServerUrl()}/Videos/${itemId}/stream.mp4?Static=true&MediaSourceId=${itemId}&api_key=${token}`
   },
 
   // Progress Reporting
