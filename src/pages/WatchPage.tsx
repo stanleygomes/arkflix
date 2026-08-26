@@ -1,28 +1,15 @@
 import React from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { useAuthStore } from '@/stores/authStore'
-import { jellyfinService } from '@/services/jellyfin'
 import { VideoPlayer } from '@/components/player'
-import { useQuery } from '@tanstack/react-query'
+import { useItemDetails, usePlaybackInfo } from '@/hooks'
 
 export const WatchPage: React.FC = () => {
   const { id } = useParams<{ id: string }>()
-  const { user } = useAuthStore()
   const navigate = useNavigate()
 
-  // Fetch item details
-  const { data: item, isLoading: loadingItem } = useQuery({
-    queryKey: ['item', id],
-    queryFn: () => jellyfinService.getItemDetails(user!.Id, id!),
-    enabled: !!user && !!id,
-  })
-
-  // Fetch playback info (codecs, audio/subtitle streams)
-  const { data: playbackInfo } = useQuery({
-    queryKey: ['playbackInfo', id],
-    queryFn: () => jellyfinService.getPlaybackInfo(user!.Id, id!),
-    enabled: !!user && !!id,
-  })
+  // Chamadas desacopladas via Hooks
+  const { data: item, isLoading: loadingItem } = useItemDetails(id)
+  const { data: playbackInfo } = usePlaybackInfo(id)
 
   if (loadingItem) {
     return (
