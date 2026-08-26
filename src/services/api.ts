@@ -1,20 +1,36 @@
 import axios from 'axios'
 
-export const JELLYFIN_SERVER_URL = import.meta.env.VITE_JELLYFIN_SERVER_URL || 'https://ark-flix.duckdns.org'
+export const DEFAULT_SERVER_URL = import.meta.env.VITE_JELLYFIN_SERVER_URL || 'https://ark-flix.duckdns.org'
 export const CLIENT_NAME = import.meta.env.VITE_APP_CLIENT_NAME || 'Arkflix'
 export const CLIENT_VERSION = import.meta.env.VITE_APP_VERSION || '1.0.0'
 export const DEVICE_ID = 'arkflix-web-client-v1'
 export const DEVICE_NAME = 'Web Browser'
 
+// Helper to get active server URL from localStorage or default
+export function getServerUrl(): string {
+  return localStorage.getItem('arkflix_server_url') || DEFAULT_SERVER_URL
+}
+
+// Helper to set active server URL
+export function setServerUrl(url: string) {
+  let cleanUrl = url.trim().replace(/\/+$/, '')
+  if (!cleanUrl.startsWith('http://') && !cleanUrl.startsWith('https://')) {
+    cleanUrl = `https://${cleanUrl}`
+  }
+  localStorage.setItem('arkflix_server_url', cleanUrl)
+  apiClient.defaults.baseURL = cleanUrl
+}
+
 export const apiClient = axios.create({
-  baseURL: JELLYFIN_SERVER_URL,
+  baseURL: getServerUrl(),
   headers: {
     'Content-Type': 'application/json',
   },
 })
 
-// Request interceptor to add authorization headers
+// Request interceptor to add authorization headers and ensure dynamic baseURL
 apiClient.interceptors.request.use((config) => {
+  config.baseURL = getServerUrl()
   const token = localStorage.getItem('arkflix_token')
   const authHeader = `MediaBrowser Client="${CLIENT_NAME}", Device="${DEVICE_NAME}", DeviceId="${DEVICE_ID}", Version="${CLIENT_VERSION}"`
 
@@ -27,7 +43,7 @@ apiClient.interceptors.request.use((config) => {
   return config
 })
 
-// Helper to construct image URLs
+// Helper to construct image URLs with dynamic server url
 export function getImageUrl(
   itemId: string,
   type: 'Primary' | 'Backdrop' | 'Logo' | 'Thumb' = 'Primary',
@@ -40,5 +56,5 @@ export function getImageUrl(
   if (options.tag) params.append('tag', options.tag)
 
   const queryString = params.toString() ? `?${params.toString()}` : ''
-  return `${JELLYFIN_SERVER_URL}/Items/${itemId}/Images/${type}${queryString}`
+  return `${getServerUrl()}/Items/${itemId}/Images/${type}${queryString}`
 }
