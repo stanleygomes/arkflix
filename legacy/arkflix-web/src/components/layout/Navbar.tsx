@@ -1,6 +1,6 @@
 import React from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
-import { Search, Bell, User, LogOut, Tv } from 'lucide-react'
+import { Search, Bell, User, LogOut, Tv, Settings } from 'lucide-react'
 import { useAuthStore } from '@/stores/authStore'
 import { cn } from '@/lib/utils'
 
@@ -119,8 +119,11 @@ export const Navbar: React.FC = () => {
 
         {/* User Profile Avatar with Apple Dropdown */}
         <div className="relative group">
-          <button className="flex items-center gap-2 cursor-pointer focus:outline-none">
-            <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-[#3A3A3C] to-[#545458] flex items-center justify-center text-xs font-semibold text-white border border-white/20 shadow-sm transition-transform group-hover:scale-105">
+          <button
+            onClick={() => navigate('/profile')}
+            className="flex items-center gap-2 cursor-pointer focus:outline-none"
+          >
+            <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-blue-500 to-indigo-600 flex items-center justify-center text-xs font-semibold text-white border border-white/20 shadow-sm transition-transform group-hover:scale-105">
               {user?.Name?.charAt(0).toUpperCase() || <User className="w-3.5 h-3.5" />}
             </div>
           </button>
@@ -131,9 +134,17 @@ export const Navbar: React.FC = () => {
               <p className="text-[11px] text-apple-subtext">Conectado como</p>
               <p className="text-xs font-semibold text-white truncate">{user?.Name || 'Convidado'}</p>
             </div>
+
+            <Link
+              to="/profile"
+              className="w-full mt-1 px-3 py-2 text-left text-xs font-medium text-white/90 hover:bg-white/10 rounded-squircle-sm flex items-center gap-2 transition-colors"
+            >
+              <Settings className="w-3.5 h-3.5 text-apple-subtext" /> Gerenciar Perfis & Tema
+            </Link>
+
             <button
               onClick={logout}
-              className="w-full mt-1 px-3 py-2 text-left text-xs font-medium text-red-400 hover:bg-white/10 rounded-squircle-sm flex items-center gap-2 transition-colors"
+              className="w-full px-3 py-2 text-left text-xs font-medium text-red-400 hover:bg-white/10 rounded-squircle-sm flex items-center gap-2 transition-colors"
             >
               <LogOut className="w-3.5 h-3.5" /> Desconectar
             </button>
