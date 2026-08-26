@@ -31,6 +31,7 @@ export const Navbar: React.FC = () => {
     e.preventDefault()
     if (searchQuery.trim()) {
       navigate(`/search?q=${encodeURIComponent(searchQuery)}`)
+      setShowSearch(false)
     }
   }
 
@@ -46,21 +47,21 @@ export const Navbar: React.FC = () => {
   return (
     <header
       className={cn(
-        'fixed top-0 left-0 right-0 z-40 transition-all duration-300 px-6 md:px-14 py-3.5 flex items-center justify-between',
+        'fixed top-0 left-0 right-0 z-40 transition-all duration-300 px-4 sm:px-6 md:px-14 py-2.5 sm:py-3.5 flex items-center justify-between',
         isProfilePage
           ? isScrolled
-            ? 'bg-white/80 backdrop-blur-2xl border-b border-black/[0.08] shadow-sm py-2.5'
+            ? 'bg-white/80 backdrop-blur-2xl border-b border-black/[0.08] shadow-sm py-2'
             : 'bg-[#F5F5F7]'
           : isScrolled
-            ? 'glass-nav py-2.5 shadow-apple'
-            : 'bg-gradient-to-b from-black/85 via-black/35 to-transparent'
+            ? 'glass-nav py-2 shadow-apple'
+            : 'bg-gradient-to-b from-black/90 via-black/40 to-transparent'
       )}
     >
       {/* Left: Distinctive Arkflix Brand Logo & Nav Tabs */}
-      <div className="flex items-center gap-10">
+      <div className="flex items-center gap-4 sm:gap-10">
         <Logo size="md" theme={isProfilePage ? 'light' : 'dark'} />
 
-        {/* Apple TV Navigation Pill Tabs */}
+        {/* Apple TV Navigation Pill Tabs (Desktop only, mobile uses bottom tab bar) */}
         <nav
           className={cn(
             'hidden md:flex items-center gap-1 backdrop-blur-xl p-1 rounded-full border transition-colors',
@@ -94,7 +95,7 @@ export const Navbar: React.FC = () => {
       </div>
 
       {/* Right: Search, Cast, Profile Direct Link */}
-      <div className="flex items-center gap-5">
+      <div className="flex items-center gap-2 sm:gap-4">
         {/* Search Bar */}
         <div className="relative flex items-center">
           {showSearch ? (
@@ -104,17 +105,17 @@ export const Navbar: React.FC = () => {
                 'flex items-center backdrop-blur-xl border px-3 py-1.5 rounded-full transition-all duration-300',
                 isProfilePage
                   ? 'bg-white border-black/15 shadow-sm'
-                  : 'bg-white/10 border-white/15'
+                  : 'bg-white/15 border-white/20'
               )}
             >
-              <Search className={cn('w-3.5 h-3.5 mr-2', isProfilePage ? 'text-[#86868B]' : 'text-apple-subtext')} />
+              <Search className={cn('w-3.5 h-3.5 mr-1.5 sm:mr-2', isProfilePage ? 'text-[#86868B]' : 'text-apple-subtext')} />
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder={t.nav.searchPlaceholder}
                 className={cn(
-                  'bg-transparent text-xs placeholder-apple-subtext focus:outline-none w-36 md:w-56',
+                  'bg-transparent text-xs placeholder-apple-subtext focus:outline-none w-28 sm:w-36 md:w-56',
                   isProfilePage ? 'text-black placeholder-[#86868B]' : 'text-white'
                 )}
                 autoFocus
@@ -126,13 +127,13 @@ export const Navbar: React.FC = () => {
               onClick={() => setShowSearch(true)}
               aria-label="Buscar"
               className={cn(
-                'p-2 rounded-full transition-all',
+                'p-1.5 sm:p-2 rounded-full transition-all',
                 isProfilePage
                   ? 'text-[#6E6E73] hover:text-[#1D1D1F] hover:bg-black/5'
                   : 'text-apple-subtext hover:text-white hover:bg-white/10'
               )}
             >
-              <Search className="w-4 h-4" />
+              <Search className="w-4 h-4 sm:w-4 sm:h-4" />
             </button>
           )}
         </div>
@@ -140,7 +141,7 @@ export const Navbar: React.FC = () => {
         {/* Google Cast Button Launcher */}
         <div
           className={cn(
-            'w-8 h-8 flex items-center justify-center p-1 rounded-full transition-colors',
+            'w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center p-1 rounded-full transition-colors',
             isProfilePage ? 'hover:bg-black/5' : 'hover:bg-white/10'
           )}
         >
@@ -152,16 +153,16 @@ export const Navbar: React.FC = () => {
           })}
         </div>
 
-        {/* User Profile Avatar (Enlarged with prominence) */}
+        {/* User Profile Avatar */}
         <Link
           to="/profile"
           title="Perfis e Configurações"
-          className="flex items-center gap-2 cursor-pointer focus:outline-none group"
+          className="flex items-center cursor-pointer focus:outline-none group ml-1"
         >
           <div
             className={cn(
-              'w-10 h-10 rounded-full overflow-hidden shadow-md transition-all duration-300 group-hover:scale-110 bg-gradient-to-tr from-blue-500 to-indigo-600 flex items-center justify-center border-2',
-              isProfilePage ? 'border-[#0071E3] ring-4 ring-blue-500/20' : 'border-white/30 group-hover:border-white'
+              'w-8 h-8 sm:w-10 sm:h-10 rounded-full overflow-hidden shadow-sm transition-all duration-300 group-hover:scale-105 bg-gradient-to-tr from-blue-500 to-indigo-600 flex items-center justify-center border-2',
+              isProfilePage ? 'border-[#0071E3] ring-2 ring-blue-500/20' : 'border-white/30 group-hover:border-white'
             )}
           >
             {userAvatarUrl && !avatarError ? (
@@ -172,8 +173,8 @@ export const Navbar: React.FC = () => {
                 className="w-full h-full object-cover"
               />
             ) : (
-              <span className="text-sm font-bold text-white">
-                {user?.Name?.charAt(0).toUpperCase() || <User className="w-4 h-4" />}
+              <span className="text-xs sm:text-sm font-bold text-white">
+                {user?.Name?.charAt(0).toUpperCase() || <User className="w-3.5 h-3.5 sm:w-4 sm:h-4" />}
               </span>
             )}
           </div>

@@ -44,9 +44,9 @@ export const FeaturedCarousel: React.FC<FeaturedCarouselProps> = ({
   }
 
   const currentItem = featuredItems[currentIndex] || featuredItems[0]
-  const backdropUrl = getImageUrl(currentItem.Id, 'Backdrop', { fillWidth: 1920, quality: 85 })
+  const backdropUrl = getImageUrl(currentItem.Id, 'Backdrop', { fillWidth: 1280, quality: 85 })
   const hasLogo = currentItem.ImageTags?.Logo
-  const logoUrl = hasLogo ? getImageUrl(currentItem.Id, 'Logo', { fillWidth: 600, quality: 90 }) : null
+  const logoUrl = hasLogo ? getImageUrl(currentItem.Id, 'Logo', { fillWidth: 500, quality: 90 }) : null
 
   const handlePrev = () => {
     setCurrentIndex((prev) => (prev === 0 ? featuredItems.length - 1 : prev - 1))
@@ -58,7 +58,7 @@ export const FeaturedCarousel: React.FC<FeaturedCarouselProps> = ({
 
   return (
     <div
-      className="relative h-[72vh] md:h-[84vh] w-full select-none overflow-hidden group/hero"
+      className="relative h-[65vh] sm:h-[75vh] md:h-[84vh] w-full select-none overflow-hidden group/hero"
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
     >
@@ -80,12 +80,12 @@ export const FeaturedCarousel: React.FC<FeaturedCarouselProps> = ({
         </motion.div>
       </AnimatePresence>
 
-      {/* Apple Subtle Vignette & Bottom Blends */}
-      <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/45 to-transparent w-full md:w-3/5 pointer-events-none" />
-      <div className="absolute inset-0 bg-gradient-to-t from-apple-bg via-apple-bg/30 to-transparent pointer-events-none" />
+      {/* Apple Vignettes - Heavy on mobile for readability */}
+      <div className="absolute inset-0 bg-gradient-to-r from-black/95 via-black/60 to-transparent w-full md:w-3/5 pointer-events-none" />
+      <div className="absolute inset-0 bg-gradient-to-t from-[#000000] via-[#000000]/40 to-transparent pointer-events-none" />
 
       {/* Content Container */}
-      <div className="absolute bottom-14 md:bottom-24 left-6 md:left-14 max-w-2xl z-10 space-y-4">
+      <div className="absolute bottom-10 sm:bottom-14 md:bottom-24 left-4 sm:left-6 md:left-14 right-4 sm:right-auto max-w-2xl z-10 space-y-3 sm:space-y-4">
         <AnimatePresence mode="wait">
           <motion.div
             key={currentItem.Id}
@@ -93,25 +93,25 @@ export const FeaturedCarousel: React.FC<FeaturedCarouselProps> = ({
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
             transition={{ duration: 0.5, delay: 0.1 }}
-            className="space-y-3.5"
+            className="space-y-2 sm:space-y-3.5"
           >
             {logoUrl ? (
               <img
                 src={logoUrl}
                 alt={currentItem.Name}
-                className="max-h-24 md:max-h-32 object-contain mb-3 drop-shadow-2xl"
+                className="max-h-16 sm:max-h-24 md:max-h-32 object-contain mb-2 drop-shadow-2xl"
               />
             ) : (
-              <h1 className="text-3xl md:text-5xl font-extrabold text-white tracking-tight leading-tight">
+              <h1 className="text-2xl sm:text-3xl md:text-5xl font-extrabold text-white tracking-tight leading-tight line-clamp-2">
                 {currentItem.Name}
               </h1>
             )}
 
             {/* Metadata Pills */}
-            <div className="flex items-center gap-2.5 text-xs text-apple-subtext font-medium">
+            <div className="flex flex-wrap items-center gap-2 text-[11px] sm:text-xs text-apple-subtext font-medium">
               {currentItem.ProductionYear && <span>{currentItem.ProductionYear}</span>}
               {currentItem.OfficialRating && (
-                <span className="bg-white/10 text-white px-2 py-0.5 rounded-squircle-sm text-[10px] uppercase font-semibold border border-white/10">
+                <span className="bg-white/10 text-white px-1.5 py-0.5 rounded-squircle-sm text-[9px] sm:text-[10px] uppercase font-semibold border border-white/10">
                   {currentItem.OfficialRating}
                 </span>
               )}
@@ -124,16 +124,16 @@ export const FeaturedCarousel: React.FC<FeaturedCarouselProps> = ({
               </span>
               {currentItem.Genres && currentItem.Genres.length > 0 && (
                 <>
-                  <span className="text-white/40">•</span>
-                  <span className="text-apple-subtext truncate max-w-[200px]">
-                    {currentItem.Genres.slice(0, 3).join(', ')}
+                  <span className="text-white/40 hidden sm:inline">•</span>
+                  <span className="text-apple-subtext truncate max-w-[150px] sm:max-w-[200px] hidden sm:inline">
+                    {currentItem.Genres.slice(0, 2).join(', ')}
                   </span>
                 </>
               )}
             </div>
 
             {currentItem.Overview && (
-              <p className="text-sm md:text-base text-[#D1D1D6] line-clamp-3 leading-relaxed font-normal max-w-xl">
+              <p className="text-xs sm:text-sm md:text-base text-[#D1D1D6] line-clamp-2 sm:line-clamp-3 leading-relaxed font-normal max-w-xl">
                 {currentItem.Overview}
               </p>
             )}
@@ -141,40 +141,40 @@ export const FeaturedCarousel: React.FC<FeaturedCarouselProps> = ({
         </AnimatePresence>
 
         {/* Action Buttons */}
-        <div className="flex items-center gap-3 pt-3">
+        <div className="flex items-center gap-2.5 sm:gap-3 pt-2">
           <Button
             variant="primary"
-            size="lg"
+            size="md"
             onClick={() => navigate(`/watch/${currentItem.Id}`)}
-            className="font-semibold shadow-apple"
+            className="font-semibold shadow-apple flex-1 sm:flex-none text-xs sm:text-sm py-2 sm:py-2.5"
           >
-            <Play className="w-4 h-4 fill-black text-black mr-1" /> {t.common.watch}
+            <Play className="w-3.5 h-3.5 sm:w-4 sm:h-4 fill-black text-black mr-1" /> {t.common.watch}
           </Button>
 
           <Button
             variant="glass"
-            size="lg"
+            size="md"
             onClick={() => openModal(currentItem)}
-            className="font-medium text-white"
+            className="font-medium text-white flex-1 sm:flex-none text-xs sm:text-sm py-2 sm:py-2.5"
           >
-            <Info className="w-4 h-4 mr-1 text-apple-subtext" /> {t.common.details}
+            <Info className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1 text-apple-subtext" /> {t.common.details}
           </Button>
         </div>
       </div>
 
       {/* Carousel Navigation Indicators (Pill Dots) & Arrows */}
-      <div className="absolute bottom-6 right-6 md:right-14 z-20 flex items-center gap-3">
+      <div className="absolute bottom-4 sm:bottom-6 right-4 sm:right-6 md:right-14 z-20 flex items-center gap-2 sm:gap-3">
         {/* Previous */}
         <button
           onClick={handlePrev}
-          className="w-9 h-9 rounded-full bg-black/40 hover:bg-black/70 backdrop-blur-xl border border-white/10 text-white flex items-center justify-center opacity-0 group-hover/hero:opacity-100 transition-all hover:scale-105 active:scale-95"
+          className="w-7 h-7 sm:w-9 sm:h-9 rounded-full bg-black/50 backdrop-blur-xl border border-white/10 text-white hidden sm:flex items-center justify-center opacity-0 group-hover/hero:opacity-100 transition-all hover:scale-105 active:scale-95"
           aria-label="Anterior"
         >
-          <ChevronLeft className="w-4 h-4" />
+          <ChevronLeft className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
         </button>
 
         {/* Carousel Dots */}
-        <div className="flex items-center gap-2 bg-black/40 backdrop-blur-xl px-3 py-2 rounded-full border border-white/10">
+        <div className="flex items-center gap-1.5 sm:gap-2 bg-black/50 backdrop-blur-xl px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-full border border-white/10">
           {featuredItems.map((item, index) => {
             const isActive = index === currentIndex
             return (
@@ -183,7 +183,7 @@ export const FeaturedCarousel: React.FC<FeaturedCarouselProps> = ({
                 onClick={() => setCurrentIndex(index)}
                 aria-label={`Slide ${index + 1}`}
                 className={`transition-all duration-300 rounded-full ${
-                  isActive ? 'w-6 h-2 bg-white' : 'w-2 h-2 bg-white/30 hover:bg-white/60'
+                  isActive ? 'w-4 sm:w-6 h-1.5 sm:h-2 bg-white' : 'w-1.5 sm:w-2 h-1.5 sm:h-2 bg-white/30 hover:bg-white/60'
                 }`}
               />
             )
@@ -193,10 +193,10 @@ export const FeaturedCarousel: React.FC<FeaturedCarouselProps> = ({
         {/* Next */}
         <button
           onClick={handleNext}
-          className="w-9 h-9 rounded-full bg-black/40 hover:bg-black/70 backdrop-blur-xl border border-white/10 text-white flex items-center justify-center opacity-0 group-hover/hero:opacity-100 transition-all hover:scale-105 active:scale-95"
+          className="w-7 h-7 sm:w-9 sm:h-9 rounded-full bg-black/50 backdrop-blur-xl border border-white/10 text-white hidden sm:flex items-center justify-center opacity-0 group-hover/hero:opacity-100 transition-all hover:scale-105 active:scale-95"
           aria-label="Próximo"
         >
-          <ChevronRight className="w-4 h-4" />
+          <ChevronRight className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
         </button>
       </div>
     </div>
