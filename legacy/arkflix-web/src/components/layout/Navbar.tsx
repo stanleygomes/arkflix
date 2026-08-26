@@ -47,27 +47,27 @@ export const Navbar: React.FC = () => {
   return (
     <header
       className={cn(
-        'fixed top-0 left-0 right-0 z-40 transition-all duration-300 px-4 sm:px-6 md:px-14 py-2.5 sm:py-3.5 flex items-center justify-between',
+        'fixed top-0 left-0 right-0 z-40 transition-all duration-300 px-6 sm:px-10 md:px-16 py-4 md:py-5 flex items-center justify-between',
         isProfilePage
           ? isScrolled
-            ? 'bg-white/80 backdrop-blur-2xl border-b border-black/[0.08] shadow-sm py-2'
+            ? 'bg-white/90 backdrop-blur-2xl border-b border-black/[0.08] shadow-sm py-3.5'
             : 'bg-[#F5F5F7]'
           : isScrolled
-            ? 'glass-nav py-2 shadow-apple'
-            : 'bg-gradient-to-b from-black/90 via-black/40 to-transparent'
+            ? 'glass-nav py-3.5 shadow-apple'
+            : 'bg-gradient-to-b from-black/95 via-black/50 to-transparent'
       )}
     >
-      {/* Left: Distinctive Arkflix Brand Logo & Nav Tabs */}
-      <div className="flex items-center gap-4 sm:gap-10">
+      {/* Left: Prominent Arkflix Brand Logo & Nav Tabs */}
+      <div className="flex items-center gap-8 lg:gap-12">
         <Logo size="md" theme={isProfilePage ? 'light' : 'dark'} />
 
-        {/* Apple TV Navigation Pill Tabs (Desktop only, mobile uses bottom tab bar) */}
+        {/* Apple TV Navigation Pill Tabs (Larger typography & touch targets) */}
         <nav
           className={cn(
-            'hidden md:flex items-center gap-1 backdrop-blur-xl p-1 rounded-full border transition-colors',
+            'hidden md:flex items-center gap-1.5 backdrop-blur-2xl p-1.5 rounded-full border transition-all shadow-sm',
             isProfilePage
-              ? 'bg-black/[0.04] border-black/10'
-              : 'bg-white/[0.06] border-white/10'
+              ? 'bg-black/[0.05] border-black/10'
+              : 'bg-white/[0.08] border-white/15'
           )}
         >
           {navLinks.map((link) => {
@@ -77,14 +77,14 @@ export const Navbar: React.FC = () => {
                 key={link.path}
                 to={link.path}
                 className={cn(
-                  'px-4 py-1.5 text-xs font-semibold rounded-full transition-all duration-300',
+                  'px-5 py-2 text-sm font-bold rounded-full transition-all duration-200 tracking-tight',
                   isProfilePage
                     ? isActive
-                      ? 'bg-white text-black shadow-sm'
-                      : 'text-[#6E6E73] hover:text-[#1D1D1F] hover:bg-black/[0.04]'
+                      ? 'bg-white text-black shadow-md scale-105'
+                      : 'text-[#515154] hover:text-[#1D1D1F] hover:bg-black/[0.04]'
                     : isActive
-                      ? 'bg-white/20 text-white shadow-sm'
-                      : 'text-apple-subtext hover:text-white hover:bg-white/5'
+                      ? 'bg-white text-black shadow-apple scale-105'
+                      : 'text-[#A1A1A6] hover:text-white hover:bg-white/10'
                 )}
               >
                 {link.label}
@@ -94,28 +94,28 @@ export const Navbar: React.FC = () => {
         </nav>
       </div>
 
-      {/* Right: Search, Cast, Profile Direct Link */}
-      <div className="flex items-center gap-2 sm:gap-4">
+      {/* Right: Search, Cast, Profile Direct Link (Tight, balanced spacing) */}
+      <div className="flex items-center gap-3 md:gap-4">
         {/* Search Bar */}
         <div className="relative flex items-center">
           {showSearch ? (
             <form
               onSubmit={handleSearchSubmit}
               className={cn(
-                'flex items-center backdrop-blur-xl border px-3 py-1.5 rounded-full transition-all duration-300',
+                'flex items-center backdrop-blur-xl border px-3.5 py-2 rounded-full transition-all duration-300 shadow-sm',
                 isProfilePage
-                  ? 'bg-white border-black/15 shadow-sm'
-                  : 'bg-white/15 border-white/20'
+                  ? 'bg-white border-black/20 shadow-md'
+                  : 'bg-white/15 border-white/25'
               )}
             >
-              <Search className={cn('w-3.5 h-3.5 mr-1.5 sm:mr-2', isProfilePage ? 'text-[#86868B]' : 'text-apple-subtext')} />
+              <Search className={cn('w-4 h-4 mr-2', isProfilePage ? 'text-[#6E6E73]' : 'text-white/80')} />
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder={t.nav.searchPlaceholder}
                 className={cn(
-                  'bg-transparent text-xs placeholder-apple-subtext focus:outline-none w-28 sm:w-36 md:w-56',
+                  'bg-transparent text-sm placeholder-apple-subtext focus:outline-none w-36 sm:w-48 md:w-64 font-medium',
                   isProfilePage ? 'text-black placeholder-[#86868B]' : 'text-white'
                 )}
                 autoFocus
@@ -127,13 +127,13 @@ export const Navbar: React.FC = () => {
               onClick={() => setShowSearch(true)}
               aria-label="Buscar"
               className={cn(
-                'p-1.5 sm:p-2 rounded-full transition-all',
+                'p-2.5 rounded-full transition-all hover:scale-105 active:scale-95',
                 isProfilePage
-                  ? 'text-[#6E6E73] hover:text-[#1D1D1F] hover:bg-black/5'
-                  : 'text-apple-subtext hover:text-white hover:bg-white/10'
+                  ? 'text-[#1D1D1F] hover:bg-black/5'
+                  : 'text-white/90 hover:text-white hover:bg-white/15'
               )}
             >
-              <Search className="w-4 h-4 sm:w-4 sm:h-4" />
+              <Search className="w-5 h-5" />
             </button>
           )}
         </div>
@@ -141,28 +141,28 @@ export const Navbar: React.FC = () => {
         {/* Google Cast Button Launcher */}
         <div
           className={cn(
-            'w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center p-1 rounded-full transition-colors',
-            isProfilePage ? 'hover:bg-black/5' : 'hover:bg-white/10'
+            'w-10 h-10 flex items-center justify-center p-1 rounded-full transition-all hover:scale-105 active:scale-95',
+            isProfilePage ? 'hover:bg-black/5' : 'hover:bg-white/15'
           )}
         >
           {React.createElement('google-cast-launcher', {
             class: cn(
-              'w-4 h-4 cursor-pointer transition-opacity',
-              isProfilePage ? 'opacity-80 hover:opacity-100 invert' : 'opacity-70 hover:opacity-100'
+              'w-5 h-5 cursor-pointer transition-opacity',
+              isProfilePage ? 'opacity-90 hover:opacity-100 invert' : 'opacity-85 hover:opacity-100'
             ),
           })}
         </div>
 
-        {/* User Profile Avatar */}
+        {/* User Profile Avatar (Prominent & High-Accessibility: 48px) */}
         <Link
           to="/profile"
           title="Perfis e Configurações"
-          className="flex items-center cursor-pointer focus:outline-none group ml-1"
+          className="flex items-center cursor-pointer focus:outline-none group pl-1"
         >
           <div
             className={cn(
-              'w-8 h-8 sm:w-10 sm:h-10 rounded-full overflow-hidden shadow-sm transition-all duration-300 group-hover:scale-105 bg-gradient-to-tr from-blue-500 to-indigo-600 flex items-center justify-center border-2',
-              isProfilePage ? 'border-[#0071E3] ring-2 ring-blue-500/20' : 'border-white/30 group-hover:border-white'
+              'w-11 h-11 md:w-12 md:h-12 rounded-full overflow-hidden shadow-apple transition-all duration-300 group-hover:scale-105 group-hover:shadow-[0_0_20px_rgba(41,151,255,0.4)] bg-gradient-to-tr from-blue-500 to-indigo-600 flex items-center justify-center border-2',
+              isProfilePage ? 'border-[#0071E3] ring-4 ring-blue-500/30' : 'border-white/40 group-hover:border-white'
             )}
           >
             {userAvatarUrl && !avatarError ? (
@@ -173,8 +173,8 @@ export const Navbar: React.FC = () => {
                 className="w-full h-full object-cover"
               />
             ) : (
-              <span className="text-xs sm:text-sm font-bold text-white">
-                {user?.Name?.charAt(0).toUpperCase() || <User className="w-3.5 h-3.5 sm:w-4 sm:h-4" />}
+              <span className="text-base md:text-lg font-extrabold text-white">
+                {user?.Name?.charAt(0).toUpperCase() || <User className="w-5 h-5" />}
               </span>
             )}
           </div>
