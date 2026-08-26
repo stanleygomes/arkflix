@@ -1,10 +1,10 @@
 import React from 'react'
 import { motion } from 'framer-motion'
-import { Play } from 'lucide-react'
+import { Play, Bookmark, Check } from 'lucide-react'
 import { MediaItem } from '@/types/jellyfin'
 import { getImageUrl } from '@/services/api'
 import { Badge, RatingBadge } from '@/components/ui'
-import { useTranslation } from '@/hooks'
+import { useTranslation, useToggleFavorite } from '@/hooks'
 import { useNavigate } from 'react-router-dom'
 import { cn } from '@/lib/utils'
 
@@ -17,9 +17,16 @@ interface MediaCardProps {
 export const MediaCard: React.FC<MediaCardProps> = ({ item, className, layout = 'grid' }) => {
   const { t } = useTranslation()
   const navigate = useNavigate()
+  const toggleFavorite = useToggleFavorite()
 
   const imageUrl = getImageUrl(item.Id, 'Primary', { fillWidth: 400, quality: 85 })
   const progressPercent = item.UserData?.PlayedPercentage || 0
+  const isFavorite = !!item.UserData?.IsFavorite
+
+  const handleFavoriteClick = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    toggleFavorite.mutate({ itemId: item.Id, isFavorite })
+  }
 
   return (
     <motion.div
@@ -40,6 +47,24 @@ export const MediaCard: React.FC<MediaCardProps> = ({ item, className, layout = 
         loading="lazy"
         className="w-full h-full object-cover transition-transform duration-500 ease-out group-hover/card:scale-105"
       />
+
+      {/* Favorite Quick Button (Top Right on Hover) */}
+      <button
+        onClick={handleFavoriteClick}
+        aria-label={isFavorite ? 'Remover dos favoritos' : 'Adicionar aos favoritos'}
+        className={cn(
+          'absolute top-2.5 right-2.5 z-20 w-7 h-7 sm:w-8 sm:h-8 rounded-full backdrop-blur-xl flex items-center justify-center transition-all duration-200 shadow-md',
+          isFavorite
+            ? 'bg-blue-500 text-white opacity-100'
+            : 'bg-black/60 text-white/80 opacity-0 group-hover/card:opacity-100 hover:bg-black/80 hover:text-white border border-white/20'
+        )}
+      >
+        {isFavorite ? (
+          <Check className="w-3.5 h-3.5 sm:w-4 sm:h-4 stroke-[3]" />
+        ) : (
+          <Bookmark className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+        )}
+      </button>
 
       {/* Progress Bar (Continuar Assistindo) */}
       {progressPercent > 0 && (

@@ -36,6 +36,35 @@ export const jellyfinService = {
     return response.data
   },
 
+  // Favorite Items (Minha Lista)
+  async getFavoriteItems(userId: string, limit = 40): Promise<{ Items: MediaItem[]; TotalRecordCount: number }> {
+    const response = await apiClient.get<{ Items: MediaItem[]; TotalRecordCount: number }>(
+      `/Users/${userId}/Items`,
+      {
+        params: {
+          Recursive: true,
+          Filters: 'IsFavorite',
+          SortBy: 'DateCreated',
+          SortOrder: 'Descending',
+          Limit: limit,
+        },
+      }
+    )
+    return response.data
+  },
+
+  // Mark Item as Favorite
+  async markFavorite(userId: string, itemId: string): Promise<any> {
+    const response = await apiClient.post(`/User/${userId}/FavoriteItems/${itemId}`)
+    return response.data
+  },
+
+  // Unmark Item as Favorite
+  async unmarkFavorite(userId: string, itemId: string): Promise<any> {
+    const response = await apiClient.delete(`/User/${userId}/FavoriteItems/${itemId}`)
+    return response.data
+  },
+
   // Items from Library (Movies, Series)
   async getItems(userId: string, params: {
     parentId?: string
