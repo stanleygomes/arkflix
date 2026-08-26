@@ -1,4 +1,5 @@
 import React from 'react'
+import { motion } from 'framer-motion'
 import { Play } from 'lucide-react'
 import { MediaItem } from '@/types/jellyfin'
 import { getImageUrl } from '@/services/api'
@@ -20,15 +21,18 @@ export const MediaCard: React.FC<MediaCardProps> = ({ item }) => {
   const progressPercent = item.UserData?.PlayedPercentage || 0
 
   return (
-    <div
+    <motion.div
       onClick={() => openModal(item)}
-      className="group relative flex-none w-[160px] sm:w-[195px] md:w-[230px] aspect-[2/3] rounded-squircle-lg overflow-hidden bg-[#1C1C1E] cursor-pointer transition-all duration-300 hover:scale-105 hover:shadow-apple border border-white/10 hover:border-white/30"
+      whileHover={{ y: -6, scale: 1.03 }}
+      whileTap={{ scale: 0.97 }}
+      transition={{ type: 'spring', stiffness: 400, damping: 28 }}
+      className="group relative flex-none w-[160px] sm:w-[195px] md:w-[230px] aspect-[2/3] rounded-squircle-lg overflow-hidden bg-[#1C1C1E] cursor-pointer shadow-sm hover:shadow-apple border border-white/10 hover:border-white/30 will-change-transform"
     >
       <img
         src={imageUrl}
         alt={item.Name}
         loading="lazy"
-        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+        className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
       />
 
       {/* Progress Bar (Continuar Assistindo) */}
@@ -63,6 +67,6 @@ export const MediaCard: React.FC<MediaCardProps> = ({ item }) => {
           </button>
         </div>
       </div>
-    </div>
+    </motion.div>
   )
 }

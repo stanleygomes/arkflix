@@ -1,16 +1,20 @@
 import React from 'react'
-import { Outlet } from 'react-router-dom'
+import { Outlet, useLocation } from 'react-router-dom'
 import { Navbar } from './Navbar'
+import { PageTransition } from './PageTransition'
 import { useTranslation } from '@/hooks'
 
 export const MainLayout: React.FC = () => {
   const { t } = useTranslation()
+  const location = useLocation()
 
   return (
     <div className="min-h-screen bg-apple-bg flex flex-col justify-between selection:bg-white/20">
       <Navbar />
-      <main className="flex-grow">
-        <Outlet />
+      <main className="flex-grow flex flex-col">
+        <PageTransition key={location.pathname}>
+          <Outlet />
+        </PageTransition>
       </main>
       <footer className="px-6 md:px-14 py-10 text-xs text-apple-subtext border-t border-white/[0.06] flex flex-col md:flex-row justify-between items-center gap-4">
         <p>{t.footer.copyright}</p>
