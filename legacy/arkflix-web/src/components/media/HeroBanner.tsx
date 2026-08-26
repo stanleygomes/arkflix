@@ -24,55 +24,71 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({ item, isLoading }) => {
   const logoUrl = hasLogo ? getImageUrl(item.Id, 'Logo', { fillWidth: 600, quality: 90 }) : null
 
   return (
-    <div className="relative h-[65vh] md:h-[85vh] w-full select-none">
+    <div className="relative h-[70vh] md:h-[82vh] w-full select-none overflow-hidden">
       {/* Backdrop Image */}
       <img
         src={backdropUrl}
         alt={item.Name}
-        className="absolute inset-0 w-full h-full object-cover object-center"
+        className="absolute inset-0 w-full h-full object-cover object-center scale-[1.02] transition-transform duration-1000 ease-out"
       />
 
-      {/* Gradients to blend into Netflix background */}
-      <div className="absolute inset-0 bg-gradient-to-r from-netflix-black via-netflix-black/40 to-transparent w-full md:w-2/3"></div>
-      <div className="absolute inset-0 bg-gradient-to-t from-netflix-black via-transparent to-black/30"></div>
+      {/* Apple Subtle Vignette & Bottom Blends */}
+      <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/40 to-transparent w-full md:w-3/5"></div>
+      <div className="absolute inset-0 bg-gradient-to-t from-apple-bg via-apple-bg/30 to-transparent"></div>
 
-      {/* Content */}
-      <div className="absolute bottom-12 md:bottom-20 left-4 md:left-12 max-w-2xl z-10 space-y-4">
+      {/* Content Container */}
+      <div className="absolute bottom-12 md:bottom-20 left-6 md:left-14 max-w-2xl z-10 space-y-4">
         {logoUrl ? (
           <img
             src={logoUrl}
             alt={item.Name}
-            className="max-h-28 md:max-h-36 object-contain mb-2 drop-shadow-xl"
+            className="max-h-24 md:max-h-32 object-contain mb-3 drop-shadow-2xl"
           />
         ) : (
-          <h1 className="text-3xl md:text-5xl font-black text-white drop-shadow-lg tracking-tight">
+          <h1 className="text-3xl md:text-5xl font-extrabold text-white tracking-tight leading-tight">
             {item.Name}
           </h1>
         )}
 
+        {/* Metadata tag pills */}
+        <div className="flex items-center gap-2 text-xs text-apple-subtext font-medium">
+          {item.ProductionYear && <span>{item.ProductionYear}</span>}
+          {item.OfficialRating && (
+            <span className="bg-white/10 text-white px-2 py-0.5 rounded-squircle-sm text-[10px] uppercase font-semibold">
+              {item.OfficialRating}
+            </span>
+          )}
+          {item.CommunityRating && (
+            <span className="text-amber-400 font-semibold">★ {item.CommunityRating.toFixed(1)}</span>
+          )}
+          <span className="text-white/40">•</span>
+          <span className="text-white/80">{item.Type === 'Series' ? 'Série' : 'Filme'}</span>
+        </div>
+
         {item.Overview && (
-          <p className="text-sm md:text-base text-netflix-lightGray line-clamp-3 md:line-clamp-4 drop-shadow">
+          <p className="text-sm md:text-base text-[#D1D1D6] line-clamp-3 leading-relaxed font-normal">
             {item.Overview}
           </p>
         )}
 
-        <div className="flex items-center gap-3 pt-2">
+        {/* Apple HIG CTA Buttons */}
+        <div className="flex items-center gap-3 pt-3">
           <Button
             variant="primary"
             size="lg"
             onClick={() => navigate(`/watch/${item.Id}`)}
-            className="shadow-lg"
+            className="font-semibold shadow-apple"
           >
-            <Play className="w-5 h-5 fill-black" /> Assistir
+            <Play className="w-4 h-4 fill-black text-black mr-1" /> Assistir
           </Button>
 
           <Button
-            variant="secondary"
+            variant="glass"
             size="lg"
             onClick={() => openModal(item)}
-            className="shadow-lg"
+            className="font-medium text-white"
           >
-            <Info className="w-5 h-5" /> Mais Informações
+            <Info className="w-4 h-4 mr-1 text-apple-subtext" /> Detalhes
           </Button>
         </div>
       </div>

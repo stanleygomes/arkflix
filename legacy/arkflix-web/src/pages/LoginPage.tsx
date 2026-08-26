@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { Button, Input } from '@/components/ui'
-import { User, Lock } from 'lucide-react'
+import { User, Lock, Tv } from 'lucide-react'
 import { useAuth } from '@/hooks'
 
 export const LoginPage: React.FC = () => {
@@ -16,28 +16,38 @@ export const LoginPage: React.FC = () => {
   }
 
   return (
-    <div className="relative min-h-screen w-full flex items-center justify-center bg-black bg-opacity-70 px-4">
-      {/* Background Image / Overlay */}
-      <div className="absolute inset-0 bg-[url('https://assets.nflxext.com/ffe/siteui/vlv3/7ca5b7c7-20aa-42a8-a278-e801b0d63e1c/bn-en-20240326-popsignuptwoweeks-perspective_alpha_website_large.jpg')] bg-cover bg-center -z-10 opacity-40"></div>
-      <div className="absolute inset-0 bg-black/60 -z-10"></div>
+    <div className="relative min-h-screen w-full flex items-center justify-center bg-apple-bg px-4 overflow-hidden selection:bg-white/20">
+      {/* Subtle Ambient Apple Glows in the background */}
+      <div className="absolute top-1/4 -left-48 w-96 h-96 bg-blue-600/20 rounded-full blur-[140px] pointer-events-none" />
+      <div className="absolute bottom-1/4 -right-48 w-96 h-96 bg-purple-600/15 rounded-full blur-[140px] pointer-events-none" />
 
-      {/* Login Card */}
-      <div className="w-full max-w-md bg-black/75 rounded-lg p-8 md:p-12 border border-white/10 shadow-2xl">
-        <h1 className="text-3xl font-bold text-white mb-6">Entrar</h1>
+      {/* Apple Glass Card */}
+      <div className="w-full max-w-sm glass-panel rounded-squircle-2xl p-8 md:p-10 shadow-apple border border-white/15 relative z-10 flex flex-col items-center">
+        {/* Apple TV Icon Badge */}
+        <div className="w-14 h-14 rounded-squircle-lg bg-white text-black flex items-center justify-center mb-6 shadow-md transition-transform hover:scale-105">
+          <Tv className="w-7 h-7 fill-black text-black" />
+        </div>
+
+        <h1 className="text-2xl font-bold text-white tracking-tight text-center">
+          Entrar no Arkflix
+        </h1>
+        <p className="text-xs text-apple-subtext mt-1.5 mb-6 text-center">
+          Conecte sua conta do Jellyfin
+        </p>
 
         {error && (
-          <div className="bg-netflix-red/20 border border-netflix-red text-netflix-lightGray p-3 rounded text-sm mb-4">
+          <div className="w-full bg-red-500/10 border border-red-500/20 text-red-300 p-3 rounded-squircle-sm text-xs mb-4 text-center font-medium animate-fadeIn">
             {error}
           </div>
         )}
 
-        <form onSubmit={handleLogin} className="space-y-5">
+        <form onSubmit={handleLogin} className="w-full space-y-4">
           <Input
             type="text"
-            label="Usuário"
+            label="ID do Usuário"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
-            placeholder="Digite seu usuário"
+            placeholder="Usuário"
             icon={<User className="w-4 h-4" />}
             required
           />
@@ -47,7 +57,7 @@ export const LoginPage: React.FC = () => {
             label="Senha"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            placeholder="Digite sua senha"
+            placeholder="Senha"
             icon={<Lock className="w-4 h-4" />}
             required
           />
@@ -56,16 +66,16 @@ export const LoginPage: React.FC = () => {
             type="submit"
             variant="primary"
             size="lg"
-            disabled={isLoading}
-            className="w-full bg-netflix-red text-white hover:bg-red-700 font-bold mt-2"
+            isLoading={isLoading}
+            loadingText="Conectando..."
+            className="w-full font-semibold mt-2 shadow-sm"
           >
-            {isLoading ? 'Conectando...' : 'Entrar no Arkflix'}
+            Continuar
           </Button>
         </form>
 
-        <div className="mt-8 text-xs text-netflix-gray space-y-2">
-          <p>Servidor Conectado: <strong className="text-white">ark-flix.duckdns.org</strong></p>
-          <p>Dica: As credenciais padrão já vêm pré-preenchidas para teste.</p>
+        <div className="mt-8 text-center text-[11px] text-apple-subtext space-y-1">
+          <p>Servidor: <strong className="text-[#F5F5F7]">ark-flix.duckdns.org</strong></p>
         </div>
       </div>
     </div>

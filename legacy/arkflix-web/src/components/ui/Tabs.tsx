@@ -16,7 +16,12 @@ export interface TabsProps {
 
 export const Tabs: React.FC<TabsProps> = ({ tabs, activeTab, onChange, className }) => {
   return (
-    <div className={cn('flex items-center gap-2 border-b border-white/10 overflow-x-auto no-scrollbar', className)}>
+    <div
+      className={cn(
+        'inline-flex items-center p-1 bg-[#1C1C1E]/80 backdrop-blur-xl border border-white/10 rounded-full select-none overflow-x-auto no-scrollbar',
+        className
+      )}
+    >
       {tabs.map((tab) => {
         const isActive = tab.id === activeTab
         return (
@@ -24,13 +29,13 @@ export const Tabs: React.FC<TabsProps> = ({ tabs, activeTab, onChange, className
             key={tab.id}
             onClick={() => onChange(tab.id)}
             className={cn(
-              'flex items-center gap-2 px-4 py-2.5 text-sm font-semibold transition-all border-b-2 whitespace-nowrap',
+              'relative flex items-center gap-2 px-4 py-1.5 text-xs font-semibold rounded-full transition-all duration-300 whitespace-nowrap',
               isActive
-                ? 'text-white border-netflix-red'
-                : 'text-netflix-gray border-transparent hover:text-white hover:border-white/30'
+                ? 'bg-white/20 text-white shadow-sm'
+                : 'text-apple-subtext hover:text-white hover:bg-white/5'
             )}
           >
-            {tab.icon && <span className="w-4 h-4">{tab.icon}</span>}
+            {tab.icon && <span className="w-3.5 h-3.5">{tab.icon}</span>}
             {tab.label}
           </button>
         )
