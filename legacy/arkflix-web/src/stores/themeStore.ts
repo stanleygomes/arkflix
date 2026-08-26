@@ -15,7 +15,7 @@ function getSystemTheme(): 'dark' | 'light' {
   return 'dark'
 }
 
-function applyThemeToDocument(theme: ThemeMode) {
+function applyThemeToDocument(theme: ThemeMode): 'dark' | 'light' {
   const root = document.documentElement
   const effective = theme === 'auto' ? getSystemTheme() : theme
 
@@ -23,8 +23,8 @@ function applyThemeToDocument(theme: ThemeMode) {
     root.classList.add('dark')
     root.classList.remove('light')
   } else {
-    root.classList.add('light')
     root.classList.remove('dark')
+    root.classList.add('light')
   }
   return effective
 }

@@ -2,47 +2,60 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  /* Apple Light Mode Palette */
+  --apple-bg: #F5F5F7;
+  --apple-card: rgba(255, 255, 255, 0.85);
+  --apple-glass: rgba(255, 255, 255, 0.7);
+  --apple-glass-border: rgba(0, 0, 0, 0.08);
+  --apple-glass-hover: rgba(0, 0, 0, 0.05);
+  --apple-subtext: #86868B;
+  --apple-text: #1D1D1F;
+}
+
+html.dark {
+  /* Apple Dark Mode Palette */
+  --apple-bg: #000000;
+  --apple-card: rgba(28, 28, 30, 0.65);
+  --apple-glass: rgba(255, 255, 255, 0.08);
+  --apple-glass-border: rgba(255, 255, 255, 0.12);
+  --apple-glass-hover: rgba(255, 255, 255, 0.16);
+  --apple-subtext: #86868B;
+  --apple-text: #F5F5F7;
+}
+
 @layer base {
   * {
     @apply box-border tracking-[-0.015em];
   }
   body {
-    @apply bg-apple-bg text-apple-text min-h-screen m-0 p-0 font-sans antialiased;
+    background-color: var(--apple-bg);
+    color: var(--apple-text);
+    @apply min-h-screen m-0 p-0 font-sans antialiased transition-colors duration-300;
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
   }
 }
 
-/* Apple iOS Glassmorphism Utility Classes */
+/* Apple Glassmorphism Utility Classes (Dynamic Light / Dark) */
 .glass-panel {
-  background: rgba(30, 30, 32, 0.7);
+  background: var(--apple-glass);
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  border: 1px solid var(--apple-glass-border);
 }
 
 .glass-nav {
-  background: rgba(10, 10, 12, 0.75);
+  background: var(--apple-glass);
   backdrop-filter: blur(30px);
   -webkit-backdrop-filter: blur(30px);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  border-bottom: 1px solid var(--apple-glass-border);
 }
 
 .glass-card {
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--apple-card);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-}
-
-.glass-card-hover {
-  transition: all 0.35s cubic-bezier(0.25, 1, 0.5, 1);
-}
-
-.glass-card-hover:hover {
-  background: rgba(255, 255, 255, 0.1);
-  border-color: rgba(255, 255, 255, 0.2);
-  transform: translateY(-4px) scale(1.02);
-  box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.6);
+  border: 1px solid var(--apple-glass-border);
 }
 
 /* Minimalist Apple Scrollbars */
@@ -56,10 +69,10 @@
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(120, 120, 128, 0.3);
   border-radius: 9999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.35);
+  background: rgba(120, 120, 128, 0.5);
 }
