@@ -2,7 +2,8 @@ import React from 'react'
 import { useNavigate } from 'react-router-dom'
 import { jellyfinService } from '@/services/jellyfin'
 import { useAuthStore } from '@/stores/authStore'
-import { Button } from '@/components/ui/Button'
+import { Button, Input } from '@/components/ui'
+import { User, Lock } from 'lucide-react'
 
 export const LoginPage: React.FC = () => {
   const [username, setUsername] = React.useState('nono')
@@ -45,28 +46,26 @@ export const LoginPage: React.FC = () => {
           </div>
         )}
 
-        <form onSubmit={handleLogin} className="space-y-4">
-          <div>
-            <input
-              type="text"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              placeholder="Usuário"
-              required
-              className="w-full bg-[#333] text-white px-4 py-3 rounded focus:outline-none focus:ring-2 focus:ring-netflix-red text-sm"
-            />
-          </div>
+        <form onSubmit={handleLogin} className="space-y-5">
+          <Input
+            type="text"
+            label="Usuário"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            placeholder="Digite seu usuário"
+            icon={<User className="w-4 h-4" />}
+            required
+          />
 
-          <div>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="Senha"
-              required
-              className="w-full bg-[#333] text-white px-4 py-3 rounded focus:outline-none focus:ring-2 focus:ring-netflix-red text-sm"
-            />
-          </div>
+          <Input
+            type="password"
+            label="Senha"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="Digite sua senha"
+            icon={<Lock className="w-4 h-4" />}
+            required
+          />
 
           <Button
             type="submit"
