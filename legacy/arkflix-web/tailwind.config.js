@@ -9,13 +9,13 @@ export default {
     extend: {
       colors: {
         apple: {
-          bg: "var(--apple-bg)",
-          card: "var(--apple-card)",
-          glass: "var(--apple-glass)",
-          glassBorder: "var(--apple-glass-border)",
-          glassHover: "var(--apple-glass-hover)",
-          subtext: "var(--apple-subtext)",
-          text: "var(--apple-text)",
+          bg: "#000000",
+          card: "rgba(28, 28, 30, 0.65)",
+          glass: "rgba(255, 255, 255, 0.08)",
+          glassBorder: "rgba(255, 255, 255, 0.12)",
+          glassHover: "rgba(255, 255, 255, 0.16)",
+          subtext: "#86868B",
+          text: "#F5F5F7",
           blue: "#0071E3",
           blueHover: "#0077ED",
           accent: "#2997FF",
@@ -49,9 +49,9 @@ export default {
         'glass-heavy': '40px',
       },
       boxShadow: {
-        'glass': '0 8px 32px 0 rgba(0, 0, 0, 0.15)',
-        'apple': '0 20px 40px rgba(0, 0, 0, 0.15)',
-        'apple-focus': '0 0 0 4px rgba(0, 113, 227, 0.3)',
+        'glass': '0 8px 32px 0 rgba(0, 0, 0, 0.37)',
+        'apple': '0 20px 40px rgba(0, 0, 0, 0.4)',
+        'apple-focus': '0 0 0 4px rgba(0, 113, 227, 0.4)',
       }
     },
   },
