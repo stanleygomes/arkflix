@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { getImageUrl } from '@/services/api'
 import { Button, Select, Badge, RatingBadge, AppleSpinner } from '@/components/ui'
 import { useSeasons, useEpisodes, useItemDetails, useTranslation, useToggleFavorite } from '@/hooks'
-import { Play, Clock, Calendar, User, ArrowLeft, Plus, Check } from 'lucide-react'
+import { Play, Clock, Calendar, User, ArrowLeft, Plus, Check, Trash2 } from 'lucide-react'
 
 export const TitlePage: React.FC = () => {
   const { id } = useParams<{ id: string }>()
@@ -128,8 +128,8 @@ export const TitlePage: React.FC = () => {
             </p>
           )}
 
-          {/* Action Buttons: Assistir + Minha Lista */}
-          <div className="flex items-center gap-3 pt-2">
+          {/* Action Buttons */}
+          <div className="flex flex-wrap items-center gap-3 pt-2">
             <Button
               variant="primary"
               size="lg"
@@ -139,22 +139,28 @@ export const TitlePage: React.FC = () => {
               <Play className="w-4 h-4 fill-black text-black mr-1.5" /> {t.common.watch}
             </Button>
 
-            <Button
-              variant="glass"
-              size="lg"
-              onClick={() => toggleFavorite.mutate({ itemId: item.Id, isFavorite })}
-              className="font-medium text-white text-xs sm:text-base py-2.5 sm:py-3.5 px-5 sm:px-6 shadow-apple"
-            >
-              {isFavorite ? (
-                <>
-                  <Check className="w-4 h-4 text-emerald-400 mr-2 stroke-[3]" /> Na Minha Lista
-                </>
-              ) : (
-                <>
-                  <Plus className="w-4 h-4 mr-2" /> Minha Lista
-                </>
-              )}
-            </Button>
+            {isFavorite ? (
+              <Button
+                variant="glass"
+                size="lg"
+                onClick={() => toggleFavorite.mutate({ itemId: item.Id, isFavorite: true })}
+                className="font-medium text-white hover:text-red-400 hover:border-red-500/40 text-xs sm:text-base py-2.5 sm:py-3.5 px-5 sm:px-6 shadow-apple group"
+              >
+                <Check className="w-4 h-4 text-emerald-400 mr-2 stroke-[3] group-hover:hidden" />
+                <Trash2 className="w-4 h-4 text-red-400 mr-2 hidden group-hover:block" />
+                <span className="group-hover:hidden">Na Minha Lista</span>
+                <span className="hidden group-hover:inline text-red-400">Remover da Lista</span>
+              </Button>
+            ) : (
+              <Button
+                variant="glass"
+                size="lg"
+                onClick={() => toggleFavorite.mutate({ itemId: item.Id, isFavorite: false })}
+                className="font-medium text-white text-xs sm:text-base py-2.5 sm:py-3.5 px-5 sm:px-6 shadow-apple"
+              >
+                <Plus className="w-4 h-4 mr-2" /> Minha Lista
+              </Button>
+            )}
           </div>
         </div>
       </div>
@@ -206,7 +212,7 @@ export const TitlePage: React.FC = () => {
             </div>
 
             {/* Synopsis */}
-            <p className="text-sm sm:text-base text-[#D1D1D6] leading-relaxed font-normal">
+            <p className="text-sm sm:text-base text-[#F5F5F7] leading-relaxed font-normal">
               {item.Overview || t.common.noOverview}
             </p>
           </div>

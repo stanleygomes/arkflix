@@ -1,6 +1,6 @@
 import React from 'react'
 import { motion } from 'framer-motion'
-import { Play, Bookmark, Check } from 'lucide-react'
+import { Play, Bookmark, Check, X } from 'lucide-react'
 import { MediaItem } from '@/types/jellyfin'
 import { getImageUrl } from '@/services/api'
 import { Badge, RatingBadge } from '@/components/ui'
@@ -48,21 +48,26 @@ export const MediaCard: React.FC<MediaCardProps> = ({ item, className, layout = 
         className="w-full h-full object-cover transition-transform duration-500 ease-out group-hover/card:scale-105"
       />
 
-      {/* Favorite Quick Button (Top Right on Hover) */}
+      {/* Interactive Favorite Button (Hover transforms Check into explicit Red Close 'X') */}
       <button
         onClick={handleFavoriteClick}
-        aria-label={isFavorite ? 'Remover dos favoritos' : 'Adicionar aos favoritos'}
+        aria-label={isFavorite ? 'Remover da minha lista' : 'Adicionar à minha lista'}
+        title={isFavorite ? 'Remover da minha lista' : 'Adicionar à minha lista'}
         className={cn(
-          'absolute top-2.5 right-2.5 z-20 w-7 h-7 sm:w-8 sm:h-8 rounded-full backdrop-blur-xl flex items-center justify-center transition-all duration-200 shadow-md',
+          'absolute top-2.5 right-2.5 z-20 w-8 h-8 rounded-full backdrop-blur-xl flex items-center justify-center transition-all duration-200 shadow-md group/favbtn cursor-pointer',
           isFavorite
-            ? 'bg-blue-500 text-white opacity-100'
-            : 'bg-black/60 text-white/80 opacity-0 group-hover/card:opacity-100 hover:bg-black/80 hover:text-white border border-white/20'
+            ? 'bg-blue-500 text-white hover:bg-rose-500 hover:scale-110 hover:shadow-rose-500/30'
+            : 'bg-black/60 text-white/80 opacity-0 group-hover/card:opacity-100 hover:bg-black/80 hover:text-white border border-white/20 hover:scale-110'
         )}
       >
         {isFavorite ? (
-          <Check className="w-3.5 h-3.5 sm:w-4 sm:h-4 stroke-[3]" />
+          <>
+            {/* Standard: Checkmark | Hover: Explicit 'X' to Remove */}
+            <Check className="w-4 h-4 stroke-[3] group-hover/favbtn:hidden" />
+            <X className="w-4 h-4 stroke-[3] hidden group-hover/favbtn:block" />
+          </>
         ) : (
-          <Bookmark className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+          <Bookmark className="w-4 h-4" />
         )}
       </button>
 
@@ -76,7 +81,7 @@ export const MediaCard: React.FC<MediaCardProps> = ({ item, className, layout = 
         </div>
       )}
 
-      {/* Discrete Bottom Info Sheet on Hover (ONLY on this specific card) */}
+      {/* Discrete Bottom Info Sheet on Hover */}
       <div className="absolute inset-x-0 bottom-0 pt-16 pb-3.5 px-3.5 bg-gradient-to-t from-black/95 via-black/70 to-transparent opacity-0 group-hover/card:opacity-100 transition-opacity duration-200 flex flex-col justify-end z-10 pointer-events-none group-hover/card:pointer-events-auto">
         <h4 className="text-xs font-bold text-white line-clamp-1 mb-1 drop-shadow">
           {item.Name}
@@ -88,15 +93,27 @@ export const MediaCard: React.FC<MediaCardProps> = ({ item, className, layout = 
           {item.OfficialRating && <Badge variant="rating">{item.OfficialRating}</Badge>}
         </div>
 
-        <button
-          onClick={(e) => {
-            e.stopPropagation()
-            navigate(`/watch/${item.Id}`)
-          }}
-          className="w-full py-1.5 bg-white text-black text-xs font-semibold rounded-squircle-sm flex items-center justify-center gap-1 hover:bg-white/90 active:scale-95 transition-all shadow-sm cursor-pointer"
-        >
-          <Play className="w-3 h-3 fill-black text-black" /> {t.common.watch}
-        </button>
+        <div className="flex items-center gap-1.5">
+          <button
+            onClick={(e) => {
+              e.stopPropagation()
+              navigate(`/watch/${item.Id}`)
+            }}
+            className="flex-1 py-1.5 bg-white text-black text-xs font-semibold rounded-squircle-sm flex items-center justify-center gap-1 hover:bg-white/90 active:scale-95 transition-all shadow-sm cursor-pointer"
+          >
+            <Play className="w-3 h-3 fill-black text-black" /> {t.common.watch}
+          </button>
+
+          {isFavorite && (
+            <button
+              onClick={handleFavoriteClick}
+              title="Remover da lista"
+              className="px-2.5 py-1.5 bg-red-500/20 hover:bg-red-500 text-red-400 hover:text-white text-xs font-semibold rounded-squircle-sm flex items-center justify-center transition-all cursor-pointer border border-red-500/30 active:scale-95"
+            >
+              <X className="w-3.5 h-3.5 stroke-[2.5]" />
+            </button>
+          )}
+        </div>
       </div>
     </motion.div>
   )
