@@ -1,39 +1,28 @@
-import React from 'react'
-import { Play } from 'lucide-react'
+import React, { useState, useEffect } from 'react'
 import { useModalStore } from '@/stores/modalStore'
 import { getImageUrl } from '@/services/api'
 import { Button, Modal, Select, Badge, RatingBadge } from '@/components/ui'
 import { useNavigate } from 'react-router-dom'
-import { useQuery } from '@tanstack/react-query'
-import { jellyfinService } from '@/services/jellyfin'
-import { useAuthStore } from '@/stores/authStore'
+import { useSeasons, useEpisodes } from '@/hooks'
+import { Play } from 'lucide-react'
 
 export const DetailModal: React.FC = () => {
   const { isOpen, selectedItem, closeModal } = useModalStore()
-  const { user } = useAuthStore()
   const navigate = useNavigate()
-  const [selectedSeasonId, setSelectedSeasonId] = React.useState<string | null>(null)
+  const [selectedSeasonId, setSelectedSeasonId] = useState<string | null>(null)
 
-  // Fetch seasons if it's a Series
-  const { data: seasons } = useQuery({
-    queryKey: ['seasons', selectedItem?.Id],
-    queryFn: () => jellyfinService.getSeasons(user!.Id, selectedItem!.Id),
-    enabled: isOpen && !!user && selectedItem?.Type === 'Series',
-  })
+  const isSeries = selectedItem?.Type === 'Series'
+
+  // Chamadas desacopladas via Hooks
+  const { data: seasons } = useSeasons(selectedItem?.Id, isOpen && isSeries)
+  const { data: episodes } = useEpisodes(selectedItem?.Id, selectedSeasonId || undefined, isOpen && isSeries && !!selectedSeasonId)
 
   // Select first season by default
-  React.useEffect(() => {
+  useEffect(() => {
     if (seasons && seasons.length > 0 && !selectedSeasonId) {
       setSelectedSeasonId(seasons[0].Id)
     }
   }, [seasons, selectedSeasonId])
-
-  // Fetch episodes if a season is selected
-  const { data: episodes } = useQuery({
-    queryKey: ['episodes', selectedItem?.Id, selectedSeasonId],
-    queryFn: () => jellyfinService.getEpisodes(user!.Id, selectedItem!.Id, selectedSeasonId!),
-    enabled: isOpen && !!user && !!selectedSeasonId,
-  })
 
   if (!isOpen || !selectedItem) return null
 
@@ -116,7 +105,7 @@ export const DetailModal: React.FC = () => {
         </div>
 
         {/* Episodes List (if Series) */}
-        {selectedItem.Type === 'Series' && (
+        {isSeries && (
           <div className="pt-6 border-t border-white/10 space-y-4">
             <div className="flex items-center justify-between">
               <h3 className="text-lg font-bold text-white">Episódios</h3>

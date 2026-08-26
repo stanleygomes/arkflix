@@ -1,33 +1,18 @@
-import React from 'react'
-import { useNavigate } from 'react-router-dom'
-import { jellyfinService } from '@/services/jellyfin'
-import { useAuthStore } from '@/stores/authStore'
+import React, { useState } from 'react'
 import { Button, Input } from '@/components/ui'
 import { User, Lock } from 'lucide-react'
+import { useAuth } from '@/hooks'
 
 export const LoginPage: React.FC = () => {
-  const [username, setUsername] = React.useState('nono')
-  const [password, setPassword] = React.useState('BR#jf2026')
-  const [error, setError] = React.useState('')
-  const [loading, setLoading] = React.useState(false)
+  const [username, setUsername] = useState('nono')
+  const [password, setPassword] = useState('BR#jf2026')
 
-  const { setAuth } = useAuthStore()
-  const navigate = useNavigate()
+  // Hook desacoplado de autenticação
+  const { login, isLoading, error } = useAuth()
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
-    setError('')
-    setLoading(true)
-
-    try {
-      const data = await jellyfinService.authenticate(username, password)
-      setAuth(data.User, data.AccessToken, data.ServerId)
-      navigate('/')
-    } catch (err: any) {
-      setError('Credenciais inválidas ou erro ao conectar ao Jellyfin.')
-    } finally {
-      setLoading(false)
-    }
+    await login(username, password)
   }
 
   return (
@@ -71,10 +56,10 @@ export const LoginPage: React.FC = () => {
             type="submit"
             variant="primary"
             size="lg"
-            disabled={loading}
+            disabled={isLoading}
             className="w-full bg-netflix-red text-white hover:bg-red-700 font-bold mt-2"
           >
-            {loading ? 'Conectando...' : 'Entrar no Arkflix'}
+            {isLoading ? 'Conectando...' : 'Entrar no Arkflix'}
           </Button>
         </form>
 
