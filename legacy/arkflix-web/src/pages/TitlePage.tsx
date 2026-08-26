@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { getImageUrl } from '@/services/api'
 import { Button, Select, Badge, RatingBadge, AppleSpinner } from '@/components/ui'
 import { useSeasons, useEpisodes, useItemDetails, useTranslation, useToggleFavorite } from '@/hooks'
-import { Play, Clock, Calendar, User, ArrowLeft, Plus, Check, Trash2 } from 'lucide-react'
+import { Play, Clock, Calendar, User, ArrowLeft, Plus, Check, Trash2, Bookmark } from 'lucide-react'
 
 export const TitlePage: React.FC = () => {
   const { id } = useParams<{ id: string }>()
@@ -309,40 +309,69 @@ export const TitlePage: React.FC = () => {
               </div>
             ) : (
               <div className="space-y-3">
-                {episodes?.map((ep, idx) => (
-                  <div
-                    key={ep.Id}
-                    onClick={() => navigate(`/watch/${ep.Id}`)}
-                    className="group flex items-center gap-3 sm:gap-5 p-3.5 rounded-squircle bg-white/[0.03] hover:bg-white/[0.08] active:scale-[0.99] transition-all cursor-pointer border border-white/5 hover:border-white/15"
-                  >
-                    <span className="text-apple-subtext font-semibold text-sm sm:text-base w-6 sm:w-8 text-center flex-none">
-                      {ep.IndexNumber || idx + 1}
-                    </span>
-                    <img
-                      src={getImageUrl(ep.Id, 'Primary', { fillWidth: 240, quality: 80 })}
-                      alt={ep.Name}
-                      className="w-24 sm:w-36 aspect-video object-cover rounded-squircle-sm bg-black/40 shadow-sm flex-none"
-                    />
-                    <div className="flex-grow min-w-0">
-                      <div className="flex items-center gap-2.5">
-                        <h4 className="text-xs sm:text-sm font-semibold text-white group-hover:text-apple-accent transition-colors truncate">
-                          {ep.Name}
-                        </h4>
-                        {ep.RunTimeTicks && (
-                          <span className="text-[10px] text-apple-subtext flex-none">
-                            {formatRuntime(ep.RunTimeTicks)}
-                          </span>
-                        )}
+                {episodes?.map((ep, idx) => {
+                  const isEpFavorite = !!ep.UserData?.IsFavorite
+
+                  return (
+                    <div
+                      key={ep.Id}
+                      onClick={() => navigate(`/watch/${ep.Id}`)}
+                      className="group flex items-center gap-3 sm:gap-5 p-3.5 rounded-squircle bg-white/[0.03] hover:bg-white/[0.08] active:scale-[0.99] transition-all cursor-pointer border border-white/5 hover:border-white/15"
+                    >
+                      <span className="text-apple-subtext font-semibold text-sm sm:text-base w-6 sm:w-8 text-center flex-none">
+                        {ep.IndexNumber || idx + 1}
+                      </span>
+                      <img
+                        src={getImageUrl(ep.Id, 'Primary', { fillWidth: 240, quality: 80 })}
+                        alt={ep.Name}
+                        className="w-24 sm:w-36 aspect-video object-cover rounded-squircle-sm bg-black/40 shadow-sm flex-none"
+                      />
+                      <div className="flex-grow min-w-0">
+                        <div className="flex items-center gap-2.5">
+                          <h4 className="text-xs sm:text-sm font-semibold text-white group-hover:text-apple-accent transition-colors truncate">
+                            {ep.Name}
+                          </h4>
+                          {ep.RunTimeTicks && (
+                            <span className="text-[10px] text-apple-subtext flex-none">
+                              {formatRuntime(ep.RunTimeTicks)}
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-xs text-apple-subtext line-clamp-2 mt-1 font-normal">
+                          {ep.Overview}
+                        </p>
                       </div>
-                      <p className="text-xs text-apple-subtext line-clamp-2 mt-1 font-normal">
-                        {ep.Overview}
-                      </p>
+
+                      {/* Actions: Add to My List + Play */}
+                      <div className="flex items-center gap-2 flex-none">
+                        {/* Bookmark Button */}
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            toggleFavorite.mutate({ itemId: ep.Id, isFavorite: isEpFavorite })
+                          }}
+                          title={isEpFavorite ? 'Remover da minha lista' : 'Adicionar à minha lista'}
+                          className={`w-9 h-9 rounded-full flex items-center justify-center transition-all cursor-pointer border ${
+                            isEpFavorite
+                              ? 'bg-blue-500/20 text-apple-accent border-blue-500/40 hover:bg-red-500 hover:text-white hover:border-red-500'
+                              : 'bg-white/10 text-white/70 border-white/10 hover:bg-white/20 hover:text-white opacity-80 sm:opacity-0 group-hover:opacity-100'
+                          }`}
+                        >
+                          {isEpFavorite ? (
+                            <Check className="w-4 h-4 stroke-[3]" />
+                          ) : (
+                            <Bookmark className="w-4 h-4" />
+                          )}
+                        </button>
+
+                        {/* Play Button */}
+                        <div className="w-9 h-9 rounded-full bg-white/10 group-hover:bg-white flex items-center justify-center transition-all opacity-80 sm:opacity-0 group-hover:opacity-100 shadow-sm">
+                          <Play className="w-4 h-4 fill-white group-hover:fill-black text-white group-hover:text-black ml-0.5 transition-colors" />
+                        </div>
+                      </div>
                     </div>
-                    <div className="w-9 h-9 rounded-full bg-white/10 flex items-center justify-center flex-none opacity-80 sm:opacity-0 group-hover:opacity-100 transition-opacity">
-                      <Play className="w-4 h-4 fill-white text-white ml-0.5" />
-                    </div>
-                  </div>
-                ))}
+                  )
+                })}
               </div>
             )}
           </div>
