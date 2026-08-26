@@ -6,6 +6,7 @@ import { MediaItem, PlaybackInfo } from '@/types/jellyfin'
 import { jellyfinService } from '@/services/jellyfin'
 import { useAuthStore } from '@/stores/authStore'
 import { useChromecast } from '@/hooks/useChromecast'
+import { useToggleFavorite } from '@/hooks/useMedia'
 import { VideoControls } from './VideoControls'
 import { CastRemoteView } from './CastRemoteView'
 
@@ -18,6 +19,7 @@ interface VideoPlayerProps {
 export const VideoPlayer: React.FC<VideoPlayerProps> = ({ item, playbackInfo, onBack }) => {
   const { token, user } = useAuthStore()
   const navigate = useNavigate()
+  const toggleFavorite = useToggleFavorite()
 
   const videoRef = useRef<HTMLVideoElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
@@ -32,6 +34,8 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({ item, playbackInfo, on
   const [isFullscreen, setIsFullscreen] = useState(false)
   const [selectedAudioIndex, setSelectedAudioIndex] = useState<number | undefined>()
   const [selectedSubtitleIndex, setSelectedSubtitleIndex] = useState<number | undefined>(-1)
+
+  const isFavorite = !!item.UserData?.IsFavorite
 
   // Chromecast integration
   const chromecast = useChromecast()
@@ -243,6 +247,10 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({ item, playbackInfo, on
     }
   }, [])
 
+  const handleToggleFavorite = () => {
+    toggleFavorite.mutate({ itemId: item.Id, isFavorite })
+  }
+
   const handleBack = () => {
     if (onBack) {
       onBack()
@@ -293,7 +301,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({ item, playbackInfo, on
           >
             <button
               onClick={handleBack}
-              className="text-white hover:text-gray-300 p-2 rounded-full hover:bg-white/10 transition-colors"
+              className="text-white hover:text-gray-300 p-2 rounded-full hover:bg-white/10 transition-colors cursor-pointer"
               title="Voltar"
             >
               <ArrowLeft className="w-6 h-6" />
@@ -310,6 +318,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({ item, playbackInfo, on
           <VideoControls
             isPlaying={isPlaying}
             isMuted={isMuted}
+            isFavorite={isFavorite}
             volume={volume}
             currentTime={currentTime}
             duration={duration}
@@ -321,6 +330,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({ item, playbackInfo, on
             selectedSubtitleIndex={selectedSubtitleIndex}
             onTogglePlay={handleTogglePlay}
             onToggleMute={handleToggleMute}
+            onToggleFavorite={handleToggleFavorite}
             onVolumeChange={handleVolumeChange}
             onSeek={handleSeek}
             onSkip={handleSkip}

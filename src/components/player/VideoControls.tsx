@@ -1,5 +1,18 @@
 import React from 'react'
-import { Play, Pause, Volume2, VolumeX, Maximize, Minimize, RotateCcw, RotateCw, Subtitles, Cast } from 'lucide-react'
+import {
+  Play,
+  Pause,
+  Volume2,
+  VolumeX,
+  Maximize,
+  Minimize,
+  RotateCcw,
+  RotateCw,
+  Subtitles,
+  Cast,
+  Bookmark,
+  Check,
+} from 'lucide-react'
 import { Slider } from '@/components/ui'
 import { MediaStream } from '@/types/jellyfin'
 import { useTranslation, useChromecast } from '@/hooks'
@@ -7,6 +20,7 @@ import { useTranslation, useChromecast } from '@/hooks'
 interface VideoControlsProps {
   isPlaying: boolean
   isMuted: boolean
+  isFavorite?: boolean
   volume: number
   currentTime: number
   duration: number
@@ -18,6 +32,7 @@ interface VideoControlsProps {
   selectedSubtitleIndex?: number
   onTogglePlay: () => void
   onToggleMute: () => void
+  onToggleFavorite?: () => void
   onVolumeChange: (vol: number) => void
   onSeek: (seconds: number) => void
   onSkip: (seconds: number) => void
@@ -30,6 +45,7 @@ interface VideoControlsProps {
 export const VideoControls: React.FC<VideoControlsProps> = ({
   isPlaying,
   isMuted,
+  isFavorite,
   volume,
   currentTime,
   duration,
@@ -41,6 +57,7 @@ export const VideoControls: React.FC<VideoControlsProps> = ({
   selectedSubtitleIndex,
   onTogglePlay,
   onToggleMute,
+  onToggleFavorite,
   onVolumeChange,
   onSeek,
   onSkip,
@@ -91,7 +108,7 @@ export const VideoControls: React.FC<VideoControlsProps> = ({
 
       <div className="flex items-center justify-between text-white">
         {/* Left: Play/Pause, Skip 10s, Volume, Time */}
-        <div className="flex items-center gap-5">
+        <div className="flex items-center gap-4 sm:gap-5">
           <button
             onClick={onTogglePlay}
             className="w-10 h-10 rounded-full bg-white text-black flex items-center justify-center hover:bg-white/90 active:scale-90 transition-all shadow-md cursor-pointer"
@@ -139,7 +156,7 @@ export const VideoControls: React.FC<VideoControlsProps> = ({
             </div>
           </div>
 
-          <span className="text-xs font-medium text-apple-subtext">
+          <span className="text-xs font-medium text-apple-subtext hidden sm:inline">
             {formatTime(currentTime)} / {formatTime(duration)}
           </span>
         </div>
@@ -149,8 +166,30 @@ export const VideoControls: React.FC<VideoControlsProps> = ({
           {title}
         </div>
 
-        {/* Right: Subtitles/Audio Menu, Cast Launcher, Fullscreen */}
-        <div className="flex items-center gap-3 relative">
+        {/* Right: Add to My List, Audio/Subtitles, Cast, Fullscreen */}
+        <div className="flex items-center gap-2 sm:gap-3 relative">
+          {/* Add to My List Button */}
+          {onToggleFavorite && (
+            <button
+              onClick={onToggleFavorite}
+              className={`p-2 rounded-full transition-all cursor-pointer flex items-center gap-1.5 ${
+                isFavorite
+                  ? 'bg-blue-500/20 text-apple-accent border border-blue-500/30'
+                  : 'text-white/80 hover:text-white hover:bg-white/10'
+              }`}
+              title={isFavorite ? t.common.inMyList : t.common.myList}
+            >
+              {isFavorite ? (
+                <Check className="w-5 h-5 stroke-[3] text-apple-accent" />
+              ) : (
+                <Bookmark className="w-5 h-5" />
+              )}
+              <span className="hidden md:inline text-xs font-medium pr-1">
+                {isFavorite ? t.common.inMyList : t.common.myList}
+              </span>
+            </button>
+          )}
+
           {/* Audio & Subtitles Selector */}
           {(audioStreams.length > 0 || subtitleStreams.length > 0) && (
             <div className="relative">
