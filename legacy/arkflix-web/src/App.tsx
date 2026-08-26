@@ -11,6 +11,7 @@ import {
   SeriesPage,
   MyListPage,
   SearchPage,
+  TitlePage,
 } from '@/pages'
 import { useAuthStore } from '@/stores/authStore'
 
@@ -50,6 +51,7 @@ export function App() {
             <Route path="my-list" element={<MyListPage />} />
             <Route path="search" element={<SearchPage />} />
             <Route path="profile" element={<ProfilePage />} />
+            <Route path="title/:id" element={<TitlePage />} />
           </Route>
 
           <Route

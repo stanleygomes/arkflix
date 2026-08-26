@@ -37,18 +37,18 @@ export const MediaRow: React.FC<MediaRowProps> = ({ title, items, isLoading }) =
   if (!items || items.length === 0) return null
 
   return (
-    <div className="group relative my-5 sm:my-8 px-4 sm:px-6 md:px-14">
+    <div className="relative my-5 sm:my-8 px-4 sm:px-6 md:px-14">
       <div className="flex items-center justify-between mb-2.5 sm:mb-3.5">
         <h2 className="text-base sm:text-lg md:text-xl font-bold text-white tracking-tight">
           {title}
         </h2>
       </div>
 
-      <div className="relative">
-        {/* Apple Glass Scroll Left Button (Visible on hover desktop) */}
+      <div className="relative group/row">
+        {/* Apple Glass Scroll Left Button */}
         <button
           onClick={() => handleScroll('left')}
-          className="hidden md:flex absolute left-0 top-1/2 -translate-y-1/2 z-30 w-10 h-10 -ml-5 bg-black/70 backdrop-blur-xl border border-white/15 text-white rounded-full opacity-0 group-hover:opacity-100 hover:bg-black/90 hover:scale-110 active:scale-95 transition-all items-center justify-center shadow-apple"
+          className="hidden md:flex absolute left-0 top-1/2 -translate-y-1/2 z-30 w-10 h-10 -ml-5 bg-black/70 backdrop-blur-xl border border-white/15 text-white rounded-full opacity-0 group-hover/row:opacity-100 hover:bg-black/90 hover:scale-110 active:scale-95 transition-all items-center justify-center shadow-apple"
           aria-label="Rolar para esquerda"
         >
           <ChevronLeft className="w-5 h-5" />
@@ -57,7 +57,7 @@ export const MediaRow: React.FC<MediaRowProps> = ({ title, items, isLoading }) =
         {/* Horizontal Row with touch momentum scroll on mobile */}
         <div
           ref={rowRef}
-          className="flex gap-3 sm:gap-4 overflow-x-auto scrollbar-hide py-1.5 sm:py-2 scroll-smooth no-scrollbar active:cursor-grabbing"
+          className="flex gap-3 sm:gap-4 overflow-x-auto scrollbar-hide py-2 scroll-smooth no-scrollbar active:cursor-grabbing"
           style={{ scrollbarWidth: 'none', msOverflowStyle: 'none', WebkitOverflowScrolling: 'touch' }}
         >
           {items.map((item) => (
@@ -65,10 +65,10 @@ export const MediaRow: React.FC<MediaRowProps> = ({ title, items, isLoading }) =
           ))}
         </div>
 
-        {/* Apple Glass Scroll Right Button (Visible on hover desktop) */}
+        {/* Apple Glass Scroll Right Button */}
         <button
           onClick={() => handleScroll('right')}
-          className="hidden md:flex absolute right-0 top-1/2 -translate-y-1/2 z-30 w-10 h-10 -mr-5 bg-black/70 backdrop-blur-xl border border-white/15 text-white rounded-full opacity-0 group-hover:opacity-100 hover:bg-black/90 hover:scale-110 active:scale-95 transition-all items-center justify-center shadow-apple"
+          className="hidden md:flex absolute right-0 top-1/2 -translate-y-1/2 z-30 w-10 h-10 -mr-5 bg-black/70 backdrop-blur-xl border border-white/15 text-white rounded-full opacity-0 group-hover/row:opacity-100 hover:bg-black/90 hover:scale-110 active:scale-95 transition-all items-center justify-center shadow-apple"
           aria-label="Rolar para direita"
         >
           <ChevronRight className="w-5 h-5" />
