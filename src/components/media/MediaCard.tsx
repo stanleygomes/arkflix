@@ -7,12 +7,15 @@ import { Badge, RatingBadge } from '@/components/ui'
 import { useModalStore } from '@/stores/modalStore'
 import { useTranslation } from '@/hooks'
 import { useNavigate } from 'react-router-dom'
+import { cn } from '@/lib/utils'
 
 interface MediaCardProps {
   item: MediaItem
+  className?: string
+  layout?: 'grid' | 'carousel'
 }
 
-export const MediaCard: React.FC<MediaCardProps> = ({ item }) => {
+export const MediaCard: React.FC<MediaCardProps> = ({ item, className, layout = 'grid' }) => {
   const { openModal } = useModalStore()
   const { t } = useTranslation()
   const navigate = useNavigate()
@@ -23,10 +26,14 @@ export const MediaCard: React.FC<MediaCardProps> = ({ item }) => {
   return (
     <motion.div
       onClick={() => openModal(item)}
-      whileHover={{ y: -6, scale: 1.03 }}
-      whileTap={{ scale: 0.97 }}
+      whileHover={{ y: -6, scale: 1.02 }}
+      whileTap={{ scale: 0.98 }}
       transition={{ type: 'spring', stiffness: 400, damping: 28 }}
-      className="group relative flex-none w-[160px] sm:w-[195px] md:w-[230px] aspect-[2/3] rounded-squircle-lg overflow-hidden bg-[#1C1C1E] cursor-pointer shadow-sm hover:shadow-apple border border-white/10 hover:border-white/30 will-change-transform"
+      className={cn(
+        'group relative aspect-[2/3] rounded-squircle-lg overflow-hidden bg-[#1C1C1E] cursor-pointer shadow-sm hover:shadow-apple border border-black/10 dark:border-white/10 hover:border-black/30 dark:hover:border-white/30 will-change-transform',
+        layout === 'grid' ? 'w-full' : 'flex-none w-[160px] sm:w-[195px] md:w-[230px]',
+        className
+      )}
     >
       <img
         src={imageUrl}
@@ -39,7 +46,7 @@ export const MediaCard: React.FC<MediaCardProps> = ({ item }) => {
       {progressPercent > 0 && (
         <div className="absolute bottom-0 left-0 right-0 h-1 bg-black/60 z-10">
           <div
-            className="h-full bg-white"
+            className="h-full bg-apple-accent"
             style={{ width: `${Math.min(progressPercent, 100)}%` }}
           />
         </div>

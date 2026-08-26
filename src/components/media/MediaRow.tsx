@@ -39,7 +39,7 @@ export const MediaRow: React.FC<MediaRowProps> = ({ title, items, isLoading }) =
   return (
     <div className="group relative my-8 px-6 md:px-14">
       <div className="flex items-center justify-between mb-3.5">
-        <h2 className="text-lg md:text-xl font-bold text-white tracking-tight">
+        <h2 className="text-lg md:text-xl font-bold text-apple-text tracking-tight">
           {title}
         </h2>
       </div>
@@ -61,7 +61,7 @@ export const MediaRow: React.FC<MediaRowProps> = ({ title, items, isLoading }) =
           style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
         >
           {items.map((item) => (
-            <MediaCard key={item.Id} item={item} />
+            <MediaCard key={item.Id} item={item} layout="carousel" />
           ))}
         </div>
 
