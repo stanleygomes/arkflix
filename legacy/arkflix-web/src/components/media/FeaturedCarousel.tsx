@@ -85,7 +85,7 @@ export const FeaturedCarousel: React.FC<FeaturedCarouselProps> = ({
       <div className="absolute inset-0 bg-gradient-to-t from-[#000000] via-[#000000]/40 to-transparent pointer-events-none" />
 
       {/* Content Container */}
-      <div className="absolute bottom-10 sm:bottom-14 md:bottom-24 left-4 sm:left-6 md:left-14 right-4 sm:right-auto max-w-2xl z-10 space-y-3 sm:space-y-4">
+      <div className="absolute bottom-16 sm:bottom-20 md:bottom-28 left-4 sm:left-6 md:left-14 right-4 sm:right-auto max-w-2xl z-10 space-y-3 sm:space-y-4">
         <AnimatePresence mode="wait">
           <motion.div
             key={currentItem.Id}
@@ -162,19 +162,19 @@ export const FeaturedCarousel: React.FC<FeaturedCarouselProps> = ({
         </div>
       </div>
 
-      {/* Carousel Navigation Indicators (Pill Dots) & Arrows */}
-      <div className="absolute bottom-4 sm:bottom-6 right-4 sm:right-6 md:right-14 z-20 flex items-center gap-2 sm:gap-3">
+      {/* Carousel Navigation Indicators (Pill Dots) & Arrows (z-30 positioned above rows) */}
+      <div className="absolute bottom-6 sm:bottom-8 md:bottom-12 right-4 sm:right-6 md:right-14 z-30 flex items-center gap-2 sm:gap-3 pointer-events-auto">
         {/* Previous */}
         <button
           onClick={handlePrev}
-          className="w-7 h-7 sm:w-9 sm:h-9 rounded-full bg-black/50 backdrop-blur-xl border border-white/10 text-white hidden sm:flex items-center justify-center opacity-0 group-hover/hero:opacity-100 transition-all hover:scale-105 active:scale-95"
+          className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-black/60 hover:bg-black/90 backdrop-blur-xl border border-white/20 text-white hidden sm:flex items-center justify-center opacity-0 group-hover/hero:opacity-100 transition-all hover:scale-110 active:scale-95 cursor-pointer shadow-apple"
           aria-label="Anterior"
         >
-          <ChevronLeft className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+          <ChevronLeft className="w-4 h-4" />
         </button>
 
         {/* Carousel Dots */}
-        <div className="flex items-center gap-1.5 sm:gap-2 bg-black/50 backdrop-blur-xl px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-full border border-white/10">
+        <div className="flex items-center gap-1.5 sm:gap-2 bg-black/60 backdrop-blur-xl px-3 py-2 rounded-full border border-white/15 shadow-apple">
           {featuredItems.map((item, index) => {
             const isActive = index === currentIndex
             return (
@@ -182,8 +182,8 @@ export const FeaturedCarousel: React.FC<FeaturedCarouselProps> = ({
                 key={item.Id}
                 onClick={() => setCurrentIndex(index)}
                 aria-label={`Slide ${index + 1}`}
-                className={`transition-all duration-300 rounded-full ${
-                  isActive ? 'w-4 sm:w-6 h-1.5 sm:h-2 bg-white' : 'w-1.5 sm:w-2 h-1.5 sm:h-2 bg-white/30 hover:bg-white/60'
+                className={`transition-all duration-300 rounded-full cursor-pointer p-0.5 ${
+                  isActive ? 'w-6 h-2 bg-white shadow-sm' : 'w-2 h-2 bg-white/40 hover:bg-white/80 hover:scale-125'
                 }`}
               />
             )
@@ -193,10 +193,10 @@ export const FeaturedCarousel: React.FC<FeaturedCarouselProps> = ({
         {/* Next */}
         <button
           onClick={handleNext}
-          className="w-7 h-7 sm:w-9 sm:h-9 rounded-full bg-black/50 backdrop-blur-xl border border-white/10 text-white hidden sm:flex items-center justify-center opacity-0 group-hover/hero:opacity-100 transition-all hover:scale-105 active:scale-95"
+          className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-black/60 hover:bg-black/90 backdrop-blur-xl border border-white/20 text-white hidden sm:flex items-center justify-center opacity-0 group-hover/hero:opacity-100 transition-all hover:scale-110 active:scale-95 cursor-pointer shadow-apple"
           aria-label="Próximo"
         >
-          <ChevronRight className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+          <ChevronRight className="w-4 h-4" />
         </button>
       </div>
     </div>

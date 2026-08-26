@@ -47,8 +47,8 @@ export const HomePage: React.FC = () => {
       {/* Rotativo Dinâmico de Destaques (Hero Carousel da API) */}
       <FeaturedCarousel items={featuredList} isLoading={isHeroLoading} autoRotateInterval={7000} />
 
-      {/* SESSÕES DA HOME */}
-      <div className="-mt-14 md:-mt-20 relative z-20 space-y-4">
+      {/* SESSÕES DA HOME - margem ajustada sem sobreposição aos botões do carousel */}
+      <div className="-mt-4 sm:-mt-6 md:-mt-8 relative z-10 space-y-2 sm:space-y-4">
         {/* 1ª SESSÃO OBRIGATÓRIA: CONTINUAR ASSISTINDO */}
         {resumeItems && resumeItems.length > 0 && (
           <MediaRow
