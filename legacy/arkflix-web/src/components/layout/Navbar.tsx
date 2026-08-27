@@ -53,6 +53,17 @@ export const Navbar: React.FC = () => {
 
   const userAvatarUrl = user?.Id ? getUserAvatarUrl(user.Id, user.PrimaryImageTag) : ''
 
+  const getPageTitle = () => {
+    if (location.pathname === '/movies') return t.nav.movies // "Filmes"
+    if (location.pathname === '/series') return t.nav.series // "Séries"
+    if (location.pathname === '/my-list') return t.common.myList // "Minha Lista"
+    if (location.pathname === '/profile') return t.nav.profile // "Perfil"
+    if (location.pathname === '/search') return t.nav.search // "Buscar"
+    return undefined // Default "Arkflix" on Home ("/")
+  }
+
+  const pageTitle = getPageTitle()
+
   return (
     <header
       className={cn(
@@ -62,9 +73,9 @@ export const Navbar: React.FC = () => {
           : 'bg-gradient-to-b from-black/95 via-black/50 to-transparent'
       )}
     >
-      {/* Left: Prominent Arkflix Brand Logo & Nav Tabs */}
+      {/* Left: Prominent Brand Emblem with Dynamic Page Title & Nav Tabs */}
       <div className="flex items-center gap-8 lg:gap-12">
-        <Logo size="md" theme="dark" />
+        <Logo size="md" theme="dark" title={pageTitle} />
 
         {/* Apple TV Navigation Pill Tabs */}
         <nav className="hidden md:flex items-center gap-1.5 backdrop-blur-2xl p-1.5 rounded-full border bg-white/[0.08] border-white/15 transition-all shadow-sm">

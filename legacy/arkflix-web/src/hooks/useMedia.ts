@@ -40,6 +40,7 @@ export function useLatestItems(parentId?: string, limit = 16) {
 
 // Hook: Movies Library Items
 export function useMovies(params: {
+  parentId?: string
   sortBy?: string
   sortOrder?: 'Ascending' | 'Descending'
   limit?: number
@@ -53,6 +54,7 @@ export function useMovies(params: {
     queryKey: ['movies', userId, params],
     queryFn: () =>
       jellyfinService.getItems(userId, {
+        parentId: params.parentId,
         includeItemTypes: 'Movie',
         sortBy: params.sortBy || 'DateCreated',
         sortOrder: params.sortOrder || 'Descending',
@@ -66,6 +68,7 @@ export function useMovies(params: {
 
 // Hook: Series Library Items
 export function useSeries(params: {
+  parentId?: string
   sortBy?: string
   sortOrder?: 'Ascending' | 'Descending'
   limit?: number
@@ -79,6 +82,7 @@ export function useSeries(params: {
     queryKey: ['series', userId, params],
     queryFn: () =>
       jellyfinService.getItems(userId, {
+        parentId: params.parentId,
         includeItemTypes: 'Series',
         sortBy: params.sortBy || 'DateCreated',
         sortOrder: params.sortOrder || 'Descending',
@@ -87,6 +91,23 @@ export function useSeries(params: {
         genres: params.genres,
       }),
     enabled: !!userId,
+  })
+}
+
+// Hook: Trigger Server Library Refresh / Rescan
+export function useRefreshLibrary() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: () => jellyfinService.refreshLibrary(),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['libraries'] })
+      queryClient.invalidateQueries({ queryKey: ['series'] })
+      queryClient.invalidateQueries({ queryKey: ['movies'] })
+      queryClient.invalidateQueries({ queryKey: ['latestItems'] })
+      queryClient.invalidateQueries({ queryKey: ['resumeItems'] })
+      queryClient.invalidateQueries({ queryKey: ['favorites'] })
+    },
   })
 }
 

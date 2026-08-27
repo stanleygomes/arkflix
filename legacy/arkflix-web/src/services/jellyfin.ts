@@ -44,6 +44,7 @@ export const jellyfinService = {
         params: {
           Recursive: true,
           IncludeItemTypes: 'Movie,Series',
+          Fields: 'ChildCount,RecursiveItemCount,ItemCounts,Overview',
           Filters: 'IsFavorite',
           SortBy: 'DateCreated',
           SortOrder: 'Descending',
@@ -79,6 +80,7 @@ export const jellyfinService = {
   }): Promise<{ Items: MediaItem[]; TotalRecordCount: number }> {
     const queryParams: Record<string, any> = {
       Recursive: true,
+      Fields: 'ChildCount,RecursiveItemCount,ItemCounts,Overview',
     }
     if (params.parentId) queryParams.ParentId = params.parentId
     if (params.includeItemTypes) queryParams.IncludeItemTypes = params.includeItemTypes
@@ -138,6 +140,11 @@ export const jellyfinService = {
     return `${getServerUrl()}/Videos/${itemId}/stream.mp4?Static=true&MediaSourceId=${itemId}&api_key=${token}`
   },
 
+  // Direct Download URL (Raw Media File)
+  getDownloadUrl(itemId: string, token: string): string {
+    return `${getServerUrl()}/Items/${itemId}/Download?api_key=${token}`
+  },
+
   // Progress Reporting
   async reportPlaybackStart(itemId: string, playSessionId: string, positionTicks = 0) {
     return apiClient.post('/Sessions/Playing', {
@@ -163,5 +170,10 @@ export const jellyfinService = {
       PlaySessionId: playSessionId,
       PositionTicks: positionTicks,
     })
+  },
+
+  // Trigger Jellyfin Library Scan (clean up deleted files/libraries from database)
+  async refreshLibrary(): Promise<void> {
+    await apiClient.post('/Library/Refresh')
   },
 }

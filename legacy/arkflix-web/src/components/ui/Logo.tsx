@@ -8,6 +8,7 @@ interface LogoProps {
   theme?: 'dark' | 'light' | 'auto'
   animated?: boolean
   withLink?: boolean
+  title?: string
   className?: string
 }
 
@@ -16,6 +17,7 @@ export const Logo: React.FC<LogoProps> = ({
   theme = 'dark',
   animated = true,
   withLink = true,
+  title,
   className,
 }) => {
   const sizeMap = {
@@ -44,12 +46,12 @@ export const Logo: React.FC<LogoProps> = ({
       whileHover={animated ? { scale: 1.04 } : undefined}
       whileTap={animated ? { scale: 0.96 } : undefined}
       transition={{ type: 'spring', stiffness: 450, damping: 25 }}
-      className={cn('inline-flex items-center gap-3 select-none cursor-pointer group', className)}
+      className={cn('inline-flex items-center gap-2.5 sm:gap-3 select-none cursor-pointer group', className)}
     >
       {/* High-Impact Popcorn Bucket Emblem */}
       <div
         className={cn(
-          'relative flex items-center justify-center filter drop-shadow-md transition-all duration-300 group-hover:drop-shadow-[0_0_15px_rgba(255,215,0,0.4)]',
+          'relative flex items-center justify-center filter drop-shadow-md transition-all duration-300 group-hover:drop-shadow-[0_0_15px_rgba(255,215,0,0.4)] flex-none',
           sizeMap[size].iconContainer
         )}
       >
@@ -92,11 +94,17 @@ export const Logo: React.FC<LogoProps> = ({
         </svg>
       </div>
 
-      {/* Modern High-End Apple Typography */}
-      <div className="flex items-baseline font-sans">
-        <span className={cn(isLight ? 'text-[#1D1D1F]' : 'text-white', sizeMap[size].text)}>
-          Ark<span className={isLight ? 'font-medium text-[#6E6E73]' : 'font-light text-[#86868B]'}>flix</span>
-        </span>
+      {/* Modern High-End Apple Typography (Displays custom page title or Arkflix default) */}
+      <div className="flex items-baseline font-sans truncate">
+        {title ? (
+          <span className={cn(isLight ? 'text-[#1D1D1F]' : 'text-white', sizeMap[size].text, 'truncate')}>
+            {title}
+          </span>
+        ) : (
+          <span className={cn(isLight ? 'text-[#1D1D1F]' : 'text-white', sizeMap[size].text)}>
+            Ark<span className={isLight ? 'font-medium text-[#6E6E73]' : 'font-light text-[#86868B]'}>flix</span>
+          </span>
+        )}
       </div>
     </motion.div>
   )
