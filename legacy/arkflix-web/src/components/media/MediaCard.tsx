@@ -4,7 +4,7 @@ import { Play, Bookmark, Check, X } from 'lucide-react'
 import { MediaItem } from '@/types/jellyfin'
 import { getImageUrl } from '@/services/api'
 import { Badge, RatingBadge } from '@/components/ui'
-import { useTranslation, useToggleFavorite } from '@/hooks'
+import { useTranslation, useToggleFavorite, useFavorites } from '@/hooks'
 import { useNavigate } from 'react-router-dom'
 import { cn } from '@/lib/utils'
 
@@ -18,10 +18,16 @@ export const MediaCard: React.FC<MediaCardProps> = ({ item, className, layout = 
   const { t } = useTranslation()
   const navigate = useNavigate()
   const toggleFavorite = useToggleFavorite()
+  const { data: favoritesData } = useFavorites(80)
 
   const imageUrl = getImageUrl(item.Id, 'Primary', { fillWidth: 400, quality: 85 })
   const progressPercent = item.UserData?.PlayedPercentage || 0
-  const isFavorite = !!item.UserData?.IsFavorite
+
+  // Calculate isFavorite dynamically against latest favorites cache or item UserData
+  const isFavorite = Boolean(
+    favoritesData?.Items?.some((fav) => fav.Id === item.Id) ||
+    item.UserData?.IsFavorite
+  )
 
   const handleFavoriteClick = (e: React.MouseEvent) => {
     e.stopPropagation()

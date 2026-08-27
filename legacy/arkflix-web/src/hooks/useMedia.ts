@@ -3,32 +3,14 @@ import { jellyfinService } from '@/services/jellyfin'
 import { useAuthStore } from '@/stores/authStore'
 
 // Hook: User Libraries (Views)
-export function useUserLibraries() {
+export function useLibraries() {
   const { user } = useAuthStore()
   const userId = user?.Id || ''
 
   return useQuery({
-    queryKey: ['userLibraries', userId],
+    queryKey: ['libraries', userId],
     queryFn: () => jellyfinService.getUserLibraries(userId),
     enabled: !!userId,
-  })
-}
-
-// Hook: Items from a specific library
-export function useLibraryItems(parentId?: string, params: { sortBy?: string; sortOrder?: 'Ascending' | 'Descending'; limit?: number } = {}) {
-  const { user } = useAuthStore()
-  const userId = user?.Id || ''
-
-  return useQuery({
-    queryKey: ['libraryItems', userId, parentId, params],
-    queryFn: () =>
-      jellyfinService.getItems(userId, {
-        parentId,
-        sortBy: params.sortBy || 'DateCreated',
-        sortOrder: params.sortOrder || 'Descending',
-        limit: params.limit || 60,
-      }),
-    enabled: !!userId && !!parentId,
   })
 }
 
@@ -56,8 +38,14 @@ export function useLatestItems(parentId?: string, limit = 16) {
   })
 }
 
-// Hook: Movies with pagination and filtering
-export function useMovies(params: { limit?: number; sortBy?: string; sortOrder?: 'Ascending' | 'Descending' } = {}) {
+// Hook: Movies Library Items
+export function useMovies(params: {
+  sortBy?: string
+  sortOrder?: 'Ascending' | 'Descending'
+  limit?: number
+  startIndex?: number
+  genres?: string
+} = {}) {
   const { user } = useAuthStore()
   const userId = user?.Id || ''
 
@@ -68,14 +56,22 @@ export function useMovies(params: { limit?: number; sortBy?: string; sortOrder?:
         includeItemTypes: 'Movie',
         sortBy: params.sortBy || 'DateCreated',
         sortOrder: params.sortOrder || 'Descending',
-        limit: params.limit || 16,
+        limit: params.limit || 50,
+        startIndex: params.startIndex || 0,
+        genres: params.genres,
       }),
     enabled: !!userId,
   })
 }
 
-// Hook: Series with pagination and filtering
-export function useSeries(params: { limit?: number; sortBy?: string; sortOrder?: 'Ascending' | 'Descending' } = {}) {
+// Hook: Series Library Items
+export function useSeries(params: {
+  sortBy?: string
+  sortOrder?: 'Ascending' | 'Descending'
+  limit?: number
+  startIndex?: number
+  genres?: string
+} = {}) {
   const { user } = useAuthStore()
   const userId = user?.Id || ''
 
@@ -86,14 +82,16 @@ export function useSeries(params: { limit?: number; sortBy?: string; sortOrder?:
         includeItemTypes: 'Series',
         sortBy: params.sortBy || 'DateCreated',
         sortOrder: params.sortOrder || 'Descending',
-        limit: params.limit || 16,
+        limit: params.limit || 50,
+        startIndex: params.startIndex || 0,
+        genres: params.genres,
       }),
     enabled: !!userId,
   })
 }
 
 // Hook: Favorite Items (Minha Lista)
-export function useFavorites(limit = 40) {
+export function useFavorites(limit = 80) {
   const { user } = useAuthStore()
   const userId = user?.Id || ''
 
@@ -119,7 +117,25 @@ export function useToggleFavorite() {
         return jellyfinService.markFavorite(userId, itemId)
       }
     },
-    onSuccess: () => {
+    onMutate: async ({ itemId, isFavorite }) => {
+      // Cancel outgoing refetches
+      await queryClient.cancelQueries({ queryKey: ['favorites'] })
+
+      // Optimistically update favorites cache
+      queryClient.setQueriesData({ queryKey: ['favorites'] }, (old: any) => {
+        if (!old || !old.Items) return old
+        if (isFavorite) {
+          // Remove from list immediately
+          return {
+            ...old,
+            Items: old.Items.filter((i: any) => i.Id !== itemId),
+            TotalRecordCount: Math.max(0, (old.TotalRecordCount || 1) - 1),
+          }
+        }
+        return old
+      })
+    },
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ['favorites'] })
       queryClient.invalidateQueries({ queryKey: ['itemDetails'] })
       queryClient.invalidateQueries({ queryKey: ['movies'] })
