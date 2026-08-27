@@ -1,7 +1,6 @@
 import React from 'react'
 import { FeaturedCarousel } from '@/components/media/FeaturedCarousel'
 import { MediaRow } from '@/components/media/MediaRow'
-import { DetailModal } from '@/components/media/DetailModal'
 import { useResumeItems, useLatestItems, useMovies, useSeries, useFavorites, useTranslation } from '@/hooks'
 
 export const HomePage: React.FC = () => {
@@ -89,9 +88,6 @@ export const HomePage: React.FC = () => {
           isLoading={loadingSeries}
         />
       </div>
-
-      {/* Media Details Modal */}
-      <DetailModal />
     </div>
   )
 }
