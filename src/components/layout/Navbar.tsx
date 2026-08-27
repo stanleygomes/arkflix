@@ -1,6 +1,6 @@
 import React from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
-import { Search, User, Cast } from 'lucide-react'
+import { Search, User, Cast, ChevronLeft } from 'lucide-react'
 import { useAuthStore } from '@/stores/authStore'
 import { useTranslation, useChromecast } from '@/hooks'
 import { getUserAvatarUrl } from '@/services/api'
@@ -17,6 +17,7 @@ export const Navbar: React.FC = () => {
   const chromecast = useChromecast()
   const navigate = useNavigate()
   const location = useLocation()
+  const isTitlePage = location.pathname.startsWith('/title/')
 
   React.useEffect(() => {
     const handleScroll = () => {
@@ -73,9 +74,19 @@ export const Navbar: React.FC = () => {
           : 'bg-gradient-to-b from-black/95 via-black/50 to-transparent'
       )}
     >
-      {/* Left: Prominent Brand Emblem with Dynamic Page Title & Nav Tabs */}
-      <div className="flex items-center gap-8 lg:gap-12">
-        <Logo size="md" theme="dark" title={pageTitle} />
+      {/* Left: Apple Back Button on TitlePage, or Brand Emblem with Dynamic Title & Nav Tabs */}
+      <div className="flex items-center gap-4 sm:gap-8 lg:gap-12">
+        {isTitlePage ? (
+          <button
+            onClick={() => navigate(-1)}
+            className="flex items-center gap-1.5 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-xl border border-white/20 text-white text-xs sm:text-sm font-semibold transition-all hover:scale-105 active:scale-95 cursor-pointer shadow-apple"
+          >
+            <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5 -ml-1 text-white" />
+            <span>Voltar</span>
+          </button>
+        ) : (
+          <Logo size="md" theme="dark" title={pageTitle} />
+        )}
 
         {/* Apple TV Navigation Pill Tabs */}
         <nav className="hidden md:flex items-center gap-1.5 backdrop-blur-2xl p-1.5 rounded-full border bg-white/[0.08] border-white/15 transition-all shadow-sm">
