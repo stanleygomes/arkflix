@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Play, Info, ChevronLeft, ChevronRight, Plus, Check } from 'lucide-react'
+import { Play, Info, ChevronLeft, ChevronRight, Plus, Check, Trash2 } from 'lucide-react'
 import { MediaItem } from '@/types/jellyfin'
 import { getImageUrl } from '@/services/api'
 import { Button, HeroBannerSkeleton, RatingBadge } from '@/components/ui'
-import { useTranslation, useToggleFavorite } from '@/hooks'
+import { useTranslation, useToggleFavorite, useFavorites } from '@/hooks'
 import { useNavigate } from 'react-router-dom'
 
 interface FeaturedCarouselProps {
@@ -21,6 +21,7 @@ export const FeaturedCarousel: React.FC<FeaturedCarouselProps> = ({
   const { t } = useTranslation()
   const navigate = useNavigate()
   const toggleFavorite = useToggleFavorite()
+  const { data: favoritesData } = useFavorites(80)
 
   const [currentIndex, setCurrentIndex] = useState(0)
   const [isPaused, setIsPaused] = useState(false)
@@ -46,7 +47,12 @@ export const FeaturedCarousel: React.FC<FeaturedCarouselProps> = ({
   const backdropUrl = getImageUrl(currentItem.Id, 'Backdrop', { fillWidth: 1280, quality: 85 })
   const hasLogo = currentItem.ImageTags?.Logo
   const logoUrl = hasLogo ? getImageUrl(currentItem.Id, 'Logo', { fillWidth: 500, quality: 90 }) : null
-  const isFavorite = !!currentItem.UserData?.IsFavorite
+
+  // Check favorite dynamically against latest favoritesData cache or item UserData
+  const isFavorite = Boolean(
+    favoritesData?.Items?.some((fav) => fav.Id === currentItem.Id) ||
+    currentItem.UserData?.IsFavorite
+  )
 
   const handlePrev = () => {
     setCurrentIndex((prev) => (prev === 0 ? featuredItems.length - 1 : prev - 1))
@@ -140,7 +146,7 @@ export const FeaturedCarousel: React.FC<FeaturedCarouselProps> = ({
           </motion.div>
         </AnimatePresence>
 
-        {/* Action Buttons: Compact, aligned & well-proportioned */}
+        {/* Action Buttons */}
         <div className="flex items-center gap-2 sm:gap-3 pt-2">
           {/* 1. Main Watch Button */}
           <Button
@@ -152,20 +158,22 @@ export const FeaturedCarousel: React.FC<FeaturedCarouselProps> = ({
             <Play className="w-4 h-4 fill-black text-black mr-1.5" /> {t.common.watch}
           </Button>
 
-          {/* 2. My List Quick Action */}
+          {/* 2. My List Quick Action with Explicit Hover Remove state */}
           <button
             onClick={() => toggleFavorite.mutate({ itemId: currentItem.Id, isFavorite })}
-            className={`h-9 sm:h-10 px-3 sm:px-4 rounded-full border backdrop-blur-xl flex items-center justify-center gap-1.5 text-xs sm:text-sm font-semibold transition-all active:scale-95 cursor-pointer ${
+            className={`group/fav h-9 sm:h-10 px-3 sm:px-4 rounded-full border backdrop-blur-xl flex items-center justify-center gap-1.5 text-xs sm:text-sm font-semibold transition-all active:scale-95 cursor-pointer ${
               isFavorite
-                ? 'bg-blue-500/20 text-apple-accent border-blue-500/35 hover:bg-red-500/20 hover:text-red-400 hover:border-red-500/40'
+                ? 'bg-blue-500/20 text-apple-accent border-blue-500/35 hover:bg-rose-500 hover:text-white hover:border-rose-500'
                 : 'bg-white/10 hover:bg-white/20 text-white border-white/15'
             }`}
             title={isFavorite ? 'Remover da Minha Lista' : 'Adicionar à Minha Lista'}
           >
             {isFavorite ? (
               <>
-                <Check className="w-4 h-4 text-apple-accent stroke-[3]" />
-                <span>Na Lista</span>
+                <Check className="w-4 h-4 text-apple-accent stroke-[3] group-hover/fav:hidden" />
+                <Trash2 className="w-4 h-4 text-white hidden group-hover/fav:block" />
+                <span className="group-hover/fav:hidden">Na Lista</span>
+                <span className="hidden group-hover/fav:inline">Remover</span>
               </>
             ) : (
               <>
