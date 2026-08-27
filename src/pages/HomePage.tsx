@@ -12,7 +12,10 @@ export const HomePage: React.FC = () => {
 
   // 2ª Sessão: Minha Lista (Favoritos)
   const { data: favoritesData, isLoading: loadingFavorites } = useFavorites(24)
-  const favoriteItems = favoritesData?.Items || []
+  const rawFavoriteItems = favoritesData?.Items || []
+  const favoriteItems = rawFavoriteItems
+    .filter((item) => !(item.Type === 'Series' && item.RecursiveItemCount === 0))
+    .filter((item, index, self) => index === self.findIndex((t) => (t.Name || '').toLowerCase() === (item.Name || '').toLowerCase()))
 
   // 3ª Sessão: Novidades / Adicionados Recentemente
   const { data: latestItems, isLoading: loadingLatest } = useLatestItems(undefined, 20)
@@ -22,6 +25,10 @@ export const HomePage: React.FC = () => {
 
   // 5ª Sessão: Séries Populares
   const { data: seriesData, isLoading: loadingSeries } = useSeries({ limit: 24, sortBy: 'DateCreated' })
+  const rawSeries = seriesData?.Items || []
+  const seriesItems = rawSeries
+    .filter((item) => !(item.Type === 'Series' && item.RecursiveItemCount === 0))
+    .filter((item, index, self) => index === self.findIndex((t) => (t.Name || '').toLowerCase() === (item.Name || '').toLowerCase()))
 
   // Destaques Rotativos no Hero Banner:
   // Se o usuário tiver itens em "Minha Lista", eles são os destaques principais.
@@ -31,7 +38,7 @@ export const HomePage: React.FC = () => {
     : [
         ...(latestItems || []),
         ...(moviesData?.Items || []),
-        ...(seriesData?.Items || []),
+        ...seriesItems,
       ].filter((item, index, self) => index === self.findIndex((t) => t.Id === item.Id))
 
   const isHeroLoading = loadingFavorites && loadingLatest
@@ -78,7 +85,7 @@ export const HomePage: React.FC = () => {
         {/* 5ª SESSÃO: SÉRIES POPULARES */}
         <MediaRow
           title={t.home.popularSeries}
-          items={seriesData?.Items || []}
+          items={seriesItems}
           isLoading={loadingSeries}
         />
       </div>

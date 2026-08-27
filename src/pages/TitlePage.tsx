@@ -1,14 +1,17 @@
 import React, { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { getImageUrl } from '@/services/api'
+import { jellyfinService } from '@/services/jellyfin'
+import { useAuthStore } from '@/stores/authStore'
 import { Button, Select, Badge, RatingBadge, AppleSpinner } from '@/components/ui'
 import { useSeasons, useEpisodes, useItemDetails, useTranslation, useToggleFavorite } from '@/hooks'
-import { Play, Clock, Calendar, User, ArrowLeft, Plus, Check, Trash2, Bookmark } from 'lucide-react'
+import { Play, Clock, Calendar, User, ArrowLeft, Plus, Check, Trash2, Bookmark, Download } from 'lucide-react'
 
 export const TitlePage: React.FC = () => {
   const { id } = useParams<{ id: string }>()
   const { t } = useTranslation()
   const navigate = useNavigate()
+  const { token } = useAuthStore()
   const toggleFavorite = useToggleFavorite()
   const [selectedSeasonId, setSelectedSeasonId] = useState<string | null>(null)
 
@@ -159,6 +162,27 @@ export const TitlePage: React.FC = () => {
                 className="font-medium text-white text-xs sm:text-base py-2.5 sm:py-3.5 px-5 sm:px-6 shadow-apple"
               >
                 <Plus className="w-4 h-4 mr-2" /> Minha Lista
+              </Button>
+            )}
+
+            {/* Download Button for Movie */}
+            {!isSeries && token && (
+              <Button
+                variant="glass"
+                size="lg"
+                onClick={() => {
+                  const url = jellyfinService.getDownloadUrl(item.Id, token)
+                  const a = document.createElement('a')
+                  a.href = url
+                  a.download = `${item.Name || 'video'}.mp4`
+                  document.body.appendChild(a)
+                  a.click()
+                  document.body.removeChild(a)
+                }}
+                className="font-medium text-white hover:text-apple-accent hover:border-blue-500/40 text-xs sm:text-base py-2.5 sm:py-3.5 px-5 sm:px-6 shadow-apple"
+                title="Baixar filme para assistir offline"
+              >
+                <Download className="w-4 h-4 mr-2 text-white/90" /> Baixar
               </Button>
             )}
           </div>
@@ -344,8 +368,28 @@ export const TitlePage: React.FC = () => {
                         </p>
                       </div>
 
-                      {/* Actions: Add to My List + Play */}
+                      {/* Actions: Download + Add to My List + Play */}
                       <div className="flex items-center gap-2 flex-none">
+                        {/* Download Episode Button */}
+                        {token && (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              const url = jellyfinService.getDownloadUrl(ep.Id, token)
+                              const a = document.createElement('a')
+                              a.href = url
+                              a.download = `${item?.Name || 'serie'} - ${ep.Name || 'episode'}.mp4`
+                              document.body.appendChild(a)
+                              a.click()
+                              document.body.removeChild(a)
+                            }}
+                            title="Baixar episódio para assistir offline"
+                            className="w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 text-white/70 hover:text-white flex items-center justify-center transition-all cursor-pointer border border-white/10 opacity-80 sm:opacity-0 group-hover:opacity-100 active:scale-95 shadow-sm"
+                          >
+                            <Download className="w-4 h-4" />
+                          </button>
+                        )}
+
                         {/* Bookmark Button */}
                         <button
                           onClick={(e) => {

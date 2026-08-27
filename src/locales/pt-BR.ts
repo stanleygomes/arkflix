@@ -29,6 +29,8 @@ export const ptBR = {
     series: 'Séries',
     trending: 'Em Alta',
     myList: 'Minha Lista',
+    search: 'Buscar',
+    profile: 'Perfil',
     searchPlaceholder: 'Buscar filmes, séries...',
     profileSettings: 'Gerenciar Perfis & Tema',
   },

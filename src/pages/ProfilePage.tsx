@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import { useAuth, useTranslation } from '@/hooks'
 import { Button, Input } from '@/components/ui'
 import { getUserAvatarUrl } from '@/services/api'
-import { Plus, Trash2, Check, Server, LogOut, User } from 'lucide-react'
+import { Plus, Trash2, Check, Server, LogOut } from 'lucide-react'
 
 export const ProfilePage: React.FC = () => {
   const { user, profiles, switchProfile, removeProfile, login, serverUrl, logout } = useAuth()
@@ -36,24 +36,8 @@ export const ProfilePage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[#000000] text-white pt-[max(env(safe-area-inset-top,0px)+4.5rem,5.5rem)] sm:pt-28 pb-20 px-4 sm:px-6 md:px-14 selection:bg-white/20">
+    <div className="min-h-screen bg-[#000000] text-white pt-[max(env(safe-area-inset-top,0px)+3.8rem,4.6rem)] sm:pt-24 pb-20 px-4 sm:px-6 md:px-14 selection:bg-white/20">
       <div className="max-w-4xl mx-auto space-y-6 sm:space-y-8 animate-fadeIn">
-        {/* Header da Página */}
-        <div className="border-b border-white/[0.08] pb-4 sm:pb-5">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-squircle bg-gradient-to-tr from-blue-500/20 to-indigo-500/20 flex items-center justify-center text-apple-accent border border-blue-500/30 shadow-sm flex-none">
-              <User className="w-5 h-5" />
-            </div>
-            <div>
-              <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight leading-tight">
-                {t.profile.title}
-              </h1>
-              <p className="text-xs text-apple-subtext mt-1">
-                {t.profile.subtitle}
-              </p>
-            </div>
-          </div>
-        </div>
 
         {/* Section 1: Perfis Cadastrados */}
         <div className="glass-panel p-5 sm:p-6 md:p-8 rounded-squircle-xl space-y-6 border border-white/10 shadow-apple">
