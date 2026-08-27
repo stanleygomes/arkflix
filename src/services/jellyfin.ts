@@ -19,7 +19,7 @@ export const jellyfinService = {
 
   // Resume / Continue Watching
   async getResumeItems(userId: string, limit = 12): Promise<MediaItem[]> {
-    const response = await apiClient.get<{ Items: MediaItem[] }>(`/User/${userId}/Items/Resume`, {
+    const response = await apiClient.get<{ Items: MediaItem[] }>(`/Users/${userId}/Items/Resume`, {
       params: { Limit: limit },
     })
     return response.data.Items
@@ -43,6 +43,7 @@ export const jellyfinService = {
       {
         params: {
           Recursive: true,
+          IncludeItemTypes: 'Movie,Series',
           Filters: 'IsFavorite',
           SortBy: 'DateCreated',
           SortOrder: 'Descending',
@@ -55,13 +56,13 @@ export const jellyfinService = {
 
   // Mark Item as Favorite
   async markFavorite(userId: string, itemId: string): Promise<any> {
-    const response = await apiClient.post(`/User/${userId}/FavoriteItems/${itemId}`)
+    const response = await apiClient.post(`/Users/${userId}/FavoriteItems/${itemId}`)
     return response.data
   },
 
   // Unmark Item as Favorite
   async unmarkFavorite(userId: string, itemId: string): Promise<any> {
-    const response = await apiClient.delete(`/User/${userId}/FavoriteItems/${itemId}`)
+    const response = await apiClient.delete(`/Users/${userId}/FavoriteItems/${itemId}`)
     return response.data
   },
 
@@ -76,13 +77,22 @@ export const jellyfinService = {
     startIndex?: number
     searchTerm?: string
   }): Promise<{ Items: MediaItem[]; TotalRecordCount: number }> {
+    const queryParams: Record<string, any> = {
+      Recursive: true,
+    }
+    if (params.parentId) queryParams.ParentId = params.parentId
+    if (params.includeItemTypes) queryParams.IncludeItemTypes = params.includeItemTypes
+    if (params.genres) queryParams.Genres = params.genres
+    if (params.sortBy) queryParams.SortBy = params.sortBy
+    if (params.sortOrder) queryParams.SortOrder = params.sortOrder
+    if (params.limit !== undefined) queryParams.Limit = params.limit
+    if (params.startIndex !== undefined) queryParams.StartIndex = params.startIndex
+    if (params.searchTerm) queryParams.SearchTerm = params.searchTerm
+
     const response = await apiClient.get<{ Items: MediaItem[]; TotalRecordCount: number }>(
       `/Users/${userId}/Items`,
       {
-        params: {
-          Recursive: true,
-          ...params,
-        },
+        params: queryParams,
       }
     )
     return response.data
