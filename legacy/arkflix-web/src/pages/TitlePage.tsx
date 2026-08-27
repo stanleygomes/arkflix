@@ -249,36 +249,38 @@ export const TitlePage: React.FC = () => {
           </div>
         </div>
 
-        {/* Elenco / Atores (Actors Horizontal List) */}
+        {/* Elenco / Atores (Actors Cinematic Cards) */}
         {actors.length > 0 && (
-          <div className="pt-4 border-t border-white/10 space-y-3.5">
-            <h3 className="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-1.5">
+          <div className="pt-6 border-t border-white/10 space-y-4">
+            <h3 className="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
               <User className="w-4 h-4 text-apple-accent" /> Elenco Principal
             </h3>
 
-            <div className="flex gap-3 overflow-x-auto pb-2 no-scrollbar" style={{ WebkitOverflowScrolling: 'touch' }}>
+            <div className="flex gap-3 sm:gap-4 overflow-x-auto pb-3 no-scrollbar -mx-4 px-4 sm:mx-0 sm:px-0" style={{ WebkitOverflowScrolling: 'touch' }}>
               {actors.map((actor) => (
                 <div
                   key={actor.Id || actor.Name}
-                  className="flex-none flex items-center gap-3 p-2 pr-4 rounded-squircle bg-white/[0.03] border border-white/5"
+                  className="flex-none flex flex-col items-center text-center p-3 rounded-squircle-lg bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 transition-all w-28 sm:w-32 group/actor shadow-sm"
                 >
-                  {actor.PrimaryImageTag ? (
-                    <img
-                      src={getImageUrl(actor.Id, 'Primary', { fillWidth: 100, quality: 80 })}
-                      alt={actor.Name}
-                      className="w-11 h-11 rounded-full object-cover shadow-sm"
-                    />
-                  ) : (
-                    <div className="w-11 h-11 rounded-full bg-white/10 flex items-center justify-center text-xs font-bold text-white">
-                      {actor.Name.charAt(0)}
-                    </div>
-                  )}
-                  <div>
-                    <p className="text-xs font-semibold text-white truncate max-w-[130px]">{actor.Name}</p>
-                    {actor.Role && (
-                      <p className="text-[10px] text-apple-subtext truncate max-w-[130px]">{actor.Role}</p>
+                  {/* High-Res Large Actor Portrait */}
+                  <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full overflow-hidden mb-2.5 shadow-apple border-2 border-white/20 group-hover/actor:border-apple-accent transition-all">
+                    {actor.PrimaryImageTag ? (
+                      <img
+                        src={getImageUrl(actor.Id, 'Primary', { fillWidth: 200, quality: 90 })}
+                        alt={actor.Name}
+                        className="w-full h-full object-cover group-hover/actor:scale-105 transition-transform duration-300"
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-gradient-to-tr from-blue-600/30 to-indigo-600/30 flex items-center justify-center text-lg sm:text-xl font-bold text-white">
+                        {actor.Name.charAt(0)}
+                      </div>
                     )}
                   </div>
+
+                  <p className="text-xs font-bold text-white line-clamp-1 w-full leading-tight">{actor.Name}</p>
+                  {actor.Role && (
+                    <p className="text-[11px] text-apple-subtext line-clamp-1 w-full mt-0.5">{actor.Role}</p>
+                  )}
                 </div>
               ))}
             </div>
