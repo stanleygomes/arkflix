@@ -10,7 +10,7 @@ export const MyListPage: React.FC = () => {
   const items = favoritesData?.Items || []
 
   return (
-    <div className="min-h-screen pt-20 sm:pt-24 pb-20 px-4 sm:px-6 md:px-14 max-w-7xl mx-auto space-y-6 sm:space-y-8 animate-fadeIn">
+    <div className="min-h-screen pt-[max(env(safe-area-inset-top,0px)+4.5rem,5.5rem)] sm:pt-28 pb-20 px-4 sm:px-6 md:px-14 max-w-7xl mx-auto space-y-6 sm:space-y-8 animate-fadeIn">
       {/* Page Header */}
       <div className="flex items-center gap-3 border-b border-white/[0.08] pb-4 sm:pb-6">
         <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-squircle bg-blue-500/15 text-apple-accent flex items-center justify-center border border-blue-500/25 flex-none">

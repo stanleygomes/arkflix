@@ -36,7 +36,7 @@ export const ProfilePage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[#F5F5F7] text-[#1D1D1F] pt-20 sm:pt-24 pb-20 px-4 sm:px-6 md:px-14 selection:bg-blue-500/20">
+    <div className="min-h-screen bg-[#F5F5F7] text-[#1D1D1F] pt-[max(env(safe-area-inset-top,0px)+4.5rem,5.5rem)] sm:pt-28 pb-20 px-4 sm:px-6 md:px-14 selection:bg-blue-500/20">
       <div className="max-w-4xl mx-auto space-y-6 sm:space-y-10 animate-fadeIn">
         {/* Header da Página */}
         <div>
