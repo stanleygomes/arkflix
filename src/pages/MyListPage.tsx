@@ -1,10 +1,12 @@
 import React from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useFavorites, useRefreshLibrary } from '@/hooks'
 import { MediaCard } from '@/components/media/MediaCard'
-import { MediaCardSkeleton, PullToRefresh } from '@/components/ui'
-import { Film } from 'lucide-react'
+import { MediaCardSkeleton, PullToRefresh, EmptyState } from '@/components/ui'
+import { Bookmark } from 'lucide-react'
 
 export const MyListPage: React.FC = () => {
+  const navigate = useNavigate()
   const { data: favoritesData, isLoading, refetch } = useFavorites(80)
   const refreshLibraryMutation = useRefreshLibrary()
   const rawItems = favoritesData?.Items || []
@@ -43,7 +45,7 @@ export const MyListPage: React.FC = () => {
 
   return (
     <PullToRefresh onRefresh={handleRefresh}>
-      <div className="min-h-screen pt-[max(env(safe-area-inset-top,0px)+3.8rem,4.6rem)] sm:pt-24 pb-20 px-4 sm:px-6 md:px-14 max-w-7xl mx-auto space-y-4 sm:space-y-6 animate-fadeIn">
+      <div className="min-h-screen pt-[max(env(safe-area-inset-top,0px)+5.25rem,6rem)] sm:pt-28 md:pt-32 pb-20 px-4 sm:px-6 md:px-14 max-w-7xl mx-auto space-y-4 sm:space-y-6 animate-fadeIn">
         {/* Favorites Grid */}
         {isLoading ? (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-6">
@@ -52,13 +54,13 @@ export const MyListPage: React.FC = () => {
             ))}
           </div>
         ) : items.length === 0 ? (
-          <div className="py-24 text-center space-y-3">
-            <Film className="w-12 h-12 text-apple-subtext mx-auto opacity-30" />
-            <p className="text-base font-semibold text-white">Sua lista está vazia</p>
-            <p className="text-xs text-apple-subtext max-w-sm mx-auto">
-              Adicione filmes e séries aos seus favoritos clicando no botão de marcador para acessá-los facilmente aqui.
-            </p>
-          </div>
+          <EmptyState
+            icon={Bookmark}
+            title="Sua lista está vazia"
+            description="Adicione filmes e séries favoritos clicando no botão 'Minha Lista' nos títulos para acessá-los facilmente aqui."
+            actionLabel="Explorar Catálogo"
+            onAction={() => navigate('/')}
+          />
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-6">
             {items.map((item) => (

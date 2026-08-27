@@ -1,8 +1,8 @@
 import React, { useState } from 'react'
 import { useSeries, useRefreshLibrary } from '@/hooks'
 import { MediaCard } from '@/components/media/MediaCard'
-import { MediaCardSkeleton, PullToRefresh } from '@/components/ui'
-import { Clock, Star, ArrowDownAZ, Calendar } from 'lucide-react'
+import { MediaCardSkeleton, PullToRefresh, EmptyState } from '@/components/ui'
+import { Clock, Star, ArrowDownAZ, Calendar, Tv } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 type SortOption = 'DateCreated' | 'CommunityRating' | 'SortName' | 'PremiereDate'
@@ -62,7 +62,7 @@ export const SeriesPage: React.FC = () => {
 
   return (
     <PullToRefresh onRefresh={handleRefresh}>
-      <div className="min-h-screen pt-[max(env(safe-area-inset-top,0px)+3.8rem,4.6rem)] sm:pt-24 pb-20 px-4 sm:px-6 md:px-14 max-w-7xl mx-auto space-y-4 sm:space-y-6 animate-fadeIn">
+      <div className="min-h-screen pt-[max(env(safe-area-inset-top,0px)+4.5rem,5.25rem)] sm:pt-28 pb-20 px-4 sm:px-6 md:px-14 max-w-7xl mx-auto space-y-4 sm:space-y-6 animate-fadeIn">
         {/* Apple Horizontal Segmented Filter Chips */}
         <div className="flex items-center justify-between gap-4 border-b border-white/[0.08] pb-3 sm:pb-4">
           <div className="flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar -mx-4 px-4 sm:mx-0 sm:px-0 flex-1">
@@ -100,9 +100,13 @@ export const SeriesPage: React.FC = () => {
             ))}
           </div>
         ) : series.length === 0 ? (
-          <div className="py-20 text-center space-y-2">
-            <p className="text-sm text-apple-subtext">Nenhuma série encontrada na sua biblioteca.</p>
-          </div>
+          <EmptyState
+            icon={Tv}
+            title="Nenhuma série encontrada"
+            description="Não encontramos séries disponíveis na sua biblioteca Jellyfin. Puxe para atualizar ou sincronize seu servidor."
+            actionLabel="Sincronizar Biblioteca"
+            onAction={handleRefresh}
+          />
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-6">
             {series.map((item) => (
