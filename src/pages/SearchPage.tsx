@@ -22,7 +22,7 @@ export const SearchPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen pt-20 sm:pt-24 pb-20 px-4 sm:px-6 md:px-14 max-w-7xl mx-auto space-y-6 sm:space-y-8 animate-fadeIn">
+    <div className="min-h-screen pt-[max(env(safe-area-inset-top,0px)+4.5rem,5.5rem)] sm:pt-28 pb-20 px-4 sm:px-6 md:px-14 max-w-7xl mx-auto space-y-6 sm:space-y-8 animate-fadeIn">
       {/* Mobile Inline Search Bar */}
       <form onSubmit={handleSearchSubmit} className="md:hidden">
         <Input

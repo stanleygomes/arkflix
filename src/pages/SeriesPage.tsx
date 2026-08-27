@@ -28,7 +28,7 @@ export const SeriesPage: React.FC = () => {
   ]
 
   return (
-    <div className="min-h-screen pt-20 sm:pt-24 pb-20 px-4 sm:px-6 md:px-14 max-w-7xl mx-auto space-y-5 sm:space-y-7 animate-fadeIn">
+    <div className="min-h-screen pt-[max(env(safe-area-inset-top,0px)+4.5rem,5.5rem)] sm:pt-28 pb-20 px-4 sm:px-6 md:px-14 max-w-7xl mx-auto space-y-5 sm:space-y-7 animate-fadeIn">
       {/* Page Header - Apple iOS Styled */}
       <div className="flex flex-col gap-4 border-b border-white/[0.08] pb-4 sm:pb-5">
         <div className="flex items-center justify-between">
