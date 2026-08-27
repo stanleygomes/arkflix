@@ -5,7 +5,7 @@ import { jellyfinService } from '@/services/jellyfin'
 import { useAuthStore } from '@/stores/authStore'
 import { Button, Select, Badge, RatingBadge, AppleSpinner } from '@/components/ui'
 import { useSeasons, useEpisodes, useItemDetails, useTranslation, useToggleFavorite } from '@/hooks'
-import { Play, Clock, Calendar, User, ArrowLeft, Plus, Check, Trash2, Bookmark, Download } from 'lucide-react'
+import { Play, Clock, Calendar, User, Plus, Check, Trash2, Bookmark, Download } from 'lucide-react'
 
 export const TitlePage: React.FC = () => {
   const { id } = useParams<{ id: string }>()
@@ -99,17 +99,6 @@ export const TitlePage: React.FC = () => {
         {/* Apple Cinematic Gradients */}
         <div className="absolute inset-0 bg-gradient-to-r from-black/95 via-black/50 to-transparent w-full md:w-3/5" />
         <div className="absolute inset-0 bg-gradient-to-t from-[#000000] via-[#000000]/40 to-transparent" />
-
-        {/* Back Button */}
-        <div className="absolute top-20 sm:top-24 left-4 sm:left-6 md:left-14 z-20">
-          <button
-            onClick={() => navigate(-1)}
-            className="flex items-center gap-2 px-3.5 py-2 rounded-full bg-black/60 hover:bg-black/85 backdrop-blur-xl border border-white/20 text-white text-xs font-semibold transition-all hover:scale-105 active:scale-95 shadow-apple cursor-pointer"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            <span>Voltar</span>
-          </button>
-        </div>
 
         {/* Hero Title & Actions */}
         <div className="absolute bottom-10 sm:bottom-14 md:bottom-20 left-4 sm:left-6 md:left-14 right-4 sm:right-auto max-w-2xl z-10 space-y-3 sm:space-y-4">
