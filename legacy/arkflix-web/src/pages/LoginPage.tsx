@@ -18,29 +18,29 @@ export const LoginPage: React.FC = () => {
   }
 
   return (
-    <div className="relative min-h-screen w-full flex items-center justify-center bg-[#F5F5F7] px-4 overflow-hidden selection:bg-blue-500/20 selection:text-black">
-      {/* Subtle Apple Light Ambient Elements */}
-      <div className="absolute top-1/4 -left-48 w-96 h-96 bg-blue-400/15 rounded-full blur-[140px] pointer-events-none" />
-      <div className="absolute bottom-1/4 -right-48 w-96 h-96 bg-indigo-400/10 rounded-full blur-[140px] pointer-events-none" />
+    <div className="relative min-h-screen w-full flex items-center justify-center bg-[#000000] px-4 overflow-hidden selection:bg-white/20 selection:text-white">
+      {/* Subtle Apple Dark Ambient Glow Elements */}
+      <div className="absolute top-1/4 -left-48 w-96 h-96 bg-blue-600/10 rounded-full blur-[140px] pointer-events-none" />
+      <div className="absolute bottom-1/4 -right-48 w-96 h-96 bg-indigo-600/10 rounded-full blur-[140px] pointer-events-none" />
 
-      {/* Apple Clean White Glass Card */}
-      <div className="w-full max-w-sm apple-light-card rounded-squircle-2xl p-8 md:p-10 relative z-10 flex flex-col items-center">
-        {/* Distinctive Logo Branding with crisp dark contrast for white theme */}
+      {/* Apple Dark Glass Card */}
+      <div className="w-full max-w-sm glass-panel rounded-squircle-2xl p-8 md:p-10 relative z-10 flex flex-col items-center border border-white/10 shadow-2xl backdrop-blur-2xl">
+        {/* Distinctive Logo Branding */}
         <div className="mb-6 flex flex-col items-center">
-          <Logo size="lg" theme="light" withLink={false} />
-          <p className="text-xs text-[#6E6E73] mt-2 text-center">
+          <Logo size="lg" theme="dark" withLink={false} />
+          <p className="text-xs text-apple-subtext mt-2 text-center">
             {t.login.subtitle}
           </p>
         </div>
 
         {error && (
-          <div className="w-full bg-red-50 border border-red-200 text-red-600 p-3 rounded-squircle-sm text-xs mb-4 text-center font-medium animate-fadeIn">
+          <div className="w-full bg-red-500/10 border border-red-500/20 text-red-400 p-3 rounded-squircle-sm text-xs mb-4 text-center font-medium animate-fadeIn">
             {error}
           </div>
         )}
 
         <form onSubmit={handleLogin} className="w-full space-y-4">
-          {/* Server URL Input (Always explicit and editable by user) */}
+          {/* Server URL Input */}
           <div className="space-y-1.5">
             <Input
               type="text"
@@ -48,8 +48,8 @@ export const LoginPage: React.FC = () => {
               value={customServerUrl}
               onChange={(e) => setCustomServerUrl(e.target.value)}
               placeholder="https://seu-servidor-jellyfin.com"
-              icon={<Server className="w-4 h-4 text-[#86868B]" />}
-              className="bg-white text-black border-black/10 focus:bg-white focus:ring-blue-500/20"
+              icon={<Server className="w-4 h-4 text-apple-subtext" />}
+              className="bg-white/10 text-white placeholder-apple-subtext border-white/10 focus:border-white/30"
               required
             />
           </div>
@@ -61,8 +61,8 @@ export const LoginPage: React.FC = () => {
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               placeholder={t.login.usernamePlaceholder}
-              icon={<User className="w-4 h-4 text-[#86868B]" />}
-              className="bg-white text-black border-black/10 focus:bg-white focus:ring-blue-500/20"
+              icon={<User className="w-4 h-4 text-apple-subtext" />}
+              className="bg-white/10 text-white placeholder-apple-subtext border-white/10 focus:border-white/30"
               required
             />
           </div>
@@ -74,19 +74,19 @@ export const LoginPage: React.FC = () => {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder={t.login.passwordPlaceholder}
-              icon={<Lock className="w-4 h-4 text-[#86868B]" />}
-              className="bg-white text-black border-black/10 focus:bg-white focus:ring-blue-500/20"
+              icon={<Lock className="w-4 h-4 text-apple-subtext" />}
+              className="bg-white/10 text-white placeholder-apple-subtext border-white/10 focus:border-white/30"
               required
             />
           </div>
 
           <Button
             type="submit"
-            variant="apple-blue"
+            variant="primary"
             size="lg"
             isLoading={isLoading}
             loadingText={t.login.connecting}
-            className="w-full font-semibold mt-3 shadow-sm text-white"
+            className="w-full font-bold mt-3 shadow-apple py-3"
           >
             {t.login.submitButton}
           </Button>
