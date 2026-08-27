@@ -2,7 +2,6 @@ import React, { useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { useSearchMedia } from '@/hooks'
 import { MediaCard } from '@/components/media/MediaCard'
-import { DetailModal } from '@/components/media/DetailModal'
 import { MediaCardSkeleton, Input } from '@/components/ui'
 import { Search } from 'lucide-react'
 
@@ -87,9 +86,6 @@ export const SearchPage: React.FC = () => {
           ))}
         </div>
       )}
-
-      {/* Details Modal */}
-      <DetailModal />
     </div>
   )
 }

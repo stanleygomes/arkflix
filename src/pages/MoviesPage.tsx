@@ -1,7 +1,6 @@
 import React, { useState } from 'react'
 import { useMovies, useRefreshLibrary } from '@/hooks'
 import { MediaCard } from '@/components/media/MediaCard'
-import { DetailModal } from '@/components/media/DetailModal'
 import { MediaCardSkeleton, PullToRefresh } from '@/components/ui'
 import { Clock, Star, ArrowDownAZ, Calendar } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -86,9 +85,6 @@ export const MoviesPage: React.FC = () => {
             ))}
           </div>
         )}
-
-        {/* Details Modal */}
-        <DetailModal />
       </div>
     </PullToRefresh>
   )
