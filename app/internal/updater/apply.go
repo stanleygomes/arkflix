@@ -14,7 +14,7 @@ import (
 )
 
 // InstallCmd é o comando que reinstala na mão (Linux) quando não dá sozinho.
-const InstallCmd = "curl -fsSL https://raw.githubusercontent.com/stanleygomes/arkflix-games/master/install.sh | bash"
+const InstallCmd = "curl -fsSL https://raw.githubusercontent.com/stanleygomes/arkflix/master/install.sh | bash"
 
 // Runner roda os comandos do sistema (hdiutil, ditto, o instalador).
 type Runner interface {
@@ -118,8 +118,8 @@ func (in Installer) ApplyAndRestart(file string, args []string) error {
 
 func psQuote(s string) string { return "'" + strings.ReplaceAll(s, "'", "''") + "'" }
 
-// linuxPrefix: o app mora em <prefix>/bin/arkflix-games (build/prefix do
-// install.sh), o mesmo layout do tarball (prefix/bin/arkflix-games).
+// linuxPrefix: o app mora em <prefix>/bin/arkflix (build/prefix do
+// install.sh), o mesmo layout do tarball (prefix/bin/arkflix).
 func linuxPrefix(exe string) (string, error) {
 	if filepath.Base(filepath.Dir(exe)) != "bin" {
 		return "", fmt.Errorf("instalação fora do padrão (%s): atualize com %s", exe, InstallCmd)
@@ -256,7 +256,7 @@ func windowsCommand(setup string) (string, []string) {
 	return "powershell", []string{"-NoProfile", "-NonInteractive", "-WindowStyle", "Hidden", "-Command", script}
 }
 
-// appBundle: .../arkflix-games.app/Contents/MacOS/arkflix-games → o .app.
+// appBundle: .../arkflix.app/Contents/MacOS/arkflix → o .app.
 func appBundle(exe string) (string, error) {
 	app := filepath.Dir(filepath.Dir(filepath.Dir(exe)))
 	if filepath.Ext(app) != ".app" {
@@ -298,7 +298,7 @@ func (in Installer) replaceApp(dmg string) error {
 	stage, old := app+".new", app+".old"
 	os.RemoveAll(stage)
 	os.RemoveAll(old)
-	if err := in.Run.Run("ditto", filepath.Join(mnt, "arkflix-games.app"), stage); err != nil {
+	if err := in.Run.Run("ditto", filepath.Join(mnt, "arkflix.app"), stage); err != nil {
 		os.RemoveAll(stage)
 		return err
 	}

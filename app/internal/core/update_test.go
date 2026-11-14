@@ -10,10 +10,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/stanleygomes/arkflix-games/app/internal/core"
-	"github.com/stanleygomes/arkflix-games/app/internal/fixture"
-	"github.com/stanleygomes/arkflix-games/app/internal/settings"
-	"github.com/stanleygomes/arkflix-games/app/internal/updater"
+	"github.com/stanleygomes/arkflix/app/internal/core"
+	"github.com/stanleygomes/arkflix/app/internal/fixture"
+	"github.com/stanleygomes/arkflix/app/internal/settings"
+	"github.com/stanleygomes/arkflix/app/internal/updater"
 )
 
 type updHarness struct {
@@ -49,7 +49,7 @@ func newUpd(t *testing.T, api string, upd core.UpdateOptions, cache, data string
 	}
 	core.SetUpdatePlatform(svc, "linux", "amd64")
 	// prefixo de mentira: nunca o binário do teste
-	exe := filepath.Join(t.TempDir(), "prefix", "bin", "arkflix-games")
+	exe := filepath.Join(t.TempDir(), "prefix", "bin", "arkflix")
 	os.MkdirAll(filepath.Dir(exe), 0o755)
 	os.WriteFile(exe, []byte("velho"), 0o755)
 	core.SetUpdateInstaller(svc, func() (updater.Installer, error) {
@@ -86,7 +86,7 @@ func TestUpdateCheckDownloadApply(t *testing.T) {
 		t.Fatal(err)
 	}
 	if !info.Available || info.Latest != "v2.0.0" || info.Notes != "- novidade" ||
-		info.Asset != "arkflix-games-linux-x86_64.tar.gz" || info.Size == 0 || !strings.HasSuffix(info.URL, "/releases/tag/v2.0.0") {
+		info.Asset != "arkflix-linux-x86_64.tar.gz" || info.Size == 0 || !strings.HasSuffix(info.URL, "/releases/tag/v2.0.0") {
 		t.Fatalf("checagem: %+v", info)
 	}
 	if ev := h.rec.updates(); len(ev) != 1 || !ev[0].Available {

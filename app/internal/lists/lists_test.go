@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/stanleygomes/arkflix-games/app/internal/lists"
+	"github.com/stanleygomes/arkflix/app/internal/lists"
 )
 
 func TestLifecycle(t *testing.T) {

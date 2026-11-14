@@ -7,11 +7,11 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/stanleygomes/arkflix-games/app/internal/history"
-	"github.com/stanleygomes/arkflix-games/app/internal/input"
-	"github.com/stanleygomes/arkflix-games/app/internal/lists"
-	"github.com/stanleygomes/arkflix-games/app/internal/profiles"
-	"github.com/stanleygomes/arkflix-games/app/internal/settings"
+	"github.com/stanleygomes/arkflix/app/internal/history"
+	"github.com/stanleygomes/arkflix/app/internal/input"
+	"github.com/stanleygomes/arkflix/app/internal/lists"
+	"github.com/stanleygomes/arkflix/app/internal/profiles"
+	"github.com/stanleygomes/arkflix/app/internal/settings"
 )
 
 // user é o que muda de um perfil pro outro: favoritos e tempo de jogo

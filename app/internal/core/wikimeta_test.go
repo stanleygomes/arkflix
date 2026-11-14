@@ -7,8 +7,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/stanleygomes/arkflix-games/app/internal/fixture"
-	"github.com/stanleygomes/arkflix-games/app/internal/meta"
+	"github.com/stanleygomes/arkflix/app/internal/fixture"
+	"github.com/stanleygomes/arkflix/app/internal/meta"
 )
 
 func fakeWiki(t *testing.T) *fixture.FakeWiki {
@@ -29,7 +29,7 @@ func TestFetchMeta(t *testing.T) {
 	if r.Year != 1992 || !strings.Contains(r.Summary, "Mega Drive") || r.Genres[0] != "Plataforma" || !strings.HasPrefix(r.Source, "https://pt.wikipedia.org/") {
 		t.Fatalf("achado: %+v", r)
 	}
-	if ua, _ := fake.Agent.Load().(string); !strings.HasPrefix(ua, "arkflix-games/test (https://") {
+	if ua, _ := fake.Agent.Load().(string); !strings.HasPrefix(ua, "arkflix/test (https://") {
 		t.Fatalf("user-agent: %q", ua)
 	}
 	// buscar não grava nada: quem grava é o editor

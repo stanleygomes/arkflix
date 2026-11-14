@@ -6,8 +6,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/stanleygomes/arkflix-games/app/internal/core"
-	"github.com/stanleygomes/arkflix-games/app/internal/meta"
+	"github.com/stanleygomes/arkflix/app/internal/core"
+	"github.com/stanleygomes/arkflix/app/internal/meta"
 )
 
 // writableExtra deixa a segunda pasta do ambiente falso ("Jogos antigos") gravável.

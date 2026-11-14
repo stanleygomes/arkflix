@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/stanleygomes/arkflix-games/app/internal/history"
+	"github.com/stanleygomes/arkflix/app/internal/history"
 )
 
 func TestAppendAndPlays(t *testing.T) {

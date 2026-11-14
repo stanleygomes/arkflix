@@ -1,4 +1,4 @@
-# arkflix-games: instruções pra agentes
+# arkflix: instruções pra agentes
 
 Leia o [README](README.md) antes. Resumo do que importa:
 

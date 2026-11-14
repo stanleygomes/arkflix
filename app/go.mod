@@ -1,4 +1,4 @@
-module github.com/stanleygomes/arkflix-games/app
+module github.com/stanleygomes/arkflix/app
 
 go 1.26
 

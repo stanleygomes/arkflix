@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/stanleygomes/arkflix-games/app/internal/hooks"
+	"github.com/stanleygomes/arkflix/app/internal/hooks"
 )
 
 func script(t *testing.T, dir, event, name, body string, exec bool) {

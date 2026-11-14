@@ -9,8 +9,8 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/stanleygomes/arkflix-games/app/internal/cheevos"
-	"github.com/stanleygomes/arkflix-games/app/internal/fixture"
+	"github.com/stanleygomes/arkflix/app/internal/cheevos"
+	"github.com/stanleygomes/arkflix/app/internal/fixture"
 )
 
 func md5hex(parts ...[]byte) string {

@@ -1,9 +1,9 @@
-# arkflix-games
+# arkflix
 
-[![release](https://img.shields.io/github/v/release/stanleygomes/arkflix-games?sort=semver)](https://github.com/stanleygomes/arkflix-games/releases)
-[![workflow](https://github.com/stanleygomes/arkflix-games/actions/workflows/release.yml/badge.svg)](https://github.com/stanleygomes/arkflix-games/actions/workflows/release.yml)
+[![release](https://img.shields.io/github/v/release/stanleygomes/arkflix?sort=semver)](https://github.com/stanleygomes/arkflix/releases)
+[![workflow](https://github.com/stanleygomes/arkflix/actions/workflows/release.yml/badge.svg)](https://github.com/stanleygomes/arkflix/actions/workflows/release.yml)
 
-![Tela inicial do arkflix games: Mario Kart 64 em destaque e a fileira de jogos com capas](site/img/inicio.webp)
+![Tela inicial do arkflix: Mario Kart 64 em destaque e a fileira de jogos com capas](site/img/inicio.webp)
 
 App de biblioteca de jogos para Linux, Windows e macOS (Go + Svelte), feito
 para controle e TV. Os jogos abrem no [RetroArch](https://www.retroarch.com)
@@ -93,18 +93,18 @@ escolha **Abrir**.
 ## Instalação
 
 Os instaladores de cada sistema ficam na
-[página de releases](https://github.com/stanleygomes/arkflix-games/releases/latest).
+[página de releases](https://github.com/stanleygomes/arkflix/releases/latest).
 Links diretos, sempre da última versão:
 
 | Sistema | Download |
 | --- | --- |
-| Windows (instalador) | [arkflix-games-windows-x86_64-setup.exe](https://github.com/stanleygomes/arkflix-games/releases/latest/download/arkflix-games-windows-x86_64-setup.exe) |
-| Windows (portátil) | [arkflix-games-windows-x86_64.zip](https://github.com/stanleygomes/arkflix-games/releases/latest/download/arkflix-games-windows-x86_64.zip) |
-| macOS | [arkflix-games-macos-universal.dmg](https://github.com/stanleygomes/arkflix-games/releases/latest/download/arkflix-games-macos-universal.dmg) |
-| Linux | [arkflix-games-linux-x86_64.tar.gz](https://github.com/stanleygomes/arkflix-games/releases/latest/download/arkflix-games-linux-x86_64.tar.gz) |
+| Windows (instalador) | [arkflix-windows-x86_64-setup.exe](https://github.com/stanleygomes/arkflix/releases/latest/download/arkflix-windows-x86_64-setup.exe) |
+| Windows (portátil) | [arkflix-windows-x86_64.zip](https://github.com/stanleygomes/arkflix/releases/latest/download/arkflix-windows-x86_64.zip) |
+| macOS | [arkflix-macos-universal.dmg](https://github.com/stanleygomes/arkflix/releases/latest/download/arkflix-macos-universal.dmg) |
+| Linux | [arkflix-linux-x86_64.tar.gz](https://github.com/stanleygomes/arkflix/releases/latest/download/arkflix-linux-x86_64.tar.gz) |
 
-**Windows.** Baixe `arkflix-games-<versão>-windows-x86_64-setup.exe` e rode (não
-pede administrador; instala em `%LOCALAPPDATA%\Programs\arkflix-games`, com
+**Windows.** Baixe `arkflix-<versão>-windows-x86_64-setup.exe` e rode (não
+pede administrador; instala em `%LOCALAPPDATA%\Programs\arkflix`, com
 atalho no Menu Iniciar). Instale também o
 [RetroArch](https://www.retroarch.com/?page=platforms) (no lugar padrão,
 `C:\RetroArch-Win64`), o [PPSSPP](https://www.ppsspp.org/download/) e o
@@ -113,7 +113,7 @@ Online Updater › Core Downloader: Snes9x, Genesis Plus GX, Mesen, Gambatte,
 Mupen64Plus-Next, Beetle PSX, FinalBurn Neo e melonDS DS). Emulador instalado em
 outro lugar: informe o caminho em Configurações › Biblioteca › Emuladores e saves.
 
-**macOS.** Baixe `arkflix-games-<versão>-macos-universal.dmg`, arraste o app para
+**macOS.** Baixe `arkflix-<versão>-macos-universal.dmg`, arraste o app para
 Aplicativos e, na primeira vez, abra com o botão direito › Abrir. Instale o
 RetroArch, o PPSSPP e o PCSX2 em Aplicativos e baixe os cores pelo RetroArch,
 como no Windows.
@@ -121,38 +121,38 @@ como no Windows.
 **Linux.** Um comando instala tudo, emuladores incluídos:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/stanleygomes/arkflix-games/master/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/stanleygomes/arkflix/master/install.sh | bash
 ```
 
 O instalador:
 
 1. instala as dependências pelo apt (incluindo o Flatpak);
-2. clona o repositório em `~/.local/share/arkflix-games` ou o atualiza, se já
+2. clona o repositório em `~/.local/share/arkflix` ou o atualiza, se já
    existir;
 3. instala o RetroArch, o PPSSPP e o PCSX2 do Flathub (no usuário) e baixa os
    oito cores do RetroArch (`make emulators`);
 4. baixa o app do release mais recente que o tenha e confere o SHA-256; se
    nenhum release tiver o app, compila (cerca de um minuto);
-5. cria o comando `arkflix-games` em `~/.local/bin`.
+5. cria o comando `arkflix` em `~/.local/bin`.
 
 Executar o instalador de novo atualiza a instalação. As opções são variáveis de
 ambiente, passadas antes do `bash`:
 
 | Variável | Efeito |
 | --- | --- |
-| `ARKFLIX_GAMES_DIR` | pasta da instalação (padrão: `~/.local/share/arkflix-games`) |
-| `ARKFLIX_GAMES_BUILD=1` | compila o app mesmo que exista release com binários |
-| `ARKFLIX_GAMES_NO_DEPS=1` | não instala pacotes do apt |
+| `ARKFLIX_DIR` | pasta da instalação (padrão: `~/.local/share/arkflix`) |
+| `ARKFLIX_BUILD=1` | compila o app mesmo que exista release com binários |
+| `ARKFLIX_NO_DEPS=1` | não instala pacotes do apt |
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/stanleygomes/arkflix-games/master/install.sh \
-  | ARKFLIX_GAMES_DIR=~/emulacao bash
+curl -fsSL https://raw.githubusercontent.com/stanleygomes/arkflix/master/install.sh \
+  | ARKFLIX_DIR=~/emulacao bash
 ```
 
 ## Uso
 
 ```bash
-arkflix-games       # após a instalação
+arkflix       # após a instalação
 make run            # dentro do repositório
 ```
 
@@ -204,7 +204,7 @@ o app baixa capa, print e tela de título do acervo aberto do RetroArch
 ([thumbnails.libretro.com](https://thumbnails.libretro.com)), sem conta: o jogo é
 reconhecido pelo CRC da ROM (cartuchos), pelo serial do disco (PS1, PS2, PSP) ou
 pelo nome do zip (arcade), usando o banco do libretro, e tudo fica em cache em
-`~/.cache/arkflix-games`. Uma imagem com o nome do jogo em
+`~/.cache/arkflix`. Uma imagem com o nome do jogo em
 `<pasta>/<console>/covers/` tem prioridade (prints em `screenshots/` e manual em
 `manuals/<nome>.pdf` também entram, e um vídeo em `videos/<nome>.mp4` toca
 mudo no fundo do Início depois de 2 s parado no jogo), assim como os `gamelist.xml` e a
@@ -217,22 +217,22 @@ como no attract mode de um fliperama. Nunca liga com jogo aberto; qualquer botã
 tecla ou clique só acorda a tela, sem executar a ação.
 
 **Scripts de evento.** Executáveis em
-`~/.config/arkflix-games/scripts/game-start/` e `.../game-end/` rodam em segundo
+`~/.config/arkflix/scripts/game-start/` e `.../game-end/` rodam em segundo
 plano ao abrir e ao fechar um jogo, em ordem alfabética, recebendo o caminho da
 ROM, o nome e o console (ao fechar, também os segundos jogados). Saída em
-`~/.config/arkflix-games/logs/scripts.log`. Exemplo: backup dos saves ao fechar o
+`~/.config/arkflix/logs/scripts.log`. Exemplo: backup dos saves ao fechar o
 jogo.
 
 ```sh
 #!/bin/sh
-# ~/.config/arkflix-games/scripts/game-end/backup.sh
+# ~/.config/arkflix/scripts/game-end/backup.sh
 rsync -a --update ~/.var/app/org.libretro.RetroArch/config/retroarch/saves/ /mnt/backup/saves/
 ```
 
 **Servidor RomM.** Em Configurações > Servidor, entre no seu
 [RomM](https://romm.app) (endereço, usuário e senha). A senha só é usada no
-login: o app cria um token próprio no RomM ("arkflix-games (<computador>)") e
-guarda só ele, em `~/.config/arkflix-games/romm.json` (permissão 600). Os jogos
+login: o app cria um token próprio no RomM ("arkflix (<computador>)") e
+guarda só ele, em `~/.config/arkflix/romm.json` (permissão 600). Os jogos
 do servidor aparecem na biblioteca com um selo de nuvem e na coleção
 "Servidor"; "Baixar do servidor" copia o jogo pra `~/Games/roms/<console>/`
 (confere o espaço em disco antes). Os downloads entram numa fila, um por vez:
@@ -263,7 +263,7 @@ saves nem edição de metadados, nem por atalho nem pela API. Para sair dele, va
 o PIN do perfil adulto: defina um.
 
 **Dados.** Configurações, favoritos e tempo de jogo ficam em
-`~/.config/arkflix-games`. O primeiro perfil usa essa pasta (quem já usava o
+`~/.config/arkflix`. O primeiro perfil usa essa pasta (quem já usava o
 app não perde nada); os outros ficam em `profiles/<id>/`, com os saves do
 RetroArch em `profiles/<id>/saves/retroarch/`. Apagar um perfil move a pasta
 dele para `profiles/apagados/`. Os saves do primeiro perfil continuam nas pastas
@@ -298,11 +298,11 @@ Pra mexer na interface: `make run-web` sobe o app em http://127.0.0.1:8484 e
 ## Compilação
 
 ```bash
-git clone https://github.com/stanleygomes/arkflix-games.git
-cd arkflix-games
+git clone https://github.com/stanleygomes/arkflix.git
+cd arkflix
 make deps        # pacotes via apt (requer sudo)
 make emulators   # Flatpaks dos emuladores e cores do RetroArch
-make app         # compila o app em build/prefix/bin/arkflix-games
+make app         # compila o app em build/prefix/bin/arkflix
 make check       # executa os testes
 make run         # abre o app
 ```
@@ -436,7 +436,7 @@ a `scph5501.bin`, em
 `~/.var/app/org.libretro.RetroArch/config/retroarch/system`.
 
 **Logs.** Os scripts de evento do app gravam em
-`~/.config/arkflix-games/logs/scripts.log`.
+`~/.config/arkflix/logs/scripts.log`.
 
 ## Contribuindo
 

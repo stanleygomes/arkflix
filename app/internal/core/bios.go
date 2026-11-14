@@ -12,10 +12,10 @@ import (
 	"sync"
 	"time"
 
-	"github.com/stanleygomes/arkflix-games/app/internal/bios"
-	"github.com/stanleygomes/arkflix-games/app/internal/catalog"
-	"github.com/stanleygomes/arkflix-games/app/internal/launcher"
-	"github.com/stanleygomes/arkflix-games/app/internal/romm"
+	"github.com/stanleygomes/arkflix/app/internal/bios"
+	"github.com/stanleygomes/arkflix/app/internal/catalog"
+	"github.com/stanleygomes/arkflix/app/internal/launcher"
+	"github.com/stanleygomes/arkflix/app/internal/romm"
 )
 
 // BiosInfo é a BIOS de um console: o que achou, o que falta e onde pôr.

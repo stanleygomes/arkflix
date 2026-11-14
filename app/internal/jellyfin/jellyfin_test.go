@@ -9,8 +9,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/stanleygomes/arkflix-games/app/internal/fixture"
-	"github.com/stanleygomes/arkflix-games/app/internal/jellyfin"
+	"github.com/stanleygomes/arkflix/app/internal/fixture"
+	"github.com/stanleygomes/arkflix/app/internal/jellyfin"
 )
 
 func TestNormalizeBase(t *testing.T) {

@@ -10,9 +10,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/stanleygomes/arkflix-games/app/internal/core"
-	"github.com/stanleygomes/arkflix-games/app/internal/fixture"
-	"github.com/stanleygomes/arkflix-games/app/internal/profiles"
+	"github.com/stanleygomes/arkflix/app/internal/core"
+	"github.com/stanleygomes/arkflix/app/internal/fixture"
+	"github.com/stanleygomes/arkflix/app/internal/profiles"
 )
 
 func TestWatchPerProfile(t *testing.T) {

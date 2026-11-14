@@ -6,8 +6,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/stanleygomes/arkflix-games/app/internal/catalog"
-	"github.com/stanleygomes/arkflix-games/app/internal/launcher"
+	"github.com/stanleygomes/arkflix/app/internal/catalog"
+	"github.com/stanleygomes/arkflix/app/internal/launcher"
 )
 
 // flatpakApp: um app instalado (flatpak list).

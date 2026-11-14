@@ -3,7 +3,7 @@ package core_test
 import (
 	"testing"
 
-	"github.com/stanleygomes/arkflix-games/app/internal/lists"
+	"github.com/stanleygomes/arkflix/app/internal/lists"
 )
 
 func TestSmartList(t *testing.T) {

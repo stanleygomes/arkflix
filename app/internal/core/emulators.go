@@ -5,8 +5,8 @@ import (
 	"errors"
 	"time"
 
-	"github.com/stanleygomes/arkflix-games/app/internal/catalog"
-	"github.com/stanleygomes/arkflix-games/app/internal/emuinstall"
+	"github.com/stanleygomes/arkflix/app/internal/catalog"
+	"github.com/stanleygomes/arkflix/app/internal/emuinstall"
 )
 
 // EmulatorsInfo é a tela de emuladores: o que está instalado e se dá pra

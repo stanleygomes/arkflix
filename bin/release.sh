@@ -66,9 +66,9 @@ trap 'rm -f "$notes"' EXIT
   echo
   echo "| Sistema | Arquivo |"
   echo "| --- | --- |"
-  echo "| Windows 10/11 (64 bits) | \`arkflix-games-$version-windows-x86_64-setup.exe\` (instalador) ou \`.zip\` (portátil) |"
-  echo "| macOS 11+ (Intel e Apple Silicon) | \`arkflix-games-$version-macos-universal.dmg\` |"
-  echo "| Linux x86_64 | \`arkflix-games-$version-linux-x86_64.tar.gz\`, ou o instalador de um comando do README |"
+  echo "| Windows 10/11 (64 bits) | \`arkflix-$version-windows-x86_64-setup.exe\` (instalador) ou \`.zip\` (portátil) |"
+  echo "| macOS 11+ (Intel e Apple Silicon) | \`arkflix-$version-macos-universal.dmg\` |"
+  echo "| Linux x86_64 | \`arkflix-$version-linux-x86_64.tar.gz\`, ou o instalador de um comando do README |"
   echo
   echo "Os emuladores (RetroArch, PPSSPP, PCSX2) são instalados à parte; veja o README."
   echo

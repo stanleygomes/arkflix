@@ -12,7 +12,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/stanleygomes/arkflix-games/app/internal/cheevos"
+	"github.com/stanleygomes/arkflix/app/internal/cheevos"
 )
 
 // cheevosTTL: quanto tempo as conquistas de um jogo ficam em memória.
@@ -43,7 +43,7 @@ type cachedHash struct {
 
 func newCheevos(cache, version string) *cheevosState {
 	c := &cheevosState{
-		agent:  "arkflix-games/" + version,
+		agent:  "arkflix/" + version,
 		hashes: filepath.Join(cache, "cheevos", "hashes.json"),
 		games:  map[string]cachedCheevos{},
 		known:  map[string]cachedHash{},

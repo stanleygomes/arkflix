@@ -33,18 +33,18 @@ func (f *FakeReleases) tag() string {
 // files: os instaladores sem versão no nome, como o bin/package.sh anexa.
 func (f *FakeReleases) files() map[string][]byte {
 	return map[string][]byte{
-		"arkflix-games-linux-x86_64.tar.gz":      FakeTarball("#!/bin/sh\necho " + f.tag() + "\n"),
-		"arkflix-games-windows-x86_64-setup.exe": []byte("setup falso " + f.tag()),
-		"arkflix-games-macos-universal.dmg":      []byte("dmg falso " + f.tag()),
+		"arkflix-linux-x86_64.tar.gz":      FakeTarball("#!/bin/sh\necho " + f.tag() + "\n"),
+		"arkflix-windows-x86_64-setup.exe": []byte("setup falso " + f.tag()),
+		"arkflix-macos-universal.dmg":      []byte("dmg falso " + f.tag()),
 	}
 }
 
-// FakeTarball: tar.gz no layout da release (prefix/bin/arkflix-games).
+// FakeTarball: tar.gz no layout da release (prefix/bin/arkflix).
 func FakeTarball(content string) []byte {
 	var buf bytes.Buffer
 	gz := gzip.NewWriter(&buf)
 	tw := tar.NewWriter(gz)
-	tw.WriteHeader(&tar.Header{Name: "prefix/bin/arkflix-games", Mode: 0o755, Size: int64(len(content)), Typeflag: tar.TypeReg})
+	tw.WriteHeader(&tar.Header{Name: "prefix/bin/arkflix", Mode: 0o755, Size: int64(len(content)), Typeflag: tar.TypeReg})
 	tw.Write([]byte(content))
 	tw.Close()
 	gz.Close()

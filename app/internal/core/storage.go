@@ -7,9 +7,9 @@ import (
 	"slices"
 	"sort"
 
-	"github.com/stanleygomes/arkflix-games/app/internal/catalog"
-	"github.com/stanleygomes/arkflix-games/app/internal/profiles"
-	"github.com/stanleygomes/arkflix-games/app/internal/settings"
+	"github.com/stanleygomes/arkflix/app/internal/catalog"
+	"github.com/stanleygomes/arkflix/app/internal/profiles"
+	"github.com/stanleygomes/arkflix/app/internal/settings"
 )
 
 // StorageInfo é a tela de armazenamento: o disco dos jogos e quanto cada coisa

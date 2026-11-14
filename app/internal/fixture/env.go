@@ -11,8 +11,8 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/stanleygomes/arkflix-games/app/internal/catalog"
-	"github.com/stanleygomes/arkflix-games/app/internal/settings"
+	"github.com/stanleygomes/arkflix/app/internal/catalog"
+	"github.com/stanleygomes/arkflix/app/internal/settings"
 )
 
 // Clip é um vídeo webm de 2 s (96x64, sem som) pros testes de vídeo.
@@ -122,7 +122,7 @@ func NewEnv(root string) Env {
 	e.Local = filepath.Join(e.Home, "Games", "roms")
 	e.Extra = filepath.Join(e.Home, "Jogos antigos")
 	e.ESDE = filepath.Join(e.Home, "ES-DE")
-	e.Data = filepath.Join(e.Home, ".config", "arkflix-games")
+	e.Data = filepath.Join(e.Home, ".config", "arkflix")
 	e.Settings = settings.Defaults(e.Home)
 	e.Settings.LibraryDirs = append(e.Settings.LibraryDirs, settings.LibraryDir{Path: e.Extra, Label: "Jogos antigos"})
 

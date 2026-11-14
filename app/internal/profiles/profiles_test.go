@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/stanleygomes/arkflix-games/app/internal/profiles"
+	"github.com/stanleygomes/arkflix/app/internal/profiles"
 )
 
 func TestMigrationKeepsRootAsMain(t *testing.T) {

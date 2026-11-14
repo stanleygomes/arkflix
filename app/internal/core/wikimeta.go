@@ -10,8 +10,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/stanleygomes/arkflix-games/app/internal/meta"
-	"github.com/stanleygomes/arkflix-games/app/internal/wiki"
+	"github.com/stanleygomes/arkflix/app/internal/meta"
+	"github.com/stanleygomes/arkflix/app/internal/wiki"
 )
 
 // missAgain: jogo que não achou na internet só é procurado de novo depois disso.
@@ -30,7 +30,7 @@ type wikiState struct {
 
 func newWikiState(cache, version string) *wikiState {
 	w := &wikiState{
-		agent:  "arkflix-games/" + version + " (https://github.com/stanleygomes/arkflix-games)",
+		agent:  "arkflix/" + version + " (https://github.com/stanleygomes/arkflix)",
 		gate:   &wiki.Gate{},
 		fast:   &wiki.Gate{Gap: time.Millisecond},
 		file:   filepath.Join(cache, "wiki-misses.json"),

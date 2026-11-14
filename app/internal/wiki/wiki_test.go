@@ -9,15 +9,15 @@ import (
 	"testing"
 	"time"
 
-	"github.com/stanleygomes/arkflix-games/app/internal/fixture"
-	"github.com/stanleygomes/arkflix-games/app/internal/wiki"
+	"github.com/stanleygomes/arkflix/app/internal/fixture"
+	"github.com/stanleygomes/arkflix/app/internal/wiki"
 )
 
 func client(t *testing.T) (*wiki.Client, *fixture.FakeWiki) {
 	fake := fixture.NewFakeWiki()
 	srv := httptest.NewServer(fake)
 	t.Cleanup(srv.Close)
-	return &wiki.Client{Base: srv.URL, UserAgent: "arkflix-games/test (teste)", Gate: &wiki.Gate{Gap: time.Millisecond}}, fake
+	return &wiki.Client{Base: srv.URL, UserAgent: "arkflix/test (teste)", Gate: &wiki.Gate{Gap: time.Millisecond}}, fake
 }
 
 func TestLookupPlatformAndPortuguese(t *testing.T) {
@@ -32,7 +32,7 @@ func TestLookupPlatformAndPortuguese(t *testing.T) {
 	if len(r.Genres) != 1 || r.Genres[0] != "Plataforma" || r.Source != "https://pt.wikipedia.org/wiki/Sonic_the_Hedgehog_2" {
 		t.Fatalf("gênero/fonte: %+v", r)
 	}
-	if ua, _ := fake.Agent.Load().(string); ua != "arkflix-games/test (teste)" {
+	if ua, _ := fake.Agent.Load().(string); ua != "arkflix/test (teste)" {
 		t.Fatalf("user-agent: %q", ua)
 	}
 }

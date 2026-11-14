@@ -13,12 +13,12 @@ import (
 	"sync"
 	"time"
 
-	"github.com/stanleygomes/arkflix-games/app/internal/catalog"
-	"github.com/stanleygomes/arkflix-games/app/internal/library"
-	"github.com/stanleygomes/arkflix-games/app/internal/meta"
-	"github.com/stanleygomes/arkflix-games/app/internal/romm"
-	"github.com/stanleygomes/arkflix-games/app/internal/saves"
-	"github.com/stanleygomes/arkflix-games/app/internal/settings"
+	"github.com/stanleygomes/arkflix/app/internal/catalog"
+	"github.com/stanleygomes/arkflix/app/internal/library"
+	"github.com/stanleygomes/arkflix/app/internal/meta"
+	"github.com/stanleygomes/arkflix/app/internal/romm"
+	"github.com/stanleygomes/arkflix/app/internal/saves"
+	"github.com/stanleygomes/arkflix/app/internal/settings"
 )
 
 // remoteState é a ligação com um servidor RomM: a conta (token do app, nunca a
@@ -193,7 +193,7 @@ func (s *Service) ConnectRemote(host, user, pass string) (RemoteInfo, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 	device, _ := os.Hostname()
-	acc, err := romm.Login(ctx, host, strings.TrimSpace(user), pass, "arkflix-games ("+device+")")
+	acc, err := romm.Login(ctx, host, strings.TrimSpace(user), pass, "arkflix ("+device+")")
 	if err != nil {
 		return RemoteInfo{}, err
 	}

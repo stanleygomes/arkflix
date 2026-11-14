@@ -8,10 +8,10 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/stanleygomes/arkflix-games/app/internal/fixture"
-	"github.com/stanleygomes/arkflix-games/app/internal/library"
-	"github.com/stanleygomes/arkflix-games/app/internal/meta"
-	"github.com/stanleygomes/arkflix-games/app/internal/thumbs"
+	"github.com/stanleygomes/arkflix/app/internal/fixture"
+	"github.com/stanleygomes/arkflix/app/internal/library"
+	"github.com/stanleygomes/arkflix/app/internal/meta"
+	"github.com/stanleygomes/arkflix/app/internal/thumbs"
 )
 
 func TestParseDAT(t *testing.T) {

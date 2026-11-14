@@ -8,8 +8,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/stanleygomes/arkflix-games/app/internal/core"
-	"github.com/stanleygomes/arkflix-games/app/internal/fixture"
+	"github.com/stanleygomes/arkflix/app/internal/core"
+	"github.com/stanleygomes/arkflix/app/internal/fixture"
 )
 
 func biosOf(t *testing.T, svc *core.Service, system string) core.BiosInfo {

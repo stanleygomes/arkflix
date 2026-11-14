@@ -10,8 +10,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/stanleygomes/arkflix-games/app/internal/cheevos"
-	"github.com/stanleygomes/arkflix-games/app/internal/fixture"
+	"github.com/stanleygomes/arkflix/app/internal/cheevos"
+	"github.com/stanleygomes/arkflix/app/internal/fixture"
 )
 
 // newZip grava os arquivos na ordem dada (o ZipBytes do fixture usa mapa).

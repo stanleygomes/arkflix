@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/stanleygomes/arkflix-games/app/internal/input"
+	"github.com/stanleygomes/arkflix/app/internal/input"
 )
 
 func TestDefaultValid(t *testing.T) {

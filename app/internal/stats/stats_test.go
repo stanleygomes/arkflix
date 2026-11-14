@@ -4,8 +4,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/stanleygomes/arkflix-games/app/internal/history"
-	"github.com/stanleygomes/arkflix-games/app/internal/stats"
+	"github.com/stanleygomes/arkflix/app/internal/history"
+	"github.com/stanleygomes/arkflix/app/internal/stats"
 )
 
 func TestCompute(t *testing.T) {

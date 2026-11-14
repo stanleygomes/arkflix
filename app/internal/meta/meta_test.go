@@ -6,9 +6,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/stanleygomes/arkflix-games/app/internal/fixture"
-	"github.com/stanleygomes/arkflix-games/app/internal/library"
-	"github.com/stanleygomes/arkflix-games/app/internal/meta"
+	"github.com/stanleygomes/arkflix/app/internal/fixture"
+	"github.com/stanleygomes/arkflix/app/internal/library"
+	"github.com/stanleygomes/arkflix/app/internal/meta"
 )
 
 func games(t *testing.T, env fixture.Env) map[string]library.Game {

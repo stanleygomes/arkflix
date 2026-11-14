@@ -64,7 +64,7 @@ func (in *Installer) get(ctx context.Context, url string) (*http.Response, error
 	if err != nil {
 		return nil, err
 	}
-	req.Header.Set("User-Agent", "arkflix-games")
+	req.Header.Set("User-Agent", "arkflix")
 	resp, err := in.HTTP.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("sem conexão com %s: %w", req.URL.Host, err)

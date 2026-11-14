@@ -7,7 +7,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/stanleygomes/arkflix-games/app/internal/bt"
+	"github.com/stanleygomes/arkflix/app/internal/bt"
 )
 
 // BTInfo é a tela de Bluetooth: o rádio e os aparelhos (controles primeiro).

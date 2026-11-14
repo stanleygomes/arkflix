@@ -6,7 +6,7 @@ import (
 	"sort"
 	"time"
 
-	"github.com/stanleygomes/arkflix-games/app/internal/history"
+	"github.com/stanleygomes/arkflix/app/internal/history"
 )
 
 // Game é o que o cálculo precisa saber de cada jogo da biblioteca.

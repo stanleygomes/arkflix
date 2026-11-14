@@ -17,7 +17,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/stanleygomes/arkflix-games/app/internal/catalog"
+	"github.com/stanleygomes/arkflix/app/internal/catalog"
 )
 
 // Flatpaks: o id de cada emulador no Flathub.

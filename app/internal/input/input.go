@@ -144,7 +144,7 @@ func bind(lines *[]string, prefix, phys string) {
 func RetroArchConfig(m Mapping) string {
 	m = m.Complete()
 	lines := []string{
-		"# gerado pelo arkflix-games: não edite, use a tela de controles",
+		"# gerado pelo arkflix: não edite, use a tela de controles",
 		`input_joypad_driver = "sdl2"`,
 		`input_autodetect_enable = "true"`,
 		`savestate_thumbnail_enable = "true"`,

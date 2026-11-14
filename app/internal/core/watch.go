@@ -14,7 +14,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/stanleygomes/arkflix-games/app/internal/jellyfin"
+	"github.com/stanleygomes/arkflix/app/internal/jellyfin"
 )
 
 // Filmes e séries: cada perfil vincula a própria conta do Jellyfin (o que ele

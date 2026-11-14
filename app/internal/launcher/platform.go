@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 	"runtime"
 
-	"github.com/stanleygomes/arkflix-games/app/internal/catalog"
+	"github.com/stanleygomes/arkflix/app/internal/catalog"
 )
 
 var names = map[string]string{catalog.RetroArch: "RetroArch", catalog.PPSSPP: "PPSSPP", catalog.PCSX2: "PCSX2"}

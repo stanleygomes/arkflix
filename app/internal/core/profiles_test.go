@@ -6,10 +6,10 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/stanleygomes/arkflix-games/app/internal/bt"
-	"github.com/stanleygomes/arkflix-games/app/internal/core"
-	"github.com/stanleygomes/arkflix-games/app/internal/meta"
-	"github.com/stanleygomes/arkflix-games/app/internal/profiles"
+	"github.com/stanleygomes/arkflix/app/internal/bt"
+	"github.com/stanleygomes/arkflix/app/internal/core"
+	"github.com/stanleygomes/arkflix/app/internal/meta"
+	"github.com/stanleygomes/arkflix/app/internal/profiles"
 )
 
 func TestProfilesIsolation(t *testing.T) {

@@ -59,7 +59,7 @@ export const test = base.extend<Options & { app: App }>({
       url,
       root,
       pad,
-      data: 'home/.config/arkflix-games',
+      data: 'home/.config/arkflix',
       calls: () => (existsSync(join(root, 'bin/calls.log')) ? readFileSync(join(root, 'bin/calls.log'), 'utf8') : ''),
       read: (rel) => readFileSync(join(root, rel), 'utf8'),
       exists: (rel) => existsSync(join(root, rel)),

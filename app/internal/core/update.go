@@ -12,7 +12,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/stanleygomes/arkflix-games/app/internal/updater"
+	"github.com/stanleygomes/arkflix/app/internal/updater"
 )
 
 // UpdateOptions liga a atualização automática.

@@ -10,7 +10,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/stanleygomes/arkflix-games/app/internal/catalog"
+	"github.com/stanleygomes/arkflix/app/internal/catalog"
 )
 
 // macApp: o nome do .app que o launcher procura (o PCSX2 vem como

@@ -11,9 +11,9 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/stanleygomes/arkflix-games/app/internal/catalog"
-	"github.com/stanleygomes/arkflix-games/app/internal/library"
-	"github.com/stanleygomes/arkflix-games/app/internal/settings"
+	"github.com/stanleygomes/arkflix/app/internal/catalog"
+	"github.com/stanleygomes/arkflix/app/internal/library"
+	"github.com/stanleygomes/arkflix/app/internal/settings"
 )
 
 // Mover os jogos de um console pra outra pasta da biblioteca (outro disco).

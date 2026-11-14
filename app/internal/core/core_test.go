@@ -10,14 +10,14 @@ import (
 	"testing"
 	"time"
 
-	"github.com/stanleygomes/arkflix-games/app/internal/bt"
-	"github.com/stanleygomes/arkflix-games/app/internal/core"
-	"github.com/stanleygomes/arkflix-games/app/internal/fixture"
-	"github.com/stanleygomes/arkflix-games/app/internal/gamepad"
-	"github.com/stanleygomes/arkflix-games/app/internal/hooks"
-	"github.com/stanleygomes/arkflix-games/app/internal/launcher"
-	"github.com/stanleygomes/arkflix-games/app/internal/meta"
-	"github.com/stanleygomes/arkflix-games/app/internal/settings"
+	"github.com/stanleygomes/arkflix/app/internal/bt"
+	"github.com/stanleygomes/arkflix/app/internal/core"
+	"github.com/stanleygomes/arkflix/app/internal/fixture"
+	"github.com/stanleygomes/arkflix/app/internal/gamepad"
+	"github.com/stanleygomes/arkflix/app/internal/hooks"
+	"github.com/stanleygomes/arkflix/app/internal/launcher"
+	"github.com/stanleygomes/arkflix/app/internal/meta"
+	"github.com/stanleygomes/arkflix/app/internal/settings"
 )
 
 type recorder struct {

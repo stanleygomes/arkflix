@@ -5,7 +5,7 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/stanleygomes/arkflix-games/app/internal/updater"
+	"github.com/stanleygomes/arkflix/app/internal/updater"
 )
 
 // Ganchos só dos testes: sistema fixo e instalador falso, pra nunca mexer

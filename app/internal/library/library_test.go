@@ -5,8 +5,8 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/stanleygomes/arkflix-games/app/internal/library"
-	"github.com/stanleygomes/arkflix-games/app/internal/settings"
+	"github.com/stanleygomes/arkflix/app/internal/library"
+	"github.com/stanleygomes/arkflix/app/internal/settings"
 )
 
 func touch(t *testing.T, path string) {

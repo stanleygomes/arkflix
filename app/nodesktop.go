@@ -6,10 +6,10 @@ import (
 	"io/fs"
 	"log"
 
-	"github.com/stanleygomes/arkflix-games/app/internal/bt"
-	"github.com/stanleygomes/arkflix-games/app/internal/gamepad"
-	"github.com/stanleygomes/arkflix-games/app/internal/launcher"
-	"github.com/stanleygomes/arkflix-games/app/internal/settings"
+	"github.com/stanleygomes/arkflix/app/internal/bt"
+	"github.com/stanleygomes/arkflix/app/internal/gamepad"
+	"github.com/stanleygomes/arkflix/app/internal/launcher"
+	"github.com/stanleygomes/arkflix/app/internal/settings"
 )
 
 // Sem a tag desktop (testes, modo web) não há janela: use --web.

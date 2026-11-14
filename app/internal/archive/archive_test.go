@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/stanleygomes/arkflix-games/app/internal/archive"
+	"github.com/stanleygomes/arkflix/app/internal/archive"
 )
 
 func makeZip(t *testing.T, files map[string]string) string {

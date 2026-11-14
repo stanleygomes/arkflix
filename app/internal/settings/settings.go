@@ -313,3 +313,23 @@ func (s *Store) RecordPlay(id string, d time.Duration, now time.Time) error {
 		st.PlayTime[id] += int64(d.Seconds())
 	})
 }
+
+// MoveLegacy leva a pasta de quando o app se chamava arkflix-games (old) pro
+// lugar novo (dir), uma vez: só se dir ainda não existe e old existe. Perfis,
+// saves, contas e capas vêm junto, sem copiar nada (rename na mesma pasta pai).
+func MoveLegacy(dir, old string) (bool, error) {
+	if _, err := os.Stat(dir); err == nil || !errors.Is(err, os.ErrNotExist) {
+		return false, nil
+	}
+	info, err := os.Stat(old)
+	if err != nil || !info.IsDir() {
+		return false, nil
+	}
+	if err := os.MkdirAll(filepath.Dir(dir), 0o700); err != nil {
+		return false, err
+	}
+	if err := os.Rename(old, dir); err != nil {
+		return false, err
+	}
+	return true, nil
+}

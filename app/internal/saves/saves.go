@@ -14,9 +14,9 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/stanleygomes/arkflix-games/app/internal/catalog"
-	"github.com/stanleygomes/arkflix-games/app/internal/isoinfo"
-	"github.com/stanleygomes/arkflix-games/app/internal/settings"
+	"github.com/stanleygomes/arkflix/app/internal/catalog"
+	"github.com/stanleygomes/arkflix/app/internal/isoinfo"
+	"github.com/stanleygomes/arkflix/app/internal/settings"
 )
 
 // State é um save state.

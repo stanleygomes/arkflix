@@ -82,7 +82,7 @@ func (c *Client) call(ctx context.Context, form url.Values, out any) error {
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	ua := c.UserAgent
 	if ua == "" {
-		ua = "arkflix-games"
+		ua = "arkflix"
 	}
 	req.Header.Set("User-Agent", ua)
 	hc := c.HTTP

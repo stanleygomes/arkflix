@@ -14,7 +14,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/stanleygomes/arkflix-games/app/internal/isoinfo"
+	"github.com/stanleygomes/arkflix/app/internal/isoinfo"
 )
 
 // maxHash: o rcheevos só lê os primeiros 64 MB de qualquer arquivo.

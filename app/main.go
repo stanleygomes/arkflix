@@ -1,10 +1,10 @@
-// arkflix-games: frontend de jogos (biblioteca, saves, controle, configurações).
+// arkflix: frontend de jogos (biblioteca, saves, controle, configurações).
 //
 // Uso:
 //
-//	arkflix-games                      # janela desktop (build com -tags desktop)
-//	arkflix-games --web 127.0.0.1:8484 # mesma interface no navegador
-//	arkflix-games --smoke              # abre escondido, espera a tela e sai (teste)
+//	arkflix                      # janela desktop (build com -tags desktop)
+//	arkflix --web 127.0.0.1:8484 # mesma interface no navegador
+//	arkflix --smoke              # abre escondido, espera a tela e sai (teste)
 //
 // Os jogos abrem nos Flatpaks do RetroArch, PPSSPP e PCSX2; --bin e --cores
 // trocam por executáveis e cores próprios. --data: configurações e estado. --fixture monta um ambiente falso (testes de ponta a ponta).
@@ -24,13 +24,13 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/stanleygomes/arkflix-games/app/internal/bt"
-	"github.com/stanleygomes/arkflix-games/app/internal/core"
-	"github.com/stanleygomes/arkflix-games/app/internal/fixture"
-	"github.com/stanleygomes/arkflix-games/app/internal/gamepad"
-	"github.com/stanleygomes/arkflix-games/app/internal/httpapi"
-	"github.com/stanleygomes/arkflix-games/app/internal/launcher"
-	"github.com/stanleygomes/arkflix-games/app/internal/settings"
+	"github.com/stanleygomes/arkflix/app/internal/bt"
+	"github.com/stanleygomes/arkflix/app/internal/core"
+	"github.com/stanleygomes/arkflix/app/internal/fixture"
+	"github.com/stanleygomes/arkflix/app/internal/gamepad"
+	"github.com/stanleygomes/arkflix/app/internal/httpapi"
+	"github.com/stanleygomes/arkflix/app/internal/launcher"
+	"github.com/stanleygomes/arkflix/app/internal/settings"
 )
 
 var version = "dev"
@@ -56,7 +56,7 @@ func parseFlags() flags {
 	flag.StringVar(&f.web, "web", "", "serve a interface no navegador neste endereço (ex.: 127.0.0.1:8484)")
 	flag.BoolVar(&f.windowed, "windowed", false, "abre em janela em vez de tela cheia (F11 alterna)")
 	flag.BoolVar(&f.smoke, "smoke", false, "abre a janela escondida, espera a interface ficar pronta e sai (0 = ok)")
-	flag.StringVar(&f.data, "data", "", "pasta de configurações e estado (padrão: ~/.config/arkflix-games)")
+	flag.StringVar(&f.data, "data", "", "pasta de configurações e estado (padrão: ~/.config/arkflix)")
 	flag.StringVar(&f.bin, "bin", "", "pasta com retroarch, ppsspp e pcsx2 próprios (padrão: Flatpaks)")
 	flag.StringVar(&f.cores, "cores", "", "pasta dos cores do RetroArch (padrão: a do Flatpak)")
 	flag.StringVar(&f.fixture, "fixture", "", "monta um ambiente falso nesta pasta (testes)")
@@ -72,15 +72,28 @@ func parseFlags() flags {
 	return f
 }
 
-// defaultData: ~/.config/arkflix-games no Linux, %AppData%\arkflix-games no
-// Windows, ~/Library/Application Support/arkflix-games no macOS.
+// defaultData: ~/.config/arkflix no Linux, %AppData%\arkflix no
+// Windows, ~/Library/Application Support/arkflix no macOS.
 func defaultData() string {
 	dir, err := os.UserConfigDir()
 	if err != nil {
 		home, _ := os.UserHomeDir()
 		dir = filepath.Join(home, ".config")
 	}
-	return filepath.Join(dir, "arkflix-games")
+	return legacyDir(dir, "dados")
+}
+
+// legacyDir: <base>/arkflix, trazendo a <base>/arkflix-games de antes do nome
+// novo na primeira vez (o que falhar, avisa e segue com a pasta nova).
+func legacyDir(base, what string) string {
+	dir := filepath.Join(base, "arkflix")
+	old := filepath.Join(base, "arkflix-games")
+	if moved, err := settings.MoveLegacy(dir, old); err != nil {
+		log.Printf("não deu pra trazer os %s de %s: %v", what, old, err)
+	} else if moved {
+		log.Printf("%s de %s agora em %s", what, old, dir)
+	}
+	return dir
 }
 
 func assets(f flags) (fs.FS, error) {
@@ -158,7 +171,7 @@ func main() {
 		if err != nil {
 			log.Fatal(err)
 		}
-		fmt.Printf("arkflix-games %s em http://%s\n", version, ln.Addr())
+		fmt.Printf("arkflix %s em http://%s\n", version, ln.Addr())
 		handler := httpapi.Handler(svc, broker, httpapi.Options{Assets: ui, Test: f.test, Pads: pads})
 		if f.fixture != "" && f.test {
 			// RomM falso no mesmo endereço (testes de ponta a ponta do servidor)
@@ -191,7 +204,7 @@ func bluetooth(f flags) bt.Backend {
 	return bt.New()
 }
 
-// cacheDir: capas baixadas e bancos do libretro (~/.cache/arkflix-games no
+// cacheDir: capas baixadas e bancos do libretro (~/.cache/arkflix no
 // Linux; a pasta de cache do sistema nos outros).
 // No ambiente falso, fica dentro dele.
 func cacheDir(f flags) string {
@@ -203,7 +216,7 @@ func cacheDir(f flags) string {
 		home, _ := os.UserHomeDir()
 		dir = filepath.Join(home, ".cache")
 	}
-	return filepath.Join(dir, "arkflix-games")
+	return legacyDir(dir, "arquivos de cache")
 }
 
 // fixtureUpdate: no navegador só o ambiente falso olha atualização, e só com

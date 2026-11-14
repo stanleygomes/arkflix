@@ -13,10 +13,10 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/stanleygomes/arkflix-games/app/internal/archive"
-	"github.com/stanleygomes/arkflix-games/app/internal/catalog"
-	"github.com/stanleygomes/arkflix-games/app/internal/isoinfo"
-	"github.com/stanleygomes/arkflix-games/app/internal/library"
+	"github.com/stanleygomes/arkflix/app/internal/archive"
+	"github.com/stanleygomes/arkflix/app/internal/catalog"
+	"github.com/stanleygomes/arkflix/app/internal/isoinfo"
+	"github.com/stanleygomes/arkflix/app/internal/library"
 )
 
 // Item é um candidato a importação, já analisado.

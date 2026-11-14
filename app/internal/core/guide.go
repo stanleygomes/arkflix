@@ -10,8 +10,8 @@ import (
 	"runtime"
 	"time"
 
-	"github.com/stanleygomes/arkflix-games/app/internal/catalog"
-	"github.com/stanleygomes/arkflix-games/app/internal/saves"
+	"github.com/stanleygomes/arkflix/app/internal/catalog"
+	"github.com/stanleygomes/arkflix/app/internal/saves"
 )
 
 // gameRun é o jogo aberto: o guia fecha ele ou manda comando pro emulador.

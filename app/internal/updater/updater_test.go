@@ -42,9 +42,9 @@ func TestNewer(t *testing.T) {
 }
 
 func TestAssetName(t *testing.T) {
-	if AssetName("linux", "amd64") != "arkflix-games-linux-x86_64.tar.gz" ||
-		AssetName("windows", "amd64") != "arkflix-games-windows-x86_64-setup.exe" ||
-		AssetName("darwin", "arm64") != "arkflix-games-macos-universal.dmg" ||
+	if AssetName("linux", "amd64") != "arkflix-linux-x86_64.tar.gz" ||
+		AssetName("windows", "amd64") != "arkflix-windows-x86_64-setup.exe" ||
+		AssetName("darwin", "arm64") != "arkflix-macos-universal.dmg" ||
 		AssetName("linux", "arm64") != "" {
 		t.Fatal("nomes dos anexos não batem com o bin/package.sh")
 	}
@@ -150,12 +150,12 @@ func tarball(t *testing.T, entries ...entry) []byte {
 func TestExtract(t *testing.T) {
 	prefix := filepath.Join(t.TempDir(), "prefix")
 	os.MkdirAll(filepath.Join(prefix, "bin"), 0o755)
-	os.WriteFile(filepath.Join(prefix, "bin", "arkflix-games"), []byte("velho"), 0o755)
-	tgz := tarball(t, entry{"prefix/", "", tar.TypeDir}, entry{"prefix/bin/arkflix-games", "novo", tar.TypeReg})
+	os.WriteFile(filepath.Join(prefix, "bin", "arkflix"), []byte("velho"), 0o755)
+	tgz := tarball(t, entry{"prefix/", "", tar.TypeDir}, entry{"prefix/bin/arkflix", "novo", tar.TypeReg})
 	if err := Extract(bytes.NewReader(tgz), prefix); err != nil {
 		t.Fatal(err)
 	}
-	bin := filepath.Join(prefix, "bin", "arkflix-games")
+	bin := filepath.Join(prefix, "bin", "arkflix")
 	got, _ := os.ReadFile(bin)
 	info, _ := os.Stat(bin)
 	if string(got) != "novo" || info.Mode().Perm() != 0o755 {
@@ -196,11 +196,11 @@ func TestExtractRejectsTraversal(t *testing.T) {
 
 func TestApplyLinux(t *testing.T) {
 	prefix := filepath.Join(t.TempDir(), "build", "prefix")
-	exe := filepath.Join(prefix, "bin", "arkflix-games")
+	exe := filepath.Join(prefix, "bin", "arkflix")
 	os.MkdirAll(filepath.Dir(exe), 0o755)
 	os.WriteFile(exe, []byte("velho"), 0o755)
 	pkg := filepath.Join(t.TempDir(), "a.tar.gz")
-	os.WriteFile(pkg, tarball(t, entry{"prefix/bin/arkflix-games", "novo", tar.TypeReg}), 0o644)
+	os.WriteFile(pkg, tarball(t, entry{"prefix/bin/arkflix", "novo", tar.TypeReg}), 0o644)
 	in := Installer{GOOS: "linux", Exe: exe}
 	if err := in.Check(); err != nil {
 		t.Fatal(err)
@@ -212,7 +212,7 @@ func TestApplyLinux(t *testing.T) {
 		t.Fatalf("binário não trocado: %q", got)
 	}
 	// fora de <prefix>/bin: não mexe, manda reinstalar
-	odd := Installer{GOOS: "linux", Exe: filepath.Join(t.TempDir(), "arkflix-games")}
+	odd := Installer{GOOS: "linux", Exe: filepath.Join(t.TempDir(), "arkflix")}
 	if err := odd.Check(); err == nil || !strings.Contains(err.Error(), "install.sh") {
 		t.Fatalf("layout estranho: %v", err)
 	}
@@ -227,7 +227,7 @@ func TestApplyLinuxReadOnly(t *testing.T) {
 	os.MkdirAll(bin, 0o755)
 	os.Chmod(bin, 0o555)
 	t.Cleanup(func() { os.Chmod(bin, 0o755) })
-	in := Installer{GOOS: "linux", Exe: filepath.Join(bin, "arkflix-games")}
+	in := Installer{GOOS: "linux", Exe: filepath.Join(bin, "arkflix")}
 	if err := in.Check(); err == nil || !strings.Contains(err.Error(), "sem permissão") {
 		t.Fatalf("pasta só leitura: %v", err)
 	}
@@ -254,7 +254,7 @@ func (f *fakeRunner) Start(name string, args ...string) error {
 
 func TestApplyWindows(t *testing.T) {
 	r := &fakeRunner{}
-	in := Installer{GOOS: "windows", Exe: `C:\x\arkflix-games.exe`, Run: r}
+	in := Installer{GOOS: "windows", Exe: `C:\x\arkflix.exe`, Run: r}
 	if err := in.Apply(`C:\Users\o'neil\cache\setup.exe`); err != nil {
 		t.Fatal(err)
 	}
@@ -265,8 +265,8 @@ func TestApplyWindows(t *testing.T) {
 }
 
 func macApp(t *testing.T) (app, exe string) {
-	app = filepath.Join(t.TempDir(), "Applications", "arkflix-games.app")
-	exe = filepath.Join(app, "Contents", "MacOS", "arkflix-games")
+	app = filepath.Join(t.TempDir(), "Applications", "arkflix.app")
+	exe = filepath.Join(app, "Contents", "MacOS", "arkflix")
 	os.MkdirAll(filepath.Dir(exe), 0o755)
 	os.WriteFile(exe, []byte("velho"), 0o755)
 	return app, exe
@@ -276,7 +276,7 @@ func TestApplyDarwin(t *testing.T) {
 	app, exe := macApp(t)
 	r := &fakeRunner{ditto: func(dst string) {
 		os.MkdirAll(filepath.Join(dst, "Contents", "MacOS"), 0o755)
-		os.WriteFile(filepath.Join(dst, "Contents", "MacOS", "arkflix-games"), []byte("novo"), 0o755)
+		os.WriteFile(filepath.Join(dst, "Contents", "MacOS", "arkflix"), []byte("novo"), 0o755)
 	}}
 	in := Installer{GOOS: "darwin", Exe: exe, Run: r}
 	if err := in.Apply("/tmp/x.dmg"); err != nil {
@@ -309,19 +309,19 @@ func TestApplyDarwinFallbackOpensDMG(t *testing.T) {
 	}
 	// fora de um .app: abre o dmg direto
 	r2 := &fakeRunner{}
-	if err := (Installer{GOOS: "darwin", Exe: "/usr/local/bin/arkflix-games", Run: r2}).Apply("/tmp/x.dmg"); err == nil || len(r2.calls) != 1 {
+	if err := (Installer{GOOS: "darwin", Exe: "/usr/local/bin/arkflix", Run: r2}).Apply("/tmp/x.dmg"); err == nil || len(r2.calls) != 1 {
 		t.Fatalf("sem .app: %v %v", err, r2.calls)
 	}
 }
 
 func TestApplyAndRestartWindows(t *testing.T) {
 	r := &fakeRunner{}
-	in := Installer{GOOS: "windows", Exe: `C:\Users\o'neil\arkflix-games.exe`, Run: r}
+	in := Installer{GOOS: "windows", Exe: `C:\Users\o'neil\arkflix.exe`, Run: r}
 	if err := in.ApplyAndRestart(`C:\tmp\setup.exe`, nil); err != nil {
 		t.Fatal(err)
 	}
 	got := r.calls[0]
-	if !strings.Contains(got, "-ArgumentList '/S' -Wait; Start-Process -FilePath 'C:\\Users\\o''neil\\arkflix-games.exe'") {
+	if !strings.Contains(got, "-ArgumentList '/S' -Wait; Start-Process -FilePath 'C:\\Users\\o''neil\\arkflix.exe'") {
 		t.Fatalf("script: %s", got)
 	}
 }

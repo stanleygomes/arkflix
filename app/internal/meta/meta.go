@@ -12,7 +12,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/stanleygomes/arkflix-games/app/internal/library"
+	"github.com/stanleygomes/arkflix/app/internal/library"
 )
 
 // Info são os metadados de um jogo. Cover é um caminho local.

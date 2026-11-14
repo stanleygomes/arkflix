@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/stanleygomes/arkflix-games/app/internal/catalog"
-	"github.com/stanleygomes/arkflix-games/app/internal/history"
-	"github.com/stanleygomes/arkflix-games/app/internal/profiles"
+	"github.com/stanleygomes/arkflix/app/internal/catalog"
+	"github.com/stanleygomes/arkflix/app/internal/history"
+	"github.com/stanleygomes/arkflix/app/internal/profiles"
 )
 
 // Limite de tempo do perfil infantil: minutos por dia e hora de dormir.

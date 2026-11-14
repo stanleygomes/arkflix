@@ -52,7 +52,7 @@
   }
 
   async function quit() {
-    if (!(await confirm('Fechar o arkflix-games?', 'Fechar'))) return
+    if (!(await confirm('Fechar o arkflix?', 'Fechar'))) return
     close()
     await run(api.quit)
   }

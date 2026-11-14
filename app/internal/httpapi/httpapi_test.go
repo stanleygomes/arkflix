@@ -11,12 +11,12 @@ import (
 	"testing/fstest"
 	"time"
 
-	"github.com/stanleygomes/arkflix-games/app/internal/bt"
-	"github.com/stanleygomes/arkflix-games/app/internal/core"
-	"github.com/stanleygomes/arkflix-games/app/internal/fixture"
-	"github.com/stanleygomes/arkflix-games/app/internal/gamepad"
-	"github.com/stanleygomes/arkflix-games/app/internal/httpapi"
-	"github.com/stanleygomes/arkflix-games/app/internal/settings"
+	"github.com/stanleygomes/arkflix/app/internal/bt"
+	"github.com/stanleygomes/arkflix/app/internal/core"
+	"github.com/stanleygomes/arkflix/app/internal/fixture"
+	"github.com/stanleygomes/arkflix/app/internal/gamepad"
+	"github.com/stanleygomes/arkflix/app/internal/httpapi"
+	"github.com/stanleygomes/arkflix/app/internal/settings"
 )
 
 func server(t *testing.T) *httptest.Server {

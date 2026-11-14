@@ -11,8 +11,8 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/stanleygomes/arkflix-games/app/internal/catalog"
-	"github.com/stanleygomes/arkflix-games/app/internal/settings"
+	"github.com/stanleygomes/arkflix/app/internal/catalog"
+	"github.com/stanleygomes/arkflix/app/internal/settings"
 )
 
 // Game é um jogo encontrado no disco. Metadados (capa, resumo) entram depois.

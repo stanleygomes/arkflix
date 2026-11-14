@@ -11,8 +11,8 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/stanleygomes/arkflix-games/app/internal/catalog"
-	"github.com/stanleygomes/arkflix-games/app/internal/launcher"
+	"github.com/stanleygomes/arkflix/app/internal/catalog"
+	"github.com/stanleygomes/arkflix/app/internal/launcher"
 )
 
 // GameSettings é a configuração de um jogo no RetroArch (vazio = padrão).

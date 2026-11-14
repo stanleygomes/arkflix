@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/stanleygomes/arkflix-games/app/internal/emucfg"
+	"github.com/stanleygomes/arkflix/app/internal/emucfg"
 )
 
 const controls = "\uFEFF[ControlMapping]\r\nUp = 1-19,10-19\r\nStart = 1-41,10-197\r\nSelect = 1-66,10-196\r\nTriangle = 1-51,10-188\r\nPause = 1-111,10-109,10-104\r\nRewind = 1-67\r\n"

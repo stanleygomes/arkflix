@@ -13,7 +13,7 @@ import (
 // API e Repo padrão: a release mais nova do próprio app.
 const (
 	API  = "https://api.github.com"
-	Repo = "stanleygomes/arkflix-games"
+	Repo = "stanleygomes/arkflix"
 )
 
 // Asset é um arquivo anexado na release.
@@ -46,11 +46,11 @@ func (r Release) Find(name string) (Asset, bool) {
 func AssetName(goos, goarch string) string {
 	switch {
 	case goos == "linux" && goarch == "amd64":
-		return "arkflix-games-linux-x86_64.tar.gz"
+		return "arkflix-linux-x86_64.tar.gz"
 	case goos == "windows" && goarch == "amd64":
-		return "arkflix-games-windows-x86_64-setup.exe"
+		return "arkflix-windows-x86_64-setup.exe"
 	case goos == "darwin":
-		return "arkflix-games-macos-universal.dmg"
+		return "arkflix-macos-universal.dmg"
 	}
 	return ""
 }
@@ -75,7 +75,7 @@ func (c Client) get(ctx context.Context, url string) (*http.Response, error) {
 		return nil, err
 	}
 	// a API do GitHub recusa pedido sem User-Agent
-	req.Header.Set("User-Agent", "arkflix-games-updater")
+	req.Header.Set("User-Agent", "arkflix-updater")
 	resp, err := c.client().Do(req)
 	if err != nil {
 		return nil, err

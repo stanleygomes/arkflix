@@ -16,7 +16,8 @@ import json, sys
 data = json.load(sys.stdin)
 for release in data if isinstance(data, list) else [data]:
   assets = {a["name"]: a["browser_download_url"] for a in release["assets"]}
-  pkg = [n for n in assets if n.endswith("-linux-x86_64.tar.gz")]
+  # o pacote com versão no nome (o arkflix-games-* é só pro updater antigo)
+  pkg = sorted((n for n in assets if n.endswith("-linux-x86_64.tar.gz")), key=lambda n: not n.startswith("arkflix-v"))
   if pkg and pkg[0] + ".sha256" in assets:
     print(release["tag_name"], assets[pkg[0]], assets[pkg[0] + ".sha256"])
     break

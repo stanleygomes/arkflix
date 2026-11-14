@@ -1,6 +1,6 @@
-# arkflix-games: app de jogos (biblioteca, saves, controle, perfis) que abre os
-# jogos nos Flatpaks do RetroArch (8 cores), PPSSPP e PCSX2. Só o app é
-# compilado aqui; os emuladores vêm prontos do Flathub.
+# arkflix: app de jogos e filmes (biblioteca, saves, controle, perfis, Jellyfin)
+# que abre os jogos nos Flatpaks do RetroArch (8 cores), PPSSPP e PCSX2. Só o
+# app é compilado aqui; os emuladores vêm prontos do Flathub.
 
 SHELL := /bin/bash
 .SHELLFLAGS := -eu -o pipefail -c
@@ -11,7 +11,7 @@ BUILD   := $(ROOT)/build
 PREFIX  := $(BUILD)/prefix
 APP     := $(ROOT)/app
 WEB     := $(APP)/web
-APP_BIN := $(PREFIX)/bin/arkflix-games
+APP_BIN := $(PREFIX)/bin/arkflix
 VERSION ?= $(shell git describe --tags --always --dirty 2>/dev/null || echo dev)
 
 # Emuladores (Flathub) e os cores que o catálogo do app usa
@@ -69,21 +69,23 @@ app-web: ## Compila a interface (Svelte + TypeScript) em app/web/dist
 	@test -d $(WEB)/node_modules || $(MAKE) --no-print-directory app-deps
 	cd $(WEB) && npm run build
 
-app: app-web ## Compila o app desktop (Go + Wails) em build/prefix/bin/arkflix-games
+app: app-web ## Compila o app desktop (Go + Wails) em build/prefix/bin/arkflix
 	@pkg-config --exists webkit2gtk-4.1 || { echo "❌ falta o WebKitGTK de desenvolvimento: make deps"; exit 1; }
 	cd $(APP) && CGO_ENABLED=1 go build -tags desktop,production,webkit2_41 -trimpath \
 	  -ldflags "-s -w -X main.version=$(VERSION)" -o $(APP_BIN) .
 	@$(MAKE) --no-print-directory desktop-entry
 
-DESKTOP_FILE := $(HOME)/.local/share/applications/arkflix-games.desktop
-ICON_FILE    := $(HOME)/.local/share/icons/hicolor/512x512/apps/arkflix-games.png
+DESKTOP_FILE := $(HOME)/.local/share/applications/arkflix.desktop
+ICON_FILE    := $(HOME)/.local/share/icons/hicolor/512x512/apps/arkflix.png
 
 desktop-entry: ## Põe o app no menu e o ícone na doca (Linux, só pro seu usuário)
-	@install -Dm644 $(APP)/assets/arkflix-games.png $(ICON_FILE)
+	@install -Dm644 $(APP)/assets/arkflix.png $(ICON_FILE)
 	@mkdir -p $(dir $(DESKTOP_FILE))
-	@printf '%s\n' '[Desktop Entry]' 'Type=Application' 'Name=arkflix games' \
-	  'Comment=Seus jogos clássicos, do jeito de um console' 'Exec=$(APP_BIN)' \
-	  'Icon=arkflix-games' 'StartupWMClass=arkflix-games' 'Categories=Game;' 'Terminal=false' >$(DESKTOP_FILE)
+	@printf '%s\n' '[Desktop Entry]' 'Type=Application' 'Name=arkflix' \
+	  'Comment=Seus jogos clássicos, filmes e séries, do jeito de um console' 'Exec=$(APP_BIN)' \
+	  'Icon=arkflix' 'StartupWMClass=arkflix' 'Categories=Game;' 'Terminal=false' >$(DESKTOP_FILE)
+	@# atalho e ícone de quando o app se chamava arkflix-games
+	@rm -f $(HOME)/.local/share/applications/arkflix-games.desktop $(HOME)/.local/share/icons/hicolor/512x512/apps/arkflix-games.png
 	@command -v update-desktop-database >/dev/null && update-desktop-database -q $(dir $(DESKTOP_FILE)) || true
 	@command -v gtk-update-icon-cache >/dev/null && gtk-update-icon-cache -q -t $(HOME)/.local/share/icons/hicolor || true
 
@@ -129,9 +131,9 @@ clean: ## Apaga o build
 
 # Instaladores: bin/package.sh (o CI gera Linux, Windows e macOS a cada release).
 DIST := $(BUILD)/dist
-GH_REPO ?= stanleygomes/arkflix-games
+GH_REPO ?= stanleygomes/arkflix
 RELEASE ?=
-RELEASE_FILES := prefix/bin/arkflix-games
+RELEASE_FILES := prefix/bin/arkflix
 
 package: app-web ## Empacota o app pra um sistema em build/dist (OS=linux|windows|macos)
 	bin/package.sh $(or $(OS),linux) $(VERSION)
@@ -148,7 +150,7 @@ release-binaries: ## Plano B: gera os pacotes de Linux e Windows daqui e anexa n
 	$(MAKE) --no-print-directory app check
 	@set -e; tag=$$(git describe --tags --exact-match HEAD); \
 	bin/package.sh linux $$tag; bin/package.sh windows $$tag; \
-	gh release upload $$tag $(DIST)/arkflix-games-$$tag-* --clobber; \
+	gh release upload $$tag $(DIST)/arkflix-$$tag-* --clobber; \
 	echo "✅ pacotes anexados na $$tag"
 
 release-install: ## Baixa o app do último release que tiver (RELEASE=vX fixa)

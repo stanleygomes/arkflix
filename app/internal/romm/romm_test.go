@@ -9,8 +9,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/stanleygomes/arkflix-games/app/internal/fixture"
-	"github.com/stanleygomes/arkflix-games/app/internal/romm"
+	"github.com/stanleygomes/arkflix/app/internal/fixture"
+	"github.com/stanleygomes/arkflix/app/internal/romm"
 )
 
 func TestNormalizeBase(t *testing.T) {
@@ -41,11 +41,11 @@ func TestLoginCatalogDownloadAndSaves(t *testing.T) {
 	if _, err := romm.Login(ctx, srv.URL, "stanley", "errada", "teste"); err == nil || !strings.Contains(err.Error(), "senha") {
 		t.Fatalf("senha errada: %v", err)
 	}
-	acc, err := romm.Login(ctx, srv.URL, "stanley", "senha123", "arkflix-games (pc)")
+	acc, err := romm.Login(ctx, srv.URL, "stanley", "senha123", "arkflix (pc)")
 	if err != nil {
 		t.Fatal(err)
 	}
-	if acc.Token != "token-do-app" || acc.TokenID != 7 || fake.Tokens()[0] != "arkflix-games (pc)" {
+	if acc.Token != "token-do-app" || acc.TokenID != 7 || fake.Tokens()[0] != "arkflix (pc)" {
 		t.Fatalf("token de dispositivo: %+v %v", acc, fake.Tokens())
 	}
 	c := &romm.Client{Base: acc.Base, Token: acc.Token}

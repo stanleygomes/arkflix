@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/stanleygomes/arkflix-games/app/internal/settings"
+	"github.com/stanleygomes/arkflix/app/internal/settings"
 )
 
 func TestDefaultsAndPersistence(t *testing.T) {

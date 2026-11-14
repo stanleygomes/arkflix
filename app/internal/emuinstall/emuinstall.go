@@ -19,8 +19,8 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/stanleygomes/arkflix-games/app/internal/catalog"
-	"github.com/stanleygomes/arkflix-games/app/internal/launcher"
+	"github.com/stanleygomes/arkflix/app/internal/catalog"
+	"github.com/stanleygomes/arkflix/app/internal/launcher"
 )
 
 // Versões fixas (troque aqui pra atualizar). O RetroArch usa a estável mais

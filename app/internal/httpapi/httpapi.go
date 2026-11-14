@@ -17,8 +17,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/stanleygomes/arkflix-games/app/internal/core"
-	"github.com/stanleygomes/arkflix-games/app/internal/gamepad"
+	"github.com/stanleygomes/arkflix/app/internal/core"
+	"github.com/stanleygomes/arkflix/app/internal/gamepad"
 )
 
 // Broker distribui eventos pros clientes SSE. Implementa core.Emitter.

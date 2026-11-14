@@ -12,9 +12,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/stanleygomes/arkflix-games/app/internal/catalog"
-	"github.com/stanleygomes/arkflix-games/app/internal/romm"
-	"github.com/stanleygomes/arkflix-games/app/internal/settings"
+	"github.com/stanleygomes/arkflix/app/internal/catalog"
+	"github.com/stanleygomes/arkflix/app/internal/romm"
+	"github.com/stanleygomes/arkflix/app/internal/settings"
 )
 
 // Fila de downloads do servidor: um jogo por vez, na ordem em que foram

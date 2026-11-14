@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/stanleygomes/arkflix-games/app/internal/core"
+	"github.com/stanleygomes/arkflix/app/internal/core"
 )
 
 func TestGameMediaAndNotes(t *testing.T) {

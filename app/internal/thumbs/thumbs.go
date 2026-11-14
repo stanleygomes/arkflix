@@ -28,9 +28,9 @@ import (
 
 	"golang.org/x/text/unicode/norm"
 
-	"github.com/stanleygomes/arkflix-games/app/internal/isoinfo"
-	"github.com/stanleygomes/arkflix-games/app/internal/library"
-	"github.com/stanleygomes/arkflix-games/app/internal/meta"
+	"github.com/stanleygomes/arkflix/app/internal/isoinfo"
+	"github.com/stanleygomes/arkflix/app/internal/library"
+	"github.com/stanleygomes/arkflix/app/internal/meta"
 )
 
 // Padrões dos servidores (configuráveis pra teste).
@@ -332,7 +332,7 @@ var Kinds = map[string]string{"cover": "Named_Boxarts", "snap": "Named_Snaps", "
 
 // Store baixa e guarda os DATs e as imagens.
 type Store struct {
-	Cache  string // ~/.cache/arkflix-games
+	Cache  string // ~/.cache/arkflix
 	Images string // servidor de imagens
 	DB     string // servidor dos DATs
 	HTTP   *http.Client

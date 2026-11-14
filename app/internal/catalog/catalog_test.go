@@ -5,7 +5,7 @@ import (
 	"strconv"
 	"testing"
 
-	"github.com/stanleygomes/arkflix-games/app/internal/catalog"
+	"github.com/stanleygomes/arkflix/app/internal/catalog"
 )
 
 func lum(hex string) float64 {

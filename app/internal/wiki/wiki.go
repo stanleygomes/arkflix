@@ -120,7 +120,7 @@ func (c *Client) get(ctx context.Context, u string, out any) (int, error) {
 	}
 	ua := c.UserAgent
 	if ua == "" {
-		ua = "arkflix-games (https://github.com/stanleygomes/arkflix-games)"
+		ua = "arkflix (https://github.com/stanleygomes/arkflix)"
 	}
 	req.Header.Set("User-Agent", ua)
 	req.Header.Set("Accept", "application/json")
