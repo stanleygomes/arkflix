@@ -213,7 +213,11 @@ func (s *Service) DeleteProfile(id, pin string) error {
 	if id == s.cur().id {
 		return errors.New("troque de perfil antes de apagar este")
 	}
-	return s.profiles.Delete(id, pin)
+	if err := s.profiles.Delete(id, pin); err != nil {
+		return err
+	}
+	s.forgetWatch(id)
+	return nil
 }
 
 // CheckProfilePIN confere o PIN (perfil sem PIN aceita qualquer coisa).

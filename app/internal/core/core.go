@@ -187,6 +187,7 @@ type Service struct {
 	dl       *dlQueue // fila de downloads do servidor
 	cheevos  *cheevosState
 	wiki     *wikiState
+	watch    *watchState // filmes e séries (Jellyfin) por perfil
 
 	umu    sync.RWMutex
 	u      *user // perfil em uso
@@ -256,6 +257,7 @@ func New(opt Options) (*Service, error) {
 	go s.dlLoop()
 	s.cheevos = newCheevos(opt.Cache, opt.Version)
 	s.wiki = newWikiState(opt.Cache, opt.Version)
+	s.watch = newWatchState(s)
 	if opt.Pads != nil {
 		opt.Pads.Subscribe(func(e gamepad.Event) { s.opt.Emitter.Emit("pad", e) })
 		opt.Pads.OnPadsChanged(func(p []gamepad.Pad) { s.opt.Emitter.Emit("pads", p) })
@@ -383,6 +385,8 @@ type Boot struct {
 	// Gamepad API do WebView (Windows, macOS).
 	NativePads bool   `json:"nativePads"`
 	Platform   string `json:"platform"`
+	// Watch: o perfil tem conta do Jellyfin (filmes e séries).
+	Watch WatchInfo `json:"watch"`
 }
 
 // Bootstrap devolve o estado inicial.
@@ -393,6 +397,7 @@ func (s *Service) Bootstrap() (Boot, error) {
 		Version: s.opt.Version, Mode: s.opt.Mode, Systems: catalog.Systems,
 		Games: s.views(), Settings: s.GetSettings(), Input: m, RetroPad: input.RetroPad,
 		Pads: s.Pads(), Running: s.Running(), NativePads: gamepad.Native && !s.opt.BrowserPads, Platform: runtime.GOOS,
+		Watch: s.WatchStatus(),
 	}
 	var err error
 	if b.Lists, err = u.lists.All(); err != nil {
