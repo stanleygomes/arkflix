@@ -112,10 +112,6 @@
 
   // preferências de acessibilidade viram classes no <body> e no <html>
   $effect(() => {
-    document.body.classList.toggle('watching', app.watching)
-  })
-
-  $effect(() => {
     const a = app.settings?.a11y
     if (!a) return
     const body = document.body.classList
@@ -220,7 +216,7 @@
 <Guide />
 <Screensaver />
 <Restarting />
-{#if !app.watching}<Crt paused={idle.active} />{/if}
+<Crt paused={idle.active} />
 {#if app.ready}<Boot />{/if}
 
 <style>
