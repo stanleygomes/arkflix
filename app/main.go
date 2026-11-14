@@ -192,6 +192,7 @@ func main() {
 		}
 		log.Fatal(http.Serve(ln, handler))
 	}
+	desktopCache = cacheDir(f)
 	os.Exit(runDesktop(store, pads, ui, f.smoke, f.windowed, emu, bluetooth(f)))
 }
 
@@ -210,6 +211,10 @@ func bluetooth(f flags) bt.Backend {
 func cacheDir(f flags) string {
 	if f.fixture != "" {
 		return filepath.Join(f.fixture, "cache")
+	}
+	// teste de fumaça com pasta própria: nem lê nem migra o cache de verdade
+	if f.smoke && f.data != "" {
+		return filepath.Join(f.data, "cache")
 	}
 	dir, err := os.UserCacheDir()
 	if err != nil {
@@ -240,4 +245,7 @@ func fixtureUpdate(f flags) core.UpdateOptions {
 // O desktop nunca roda com o ambiente falso: partida mínima padrão (10 s).
 const minPlayDesktop time.Duration = 0
 
-func cacheDirDesktop() string { return cacheDir(flags{}) }
+// desktopCache: o cache que o main escolheu (cacheDir) pra janela.
+var desktopCache string
+
+func cacheDirDesktop() string { return desktopCache }
