@@ -38,6 +38,9 @@
   import Welcome from './screens/Welcome.svelte'
   import You from './screens/You.svelte'
   import Activity from './screens/Activity.svelte'
+  import Watch from './screens/Watch.svelte'
+  import Title from './screens/Title.svelte'
+  import Player from './screens/Player.svelte'
 
   const current = $derived(screen())
 
@@ -160,7 +163,7 @@
 {:else}
   <!-- com o protetor de tela ligado, o chão sai (nada animando por trás) -->
   {#if FLOOR.has(current.name) && !idle.active}<Synthwave />{/if}
-  {#key app.stack.length + current.name + (current.name === 'game' ? current.id : current.name === 'library' ? current.source : '') + (app.profile?.current ?? '')}
+  {#key app.stack.length + current.name + ('id' in current ? (current.id ?? '') : current.name === 'library' ? current.source : '') + (app.profile?.current ?? '')}
     <div class="layer" in:screenIn={motionFor(current.name)} out:screenOut={motionFor(current.name)}>
     {#if current.name === 'home'}
       <Home />
@@ -188,6 +191,12 @@
       <You item={current.item} />
     {:else if current.name === 'activity'}
       <Activity />
+    {:else if current.name === 'watch'}
+      <Watch />
+    {:else if current.name === 'title'}
+      <Title id={current.id} />
+    {:else if current.name === 'player'}
+      <Player id={current.id} start={current.start ?? -1} />
     {/if}
     </div>
   {/key}
@@ -204,7 +213,7 @@
 <Guide />
 <Screensaver />
 <Restarting />
-<Crt paused={idle.active} />
+{#if !app.watching}<Crt paused={idle.active} />{/if}
 {#if app.ready}<Boot />{/if}
 
 <style>

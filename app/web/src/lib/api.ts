@@ -38,6 +38,13 @@ import type {
   DownloadOptions,
   TaskEvent,
   Stats,
+  Accounts,
+  WatchInfo,
+  WatchHome,
+  WatchPage,
+  WatchDetails,
+  WatchItem,
+  WatchStream,
 } from './types'
 
 type Service = Record<string, (...args: unknown[]) => Promise<unknown>>
@@ -207,4 +214,20 @@ export const api = {
   gameMedia: (id: string) => call<MediaFile[]>('GameMedia', id),
   gameNote: (id: string) => call<string>('GameNote', id),
   setGameNote: (id: string, text: string) => call<void>('SetGameNote', id, text),
+  // filmes e séries (Jellyfin)
+  watchStatus: () => call<WatchInfo>('WatchStatus'),
+  profileAccounts: (profile: string) => call<Accounts>('ProfileAccounts', profile),
+  linkRomM: (profile: string) => call<Accounts>('LinkRomM', profile),
+  connectWatch: (profile: string, host: string, user: string, pass: string) => call<WatchInfo>('ConnectWatch', profile, host, user, pass),
+  disconnectWatch: (profile: string) => call<void>('DisconnectWatch', profile),
+  watchHome: () => call<WatchHome>('WatchHome'),
+  watchList: (kind: string, sort: string, genre = '', start = 0, limit = 60) => call<WatchPage>('WatchList', kind, sort, genre, start, limit),
+  watchSearch: (text: string) => call<WatchItem[]>('WatchSearch', text),
+  watchDetails: (id: string) => call<WatchDetails>('WatchDetails', id),
+  watchEpisodes: (series: string, season: string) => call<WatchItem[]>('WatchEpisodes', series, season),
+  watchPlay: (id: string, audio = -1, start = -1) => call<WatchStream>('WatchPlay', id, audio, start),
+  watchReport: (event: 'start' | 'progress' | 'stop', id: string, session: string, source: string, position: number, paused: boolean) =>
+    call<void>('WatchReport', event, id, session, source, position, paused),
+  watchFavorite: (id: string, fav: boolean) => call<WatchItem>('WatchFavorite', id, fav),
+  watchPlayed: (id: string, played: boolean) => call<WatchItem>('WatchPlayed', id, played),
 }

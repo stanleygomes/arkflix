@@ -164,6 +164,8 @@ func main() {
 			// RomM falso no mesmo endereço (testes de ponta a ponta do servidor)
 			mux := http.NewServeMux()
 			mux.Handle("/fake-romm/", http.StripPrefix("/fake-romm", fixture.NewFakeRomM()))
+			// Jellyfin falso: stanley / senha123, filmes e uma série
+			mux.Handle("/fake-jellyfin/", http.StripPrefix("/fake-jellyfin", fixture.NewFakeJellyfin()))
 			// RetroAchievements falso: stanley / senha123, Super Mario World
 			ra := fixture.NewFakeRA()
 			ra.Prefix = "/fake-ra"

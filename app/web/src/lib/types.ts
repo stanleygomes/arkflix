@@ -429,6 +429,7 @@ export interface Boot {
   profile: ProfileState
   nativePads: boolean
   platform: string
+  watch: WatchInfo
 }
 
 export interface Profile {
@@ -524,4 +525,84 @@ export interface ScriptsInfo {
 export interface InputResult {
   mapping: Mapping
   conflicts: string[]
+}
+
+// Filmes e séries (Jellyfin, conta por perfil)
+export interface WatchInfo {
+  connected: boolean
+  base: string
+  user: string
+  server: string
+}
+
+export interface Accounts {
+  jellyfin: WatchInfo
+  romm: { connected: boolean; base: string; user: string; mine: boolean; owner: string }
+}
+
+export interface WatchItem {
+  id: string
+  type: 'Movie' | 'Series' | 'Season' | 'Episode'
+  name: string
+  overview: string
+  year: number
+  genres: string[]
+  rating: string
+  score: number
+  runtime: number
+  position: number
+  played: boolean
+  favorite: boolean
+  unplayed: number
+  seriesId: string
+  seriesName: string
+  seasonId: string
+  season: number
+  episode: number
+  poster: string
+  backdrop: string
+  logo: string
+  thumb: string
+  progress: number
+}
+
+export interface WatchHome {
+  resume: WatchItem[]
+  nextUp: WatchItem[]
+  movies: WatchItem[]
+  series: WatchItem[]
+  favorites: WatchItem[]
+}
+
+export interface WatchPage {
+  items: WatchItem[]
+  total: number
+}
+
+export interface WatchDetails {
+  item: WatchItem
+  seasons: WatchItem[]
+  next: WatchItem | null
+}
+
+export interface WatchTrack {
+  index: number
+  label: string
+  language: string
+  default: boolean
+  url?: string
+}
+
+export interface WatchStream {
+  url: string
+  hls: boolean
+  session: string
+  source: string
+  duration: number
+  audio: WatchTrack[]
+  subtitles: WatchTrack[]
+  audioIndex: number
+  start: number
+  item: WatchItem
+  next: WatchItem | null
 }

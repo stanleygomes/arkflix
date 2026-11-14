@@ -11,6 +11,10 @@
   import { app, go, isKids, shown } from '../lib/state.svelte'
   import { shortcuts, type Shortcut } from '../lib/shortcuts'
   import Icon from '../components/Icon.svelte'
+  import Poster from '../components/Poster.svelte'
+  import { api } from '../lib/api'
+  import type { WatchItem } from '../lib/types'
+  import { cardLabel } from '../lib/watch'
 
   let query = $state('')
   const results = $derived(search(shown(), query))
@@ -24,6 +28,20 @@
     }),
   )
   const icons = { console: 'pad', list: 'star', setting: 'gear' } as const
+
+  // filmes e séries do Jellyfin do perfil (busca no servidor, com atraso)
+  let videos = $state<WatchItem[]>([])
+  $effect(() => {
+    const q = query.trim()
+    if (!app.watch?.connected || q.length < 2) {
+      videos = []
+      return
+    }
+    const t = setTimeout(() => {
+      api.watchSearch(q).then((r) => query.trim() === q && (videos = r)).catch(() => (videos = []))
+    }, 300)
+    return () => clearTimeout(t)
+  })
 
   function openShortcut(s: Shortcut) {
     if (s.power) app.power = true
@@ -65,7 +83,7 @@
         data-nav
         data-nav-default={typing ? '' : undefined}
         bind:value={query}
-        placeholder="Jogo, console ou configuração"
+        placeholder={app.watch?.connected ? "Jogo, filme, série ou configuração" : "Jogo, console ou configuração"}
         autocomplete="off"
         spellcheck="false"
         onkeydown={(e) => {
@@ -82,10 +100,10 @@
       <p id="results-count" class="count">
         {#if !query.trim()}
           Jogo, console, lista ou configuração ("bluetooth", "tela cheia"). Acento e maiúscula não importam.
-        {:else if results.length === 0 && extra.length === 0}
+        {:else if results.length === 0 && extra.length === 0 && videos.length === 0}
           Nada encontrado pra "{query}".
         {:else}
-          {results.length} jogo{results.length === 1 ? '' : 's'}{extra.length ? ` e ${extra.length} atalho${extra.length === 1 ? '' : 's'}` : ''}
+          {results.length} jogo{results.length === 1 ? '' : 's'}{videos.length ? `, ${videos.length} filme${videos.length === 1 ? '' : 's'} ou série${videos.length === 1 ? '' : 's'}` : ''}{extra.length ? ` e ${extra.length} atalho${extra.length === 1 ? '' : 's'}` : ''}
         {/if}
       </p>
       {#if extra.length}
@@ -103,6 +121,18 @@
       {/if}
       {#if results.length}
         <GameGrid games={results} label="Resultados da busca" />
+      {/if}
+      {#if videos.length}
+        <h2 class="sub-title">Filmes e séries</h2>
+        <ul class="videos" aria-label="Filmes e séries encontrados">
+          {#each videos as v (v.id)}
+            <li>
+              <button class="video" data-nav data-item={v.id} aria-label={cardLabel(v)} onclick={() => go({ name: 'title', id: v.id })}>
+                <Poster item={v} />
+              </button>
+            </li>
+          {/each}
+        </ul>
       {/if}
     </section>
   </main>
@@ -165,6 +195,29 @@
   }
   .shortcut .hint {
     font-size: 0.8rem;
+  }
+  .sub-title {
+    font-size: 1.15rem;
+    margin: 1.2rem 0 0.4rem;
+  }
+  .videos {
+    list-style: none;
+    margin: 0;
+    padding: 0.5rem;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(8rem, 1fr));
+    gap: 1.2rem;
+  }
+  .video {
+    width: 100%;
+    padding: 0;
+    border: none;
+    background: none;
+    cursor: pointer;
+    border-radius: 6px;
+  }
+  .video:focus-visible :global(.poster) {
+    box-shadow: 0 0 0 4px var(--focus), var(--glow-focus);
   }
   .count {
     color: var(--muted);

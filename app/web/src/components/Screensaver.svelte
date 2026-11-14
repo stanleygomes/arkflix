@@ -21,7 +21,7 @@
   $effect(() => {
     watchPointer()
     const iv = setInterval(() => {
-      if (!cfg?.enabled || idle.active || app.playing || !app.ready) return
+      if (!cfg?.enabled || idle.active || app.playing || app.watching || !app.ready) return
       if (idleFor() >= cfg.minutes * 60_000) sleep()
     }, 1000)
     return () => clearInterval(iv)

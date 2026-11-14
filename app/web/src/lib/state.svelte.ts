@@ -1,7 +1,7 @@
 // Estado global da interface (Svelte 5 runes).
 import { play } from './sound'
 import { glitch } from './glitch'
-import type { Boot, Family, Game, GameEvent, GameList, Mapping, Pad, ProfileState, Settings, System, RetroPadButton, UpdateInfo } from './types'
+import type { Boot, Family, WatchInfo, Game, GameEvent, GameList, Mapping, Pad, ProfileState, Settings, System, RetroPadButton, UpdateInfo } from './types'
 
 export type Screen =
   | { name: 'home' }
@@ -17,6 +17,9 @@ export type Screen =
   | { name: 'welcome' }
   | { name: 'you'; item?: string }
   | { name: 'activity' }
+  | { name: 'watch' }
+  | { name: 'title'; id: string }
+  | { name: 'player'; id: string; start?: number }
 
 export type SettingsTab = 'library' | 'server' | 'storage' | 'emulators' | 'bluetooth' | 'updates' | 'cheevos' | 'controls' | 'a11y' | 'about'
 
@@ -95,6 +98,11 @@ export const app = $state({
   homeView: 'games' as 'games' | 'store', // Jogos (baixados) ou Catálogo (do servidor)
   selected: '',
   error: '',
+  // filmes e séries: conta do perfil, aba e destaque da tela, player aberto
+  watch: null as WatchInfo | null,
+  watchTab: 'home' as 'home' | 'movies' | 'series' | 'favorites',
+  watchSelected: '',
+  watching: false,
 })
 
 export function screen(): Screen {
@@ -214,6 +222,7 @@ export function applyBoot(boot: Boot) {
     lists: boot.lists ?? [],
     profile: boot.profile,
     platform: boot.platform || 'linux',
+    watch: boot.watch ?? null,
   })
 }
 
@@ -228,6 +237,8 @@ export function resetTo(s: Screen) {
   app.stack = [s]
   app.homeTab = 'home'
   app.selected = ''
+  app.watchTab = 'home'
+  app.watchSelected = ''
 }
 
 export function putList(l: GameList) {

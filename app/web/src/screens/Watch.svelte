@@ -1,0 +1,619 @@
+<script lang="ts">
+  // Filmes e séries (Jellyfin da conta do perfil). Mesmo jeito do Início dos
+  // jogos: destaque grande em cima (muda com o foco) e fileiras embaixo. Abas
+  // no topo: Início, Filmes, Séries e Minha lista (estas em grade, com ordem).
+  import { tick } from 'svelte'
+  import HelpBar from '../components/HelpBar.svelte'
+  import Icon from '../components/Icon.svelte'
+  import Poster from '../components/Poster.svelte'
+  import Sections from '../components/Sections.svelte'
+  import TopBar from '../components/TopBar.svelte'
+  import { api } from '../lib/api'
+  import { pushHandler } from '../lib/input'
+  import { current, focusEl } from '../lib/nav'
+  import { applyPalette, highContrastPalette, homePalette } from '../lib/palette'
+  import { play } from '../lib/sound'
+  import { shade } from '../lib/motion'
+  import { app, go, isKids, toast } from '../lib/state.svelte'
+  import type { WatchHome, WatchItem } from '../lib/types'
+  import { cardLabel, displayName, episodeTag, opensPlayer, playLabel, remaining, runtime } from '../lib/watch'
+
+  type Tab = 'home' | 'movies' | 'series' | 'favorites'
+  const TABS: { id: Tab; label: string }[] = [
+    { id: 'home', label: 'Início' },
+    { id: 'movies', label: 'Filmes' },
+    { id: 'series', label: 'Séries' },
+    { id: 'favorites', label: 'Minha lista' },
+  ]
+  const SORTS = [
+    { id: 'added', label: 'Recentes' },
+    { id: 'name', label: 'A-Z' },
+    { id: 'year', label: 'Ano' },
+    { id: 'score', label: 'Nota' },
+  ]
+  const PAGE = 60
+
+  const connected = $derived(!!app.watch?.connected)
+  let home = $state<WatchHome | null>(null)
+  let list = $state<WatchItem[]>([])
+  let total = $state(0)
+  let sort = $state('added')
+  let loading = $state(false)
+  let failed = $state('')
+
+  $effect(() => {
+    if (app.settings?.a11y.highContrast) return applyPalette(highContrastPalette)
+    applyPalette(homePalette)
+  })
+
+  async function load(tab: Tab, order: string) {
+    if (!connected) return
+    loading = true
+    failed = ''
+    try {
+      if (tab === 'home') {
+        home = await api.watchHome()
+      } else {
+        const page = await api.watchList(tab, order, '', 0, PAGE)
+        list = page.items
+        total = page.total
+      }
+    } catch (err) {
+      failed = (err as Error).message
+    } finally {
+      loading = false
+    }
+  }
+
+  $effect(() => {
+    load(app.watchTab, sort)
+  })
+
+  async function more() {
+    try {
+      const page = await api.watchList(app.watchTab, sort, '', list.length, PAGE)
+      const first = list.length
+      list = [...list, ...page.items]
+      total = page.total
+      await tick()
+      focusEl(document.querySelectorAll<HTMLElement>('.grid [data-item]')[first])
+    } catch (err) {
+      toast((err as Error).message, 'error')
+    }
+  }
+
+  type Row = { id: string; title: string; items: WatchItem[]; wide?: boolean }
+  const rows = $derived.by((): Row[] => {
+    if (!home) return []
+    return [
+      { id: 'resume', title: 'Continuar assistindo', items: home.resume, wide: true },
+      { id: 'next', title: 'Próximos episódios', items: home.nextUp, wide: true },
+      { id: 'favorites', title: 'Minha lista', items: home.favorites },
+      { id: 'movies', title: 'Filmes adicionados', items: home.movies },
+      { id: 'series', title: 'Séries adicionadas', items: home.series },
+    ].filter((r) => r.items.length > 0)
+  })
+
+  const pool = $derived(app.watchTab === 'home' ? rows.flatMap((r) => r.items) : list)
+  const selected = $derived(pool.find((it) => it.id === app.watchSelected) ?? pool[0])
+  const hero = $derived(selected?.backdrop || selected?.poster || '')
+  const empty = $derived(!loading && !failed && (app.watchTab === 'home' ? home !== null && rows.length === 0 : list.length === 0))
+
+  // cartão largo mostra nome e uma linha embaixo: o nome acessível começa
+  // pelo mesmo texto visível e acrescenta o resto (progresso, lista)
+  function caption(it: WatchItem): string {
+    return it.type === 'Episode' ? `${episodeTag(it)} · ${it.name}` : remaining(it) || runtime(it.runtime)
+  }
+  function wideLabel(it: WatchItem): string {
+    const extra = []
+    if (it.progress > 0 && !it.played) extra.push(`${Math.round(it.progress * 100)}% assistido`)
+    if (it.favorite) extra.push('na Minha lista')
+    return [`${displayName(it)} ${caption(it)}`.trim(), ...extra].join(', ')
+  }
+
+  function selectTab(t: Tab) {
+    if (app.watchTab === t) return
+    app.watchTab = t
+    app.watchSelected = ''
+  }
+
+  function cycleTab(delta: number) {
+    const i = TABS.findIndex((t) => t.id === app.watchTab)
+    const next = TABS[(i + delta + TABS.length) % TABS.length]
+    selectTab(next.id)
+    play('move')
+    tick().then(() => focusEl(document.querySelector<HTMLElement>(`[data-watch-tab="${next.id}"]`)))
+  }
+
+  /** Abre o cartão: episódio e filme começado tocam; o resto abre a página. */
+  function open(it: WatchItem) {
+    if (opensPlayer(it)) go({ name: 'player', id: it.id })
+    else go({ name: 'title', id: it.id })
+  }
+
+  function details(it: WatchItem | undefined) {
+    if (!it) return
+    go({ name: 'title', id: it.type === 'Episode' && it.seriesId ? it.seriesId : it.id })
+  }
+
+  function put(it: WatchItem) {
+    const swap = (arr: WatchItem[]) => arr.map((x) => (x.id === it.id ? { ...x, favorite: it.favorite, played: it.played } : x))
+    if (home) home = { resume: swap(home.resume), nextUp: swap(home.nextUp), movies: swap(home.movies), series: swap(home.series), favorites: swap(home.favorites) }
+    list = swap(list)
+  }
+
+  async function toggleFav(it: WatchItem | undefined) {
+    if (!it) return
+    try {
+      const next = await api.watchFavorite(it.id, !it.favorite)
+      put(next)
+      play('toggle')
+      toast(next.favorite ? `${displayName(next)} na Minha lista` : `${displayName(next)} saiu da Minha lista`, 'ok', 2500)
+    } catch (err) {
+      toast((err as Error).message, 'error')
+    }
+  }
+
+  function focused(): WatchItem | undefined {
+    const id = current()?.dataset.item
+    return id ? pool.find((it) => it.id === id) : selected
+  }
+
+  $effect(() =>
+    pushHandler((a) => {
+      switch (a) {
+        case 'fav':
+          toggleFav(focused())
+          return true
+        case 'details':
+          details(focused())
+          return true
+        case 'prevTab':
+          cycleTab(-1)
+          return true
+        case 'nextTab':
+          cycleTab(1)
+          return true
+        case 'menu':
+          go({ name: 'you' })
+          return true
+      }
+      return false
+    }),
+  )
+
+  function playSelected() {
+    if (!selected) return
+    if (selected.type === 'Series') go({ name: 'title', id: selected.id })
+    else go({ name: 'player', id: selected.id })
+  }
+</script>
+
+<div class="watch">
+  {#key hero}
+    <div class="backdrop" in:shade style:background-image={hero ? `url("${hero}")` : 'none'} aria-hidden="true"></div>
+    <div class="scrim" aria-hidden="true"></div>
+  {/key}
+  <TopBar>
+    <div class="top-nav">
+      <Sections current="watch" />
+      {#if connected}
+        <nav class="tabs" aria-label="Filmes e séries">
+          {#each TABS as t (t.id)}
+            <button class="tab" data-nav data-watch-tab={t.id} aria-current={app.watchTab === t.id ? 'page' : undefined} onclick={() => selectTab(t.id)}>{t.label}</button>
+          {/each}
+        </nav>
+      {/if}
+    </div>
+  </TopBar>
+
+  <main class="content" aria-labelledby="watch-title">
+    {#if !connected}
+      <section class="empty panel">
+        <h1 class="pixel" id="watch-title">Filmes e séries</h1>
+        {#if isKids()}
+          <p class="muted">Este perfil ainda não tem conta do Jellyfin. Peça pra um adulto vincular uma em Perfis da casa.</p>
+          <div class="actions">
+            <button class="btn primary" data-nav data-nav-default onclick={() => go({ name: 'home' })}><Icon name="pad" /> Ir pros jogos</button>
+          </div>
+        {:else}
+          <p class="muted">
+            Vincule a sua conta do Jellyfin a este perfil pra ver os filmes e as séries do seu servidor, continuar de onde
+            parou e ter a sua lista. Cada perfil usa a própria conta.
+          </p>
+          <div class="actions">
+            <button class="btn primary" data-nav data-nav-default onclick={() => go({ name: 'you', item: 'profile' })}><Icon name="film" /> Vincular conta do Jellyfin</button>
+          </div>
+        {/if}
+      </section>
+    {:else if failed}
+      <section class="empty panel" role="alert">
+        <h1 class="pixel" id="watch-title">Sem sinal</h1>
+        <p class="muted">{failed}</p>
+        <div class="actions">
+          <button class="btn primary" data-nav data-nav-default onclick={() => load(app.watchTab, sort)}><Icon name="resume" /> Tentar de novo</button>
+          <button class="btn" data-nav onclick={() => go({ name: 'you', item: 'profile' })}><Icon name="gear" /> Conta do perfil</button>
+        </div>
+      </section>
+    {:else if empty}
+      <section class="empty panel">
+        <h1 class="pixel" id="watch-title">{app.watchTab === 'favorites' ? 'Lista vazia' : 'Nada por aqui'}</h1>
+        <p class="muted">
+          {app.watchTab === 'favorites' ? 'Aperte o botão de favorito num filme ou série pra guardar aqui.' : 'O servidor não tem nada desse tipo pra esta conta.'}
+        </p>
+        <div class="actions">
+          <button class="btn primary" data-nav data-nav-default onclick={() => selectTab('home')}><Icon name="home" /> Voltar ao início</button>
+        </div>
+      </section>
+    {:else if !selected}
+      <p class="loading pixel" aria-busy="true" id="watch-title">Sintonizando…</p>
+    {:else}
+      <section class="hero" class:compact={app.watchTab !== 'home'}>
+        <p class="kind pixel">
+          {selected.type === 'Series' ? 'Série' : selected.type === 'Episode' ? `Série · ${episodeTag(selected)}` : 'Filme'}
+        </p>
+        {#key selected.id}
+          {#if selected.logo}
+            <h1 class="logo" id="watch-title"><img src={selected.logo} alt={displayName(selected)} /></h1>
+          {:else}
+            <h1 class="pixel title" id="watch-title">{displayName(selected)}</h1>
+          {/if}
+        {/key}
+        <p class="meta">
+          {#if selected.type === 'Episode'}<span>{selected.name}</span>{/if}
+          {#if selected.year}<span>{selected.year}</span>{/if}
+          {#if selected.rating}<span class="rating">{selected.rating}</span>{/if}
+          {#if runtime(selected.runtime) && selected.type !== 'Series'}<span>{runtime(selected.runtime)}</span>{/if}
+          {#if remaining(selected)}<span class="left">{remaining(selected)}</span>{/if}
+          {#each selected.genres.slice(0, 2) as g (g)}<span>{g}</span>{/each}
+          {#if selected.favorite}<span class="fav"><Icon name="star" /> Na lista</span>{/if}
+        </p>
+        {#if selected.overview && app.watchTab === 'home'}<p class="summary">{selected.overview}</p>{/if}
+        {#if app.watchTab === 'home'}
+          <div class="actions">
+            <button class="btn primary" data-nav data-nav-group="actions" onclick={playSelected}>
+              <Icon name={selected.position > 0 && !selected.played ? 'resume' : 'play'} />
+              {selected.type === 'Episode' ? (selected.position > 0 ? 'Continuar' : 'Assistir') : playLabel(selected, null)}
+            </button>
+            <button class="btn" data-nav data-nav-group="actions" onclick={() => details(selected)}><Icon name="info" /> Detalhes</button>
+            <button class="btn" data-nav data-nav-group="actions" aria-pressed={selected.favorite} onclick={() => toggleFav(selected)}>
+              <Icon name={selected.favorite ? 'check' : 'plus'} /> Minha lista
+            </button>
+          </div>
+        {/if}
+      </section>
+
+      {#if app.watchTab === 'home'}
+        <div class="shelves">
+          {#each rows as row (row.id)}
+            <section class="shelf" aria-label={row.title}>
+              <h2 class="row-title">{row.title}</h2>
+              <ul class="row" data-nav-group={`watch-${row.id}`}>
+                {#each row.items as it (it.id)}
+                  <li>
+                    <button
+                      class="card"
+                      class:wide={row.wide}
+                      data-nav
+                      data-nav-inline="center"
+                      data-item={it.id}
+                      aria-label={row.wide ? wideLabel(it) : cardLabel(it)}
+                      onfocus={() => (app.watchSelected = it.id)}
+                      onclick={() => open(it)}
+                    >
+                      <Poster item={it} wide={row.wide} />
+                      {#if row.wide}
+                        <span class="caption">
+                          <span class="name">{displayName(it)}</span>
+                          <span class="muted">{caption(it)}</span>
+                        </span>
+                      {/if}
+                    </button>
+                  </li>
+                {/each}
+              </ul>
+            </section>
+          {/each}
+        </div>
+      {:else}
+        <div class="toolbar">
+          <p class="count">{total} {app.watchTab === 'movies' ? `filme${total === 1 ? '' : 's'}` : app.watchTab === 'series' ? `série${total === 1 ? '' : 's'}` : `título${total === 1 ? '' : 's'}`}</p>
+          <div class="segmented" role="group" aria-label="Ordem">
+            {#each SORTS as s (s.id)}
+              <button class="btn small" data-nav aria-pressed={sort === s.id} onclick={() => (sort = s.id)}>{s.label}</button>
+            {/each}
+          </div>
+        </div>
+        <ul class="grid" data-nav-group="watch-grid" aria-label={TABS.find((t) => t.id === app.watchTab)?.label}>
+          {#each list as it (it.id)}
+            <li>
+              <button class="card" data-nav data-item={it.id} aria-label={cardLabel(it)} onfocus={() => (app.watchSelected = it.id)} onclick={() => open(it)}>
+                <Poster item={it} />
+              </button>
+            </li>
+          {/each}
+          {#if list.length < total}
+            <li>
+              <button class="card more pixel" data-nav onclick={more}><Icon name="plus" size="1.6em" /> Mais</button>
+            </li>
+          {/if}
+        </ul>
+      {/if}
+    {/if}
+  </main>
+
+  <HelpBar
+    hints={[
+      { button: 'south', label: 'Abrir' },
+      { button: 'north', label: 'Minha lista' },
+      { button: 'west', label: 'Detalhes' },
+      { button: 'l1', label: 'Aba anterior' },
+      { button: 'r1', label: 'Próxima aba' },
+      { button: 'start', label: 'Você' },
+    ]}
+  />
+</div>
+
+<style>
+  .watch {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+  }
+  .backdrop {
+    position: fixed;
+    inset: 0;
+    background-size: cover;
+    background-position: center 25%;
+    opacity: 0.45;
+    z-index: -1;
+    mask-image: linear-gradient(to bottom, #000 35%, transparent 90%);
+  }
+  .scrim {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background:
+      linear-gradient(to top, var(--bg) 0%, color-mix(in srgb, var(--bg) 88%, transparent) 35%, transparent 60%),
+      linear-gradient(90deg, var(--bg) 0%, color-mix(in srgb, var(--bg) 90%, transparent) 30%, color-mix(in srgb, var(--bg) 50%, transparent) 65%, color-mix(in srgb, var(--bg) 20%, transparent) 100%);
+  }
+  .top-nav {
+    display: flex;
+    align-items: center;
+    gap: 1.4rem;
+    flex-wrap: wrap;
+  }
+  .tabs {
+    display: flex;
+    gap: 0.3rem;
+  }
+  .tab {
+    font-family: var(--font-body);
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    font-size: 1rem;
+    color: #d8cfe6;
+    background: none;
+    border: 3px solid transparent;
+    padding: 0.35rem 0.7rem;
+    cursor: pointer;
+  }
+  .tab:hover {
+    border-color: color-mix(in srgb, var(--accent) 60%, transparent);
+  }
+  .tab[aria-current='page'] {
+    color: #fff;
+    text-shadow: 0 0 10px var(--accent);
+    border-bottom-color: var(--accent);
+  }
+  .content {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 1.4rem;
+    padding: 1rem 2.5rem 0;
+    overflow-y: auto;
+  }
+  .loading {
+    margin: auto;
+    font-size: 1.4rem;
+    animation: blink 1s steps(2) infinite;
+  }
+  .hero {
+    max-width: 62rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.1rem;
+    min-height: 40vh;
+    justify-content: flex-end;
+  }
+  .hero.compact {
+    min-height: 0;
+    gap: 0.6rem;
+  }
+  .kind {
+    color: var(--accent-2);
+    font-size: 0.95rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+  .title {
+    font-size: clamp(2rem, min(4.6vw, 6.5vh), 4.4rem);
+    line-height: 1.05;
+    color: #fff;
+    text-shadow: 5px 5px 0 color-mix(in srgb, var(--accent) 55%, #000);
+    max-width: 22ch;
+  }
+  .compact .title {
+    font-size: clamp(1.6rem, 3vw, 2.6rem);
+  }
+  .logo {
+    margin: 0;
+  }
+  .logo img {
+    max-width: min(32rem, 60vw);
+    max-height: 9rem;
+    object-fit: contain;
+    object-position: left bottom;
+    filter: drop-shadow(4px 4px 0 #000);
+    display: block;
+  }
+  .compact .logo img {
+    max-height: 5rem;
+  }
+  .meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1.4rem;
+    color: #e6deef;
+    font-size: 1.05rem;
+  }
+  .rating {
+    border: 2px solid currentColor;
+    padding: 0 0.35rem;
+  }
+  .left {
+    color: var(--focus);
+  }
+  .fav {
+    color: var(--accent);
+    display: inline-flex;
+    gap: 0.3rem;
+    align-items: center;
+  }
+  .summary {
+    max-width: 44rem;
+    color: #fff;
+    font-size: 1.08rem;
+    line-height: 1.65;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.2rem;
+  }
+  .shelves {
+    display: flex;
+    flex-direction: column;
+    gap: 1.6rem;
+    padding-bottom: 0.5rem;
+  }
+  .row-title {
+    font-size: 1.2rem;
+    color: #fff;
+    margin-bottom: 0.3rem;
+  }
+  .row {
+    list-style: none;
+    margin: 0;
+    padding: 0.8rem 0.5rem 1.2rem;
+    display: flex;
+    gap: 1.5rem;
+    overflow-x: auto;
+    scroll-snap-type: x proximity;
+    scrollbar-width: none;
+  }
+  .card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    width: clamp(7.5rem, min(11vw, 17vh), 11rem);
+    padding: 0;
+    font: inherit;
+    color: var(--text);
+    text-align: left;
+    border: none;
+    background: none;
+    border-radius: 6px;
+    cursor: pointer;
+    scroll-snap-align: center;
+    transition: transform var(--t) var(--ease);
+  }
+  .card :global(.poster) {
+    box-shadow:
+      0 0 0 3px color-mix(in srgb, var(--accent) 80%, #000),
+      6px 6px 0 3px var(--press);
+  }
+  .card.wide {
+    width: clamp(13rem, min(20vw, 30vh), 19rem);
+  }
+  .card:focus {
+    transform: translateY(-0.4rem) scale(1.05);
+    outline: none;
+  }
+  .card:focus :global(.poster) {
+    box-shadow:
+      0 0 0 4px var(--focus),
+      var(--glow-focus);
+  }
+  .caption {
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+    min-width: 0;
+  }
+  .caption .name {
+    font-weight: 700;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .caption .muted {
+    font-size: 0.85rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+  .count {
+    color: var(--muted);
+  }
+  .segmented {
+    display: flex;
+    gap: 0.5rem;
+  }
+  .grid {
+    list-style: none;
+    margin: 0;
+    padding: 0.8rem 0.5rem 1.5rem;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(9rem, 1fr));
+    gap: 1.8rem 1.4rem;
+  }
+  .grid .card {
+    width: 100%;
+  }
+  .more {
+    aspect-ratio: 2 / 3;
+    align-items: center;
+    justify-content: center;
+    background: color-mix(in srgb, var(--surface) 80%, transparent);
+    border: 3px dashed color-mix(in srgb, var(--text) 40%, transparent);
+  }
+  .empty {
+    margin: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    max-width: 38rem;
+  }
+  :global(.reduce-motion) .card {
+    transition: none;
+  }
+</style>

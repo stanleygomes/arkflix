@@ -1,6 +1,7 @@
 <script lang="ts">
   // Criar ou editar perfil: nome, avatar, cor, PIN e apagar.
   import { tick } from 'svelte'
+  import Accounts from '../components/Accounts.svelte'
   import Avatar from '../components/Avatar.svelte'
   import HelpBar from '../components/HelpBar.svelte'
   import Icon from '../components/Icon.svelte'
@@ -233,6 +234,8 @@
           </div>
         </fieldset>
       {/if}
+
+      {#if existing && !setup}<Accounts profile={existing.id} />{/if}
 
       {#if existing && !existing.main && existing.id !== app.profile?.current}
         <fieldset>

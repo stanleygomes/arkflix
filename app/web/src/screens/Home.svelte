@@ -7,6 +7,7 @@
   import TopBar from '../components/TopBar.svelte'
   import GameMenu from '../components/GameMenu.svelte'
   import ConsoleIcon from '../components/ConsoleIcon.svelte'
+  import Sections from '../components/Sections.svelte'
   import { api } from '../lib/api'
   import { pushHandler } from '../lib/input'
   import { current, focusEl } from '../lib/nav'
@@ -244,6 +245,8 @@
   {/key}
   <HeroVideo game={selected} />
   <TopBar>
+    <div class="top-nav">
+    <Sections current="games" />
     {#if !isKids()}
       <nav class="views" aria-label="Visão">
         <button class="view" data-nav data-view="games" aria-current={!store ? 'page' : undefined} onclick={() => setView('games')}>Biblioteca</button>
@@ -252,6 +255,7 @@
         </button>
       </nav>
     {/if}
+    </div>
   </TopBar>
   <!-- consoles como no PS5: blocos com o desenho de cada um; o escolhido cresce e mostra o nome -->
   <nav class="tabs" aria-label="Consoles" use:indicator={app.homeTab}>
@@ -446,6 +450,12 @@
     background:
       linear-gradient(to top, var(--bg) 0%, color-mix(in srgb, var(--bg) 88%, transparent) 30%, transparent 55%),
       linear-gradient(90deg, var(--bg) 0%, color-mix(in srgb, var(--bg) 90%, transparent) 30%, color-mix(in srgb, var(--bg) 55%, transparent) 62%, color-mix(in srgb, var(--bg) 25%, transparent) 100%);
+  }
+  .top-nav {
+    display: flex;
+    align-items: center;
+    gap: 1.4rem;
+    flex-wrap: wrap;
   }
   .views {
     display: flex;
