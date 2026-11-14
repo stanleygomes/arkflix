@@ -7,6 +7,8 @@
   import Avatar from './Avatar.svelte'
   import Glyph from './Glyph.svelte'
   import Icon from './Icon.svelte'
+  import WindowControls from './WindowControls.svelte'
+  import { api } from '../lib/api'
 
   let { children, actions = true }: { children?: Snippet; actions?: boolean } = $props()
   let now = $state(new Date())
@@ -29,12 +31,18 @@
     play('back')
     back()
   }
+  // a barra é a de título da janela: duplo clique no vazio maximiza/restaura
+  function onTitleDblClick(e: MouseEvent) {
+    if (app.mode !== 'desktop' || (e.target as HTMLElement).closest('button, a, input')) return
+    api.toggleMaximise().catch(() => {})
+  }
   const padLabel = $derived(
     app.pads.length === 0 ? 'Nenhum controle conectado' : `${app.pads.length} controle(s): ${app.pads.map((p) => p.name).join(', ')}`,
   )
 </script>
 
-<header class="top">
+<!-- svelte-ignore a11y_no_static_element_interactions -->
+<header class="top" ondblclick={onTitleDblClick}>
   {#if canBack}
     <!-- voltar sempre no mesmo lugar, em toda tela que veio de outra -->
     <button class="back-btn" data-nav onclick={goBack}>
@@ -84,6 +92,7 @@
       <time class="clock sub" datetime={now.toISOString()}>{clock}</time>
       <span class="date">{date}</span>
     </span>
+    <WindowControls />
   </div>
 </header>
 
@@ -172,7 +181,9 @@
     height: 2rem;
     background: color-mix(in srgb, var(--text) 18%, transparent);
   }
+  /* arrasta a janela pela barra (desktop sem moldura); o que é clicável não */
   .top {
+    --wails-draggable: drag;
     display: flex;
     align-items: center;
     gap: 1.5rem;
@@ -189,6 +200,11 @@
   }
   .brand span {
     color: var(--accent);
+  }
+  .top :global(button),
+  .top :global(a),
+  .top :global(input) {
+    --wails-draggable: no-drag;
   }
   .middle {
     flex: 1;

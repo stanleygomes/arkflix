@@ -72,6 +72,19 @@ func (w *window) ToggleFullscreen() {
 	}
 }
 
+func (w *window) ToggleMaximise() {
+	if ctx := w.get(); ctx != nil {
+		runtime.WindowToggleMaximise(ctx)
+	}
+}
+
+func (w *window) IsMaximised() bool {
+	if ctx := w.get(); ctx != nil {
+		return runtime.WindowIsMaximised(ctx)
+	}
+	return false
+}
+
 func (w *window) Minimize() {
 	if ctx := w.get(); ctx != nil {
 		runtime.WindowMinimise(ctx)
@@ -137,6 +150,8 @@ func runDesktop(store *settings.Store, pads *gamepad.Manager, ui fs.FS, smoke, w
 		MinWidth:         960,
 		MinHeight:        600,
 		WindowStartState: start,
+		// sem a moldura do sistema: a barra de título é a do app (TopBar)
+		Frameless:        true,
 		StartHidden:      smoke,
 		BackgroundColour: &options.RGBA{R: 16, G: 14, B: 24, A: 255},
 		AssetServer:      &assetserver.Options{Assets: ui, Handler: core.Media(svc)},

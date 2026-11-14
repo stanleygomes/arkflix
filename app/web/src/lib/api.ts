@@ -176,6 +176,8 @@ export const api = {
   quit: () => call<void>('Quit'),
   minimize: () => call<void>('Minimize'),
   isFullscreen: () => call<boolean>('IsFullscreen'),
+  windowState: () => call<{ fullscreen: boolean; maximised: boolean }>('Window'),
+  toggleMaximise: () => call<void>('ToggleMaximise'),
   cancelTask: (id: string) => call<void>('CancelTask', id),
   emulatorStatus: () => call<EmulatorsInfo>('EmulatorStatus'),
   installEmulators: (which: string[] = []) => call<void>('InstallEmulators', which),

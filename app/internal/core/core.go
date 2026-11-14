@@ -79,6 +79,8 @@ type Window interface {
 	PickFiles() ([]string, error)
 	ToggleFullscreen()
 	IsFullscreen() bool
+	ToggleMaximise()
+	IsMaximised() bool
 	Minimize()
 	Quit()
 	OpenFile(path string) error
@@ -91,6 +93,8 @@ func (noWindow) Show()             {}
 func (noWindow) ToggleFullscreen() {}
 func (noWindow) Quit()             {}
 func (noWindow) Minimize()         {}
+func (noWindow) ToggleMaximise()   {}
+func (noWindow) IsMaximised() bool { return false }
 func (noWindow) IsFullscreen() bool {
 	return false
 }
@@ -784,6 +788,20 @@ func (s *Service) ToggleFullscreen() { s.opt.Window.ToggleFullscreen() }
 
 // IsFullscreen diz se a janela está em tela cheia (desktop).
 func (s *Service) IsFullscreen() bool { return s.opt.Window.IsFullscreen() }
+
+// WindowState é o estado da janela (a barra de título própria se ajusta).
+type WindowState struct {
+	Fullscreen bool `json:"fullscreen"`
+	Maximised  bool `json:"maximised"`
+}
+
+// Window diz se a janela está em tela cheia ou maximizada (desktop).
+func (s *Service) Window() WindowState {
+	return WindowState{Fullscreen: s.opt.Window.IsFullscreen(), Maximised: s.opt.Window.IsMaximised()}
+}
+
+// ToggleMaximise maximiza ou restaura a janela (desktop).
+func (s *Service) ToggleMaximise() { s.opt.Window.ToggleMaximise() }
 
 // Minimize minimiza a janela (desktop).
 func (s *Service) Minimize() { s.opt.Window.Minimize() }
