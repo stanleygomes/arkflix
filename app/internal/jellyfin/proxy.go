@@ -59,8 +59,8 @@ func (p *Proxy) Close() error {
 var allowed = []string{"/Items/", "/Videos/"}
 
 func (p *Proxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Access-Control-Allow-Origin", "*")
 	if r.Method == http.MethodOptions {
+		w.Header().Set("Access-Control-Allow-Origin", "*")
 		w.Header().Set("Access-Control-Allow-Methods", "GET, HEAD")
 		w.Header().Set("Access-Control-Allow-Headers", "Range")
 		w.WriteHeader(http.StatusNoContent)
@@ -95,6 +95,8 @@ func (p *Proxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			pr.Out.Header.Del("Referer")
 			pr.Out.Header.Set("Authorization", Authorization(acc))
 		},
+		// o ReverseProxy soma (Add) os cabeçalhos da resposta aos do w: o
+		// CORS vem só daqui, senão sai "*, *" e o navegador recusa
 		ModifyResponse: func(resp *http.Response) error {
 			resp.Header.Del("Set-Cookie")
 			resp.Header.Set("Access-Control-Allow-Origin", "*")

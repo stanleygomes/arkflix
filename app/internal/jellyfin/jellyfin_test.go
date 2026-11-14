@@ -185,7 +185,7 @@ func TestProxy(t *testing.T) {
 	resp := get("GET", base+"/Items/m1/Images/Primary?maxHeight=300", nil)
 	body, _ := io.ReadAll(resp.Body)
 	resp.Body.Close()
-	if resp.StatusCode != 200 || resp.Header.Get("Content-Type") != "image/png" || len(body) == 0 || resp.Header.Get("Access-Control-Allow-Origin") != "*" {
+	if resp.StatusCode != 200 || resp.Header.Get("Content-Type") != "image/png" || len(body) == 0 || len(resp.Header.Values("Access-Control-Allow-Origin")) != 1 || resp.Header.Get("Access-Control-Allow-Origin") != "*" {
 		t.Fatalf("imagem: %d %v", resp.StatusCode, resp.Header)
 	}
 	if auths := fake.Auths(); len(auths) != 1 || !strings.Contains(auths[0], `Token="tok-stanley"`) {
