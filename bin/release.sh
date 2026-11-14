@@ -36,7 +36,9 @@ while IFS=$'\x1f' read -r -d $'\x1e' hash subject body; do
   else
     section[other]+="$line"$'\n'
   fi
-done < <(git log --no-merges --format='%H%x1f%s%x1f%b%x1e' "$range")
+# commits que só mexeram em legacy/ (o app web antigo, trazido com o
+# histórico na fusão dos repositórios) não entram na versão nem no changelog
+done < <(git log --no-merges --format='%H%x1f%s%x1f%b%x1e' "$range" -- . ':(exclude)legacy')
 
 if ((bump == 0)); then
   echo "nada a lançar desde ${last:-o começo} (só docs/chore/test/ci...)"
