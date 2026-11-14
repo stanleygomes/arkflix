@@ -314,6 +314,10 @@ body.scanlines::after {
   z-index: 9999;
   background: repeating-linear-gradient(to bottom, rgba(0, 0, 0, 0.32) 0 2px, transparent 2px 4px);
 }
+/* filme tocando: imagem limpa (linhas e tubo só no resto do app) */
+body.watching::after {
+  display: none;
+}
 
 body.high-contrast {
   background: var(--bg);

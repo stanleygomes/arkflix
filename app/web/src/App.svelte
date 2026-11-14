@@ -112,6 +112,10 @@
 
   // preferências de acessibilidade viram classes no <body> e no <html>
   $effect(() => {
+    document.body.classList.toggle('watching', app.watching)
+  })
+
+  $effect(() => {
     const a = app.settings?.a11y
     if (!a) return
     const body = document.body.classList
@@ -164,6 +168,10 @@
   <!-- com o protetor de tela ligado, o chão sai (nada animando por trás) -->
   {#if FLOOR.has(current.name) && !idle.active}<Synthwave />{/if}
   {#key app.stack.length + current.name + ('id' in current ? (current.id ?? '') : current.name === 'library' ? current.source : '') + (app.profile?.current ?? '')}
+    {#if current.name === 'player'}
+      <!-- o player ocupa a tela inteira: fora da camada (margem do tubo, transições) -->
+      <Player id={current.id} start={current.start ?? -1} />
+    {:else}
     <div class="layer" in:screenIn={motionFor(current.name)} out:screenOut={motionFor(current.name)}>
     {#if current.name === 'home'}
       <Home />
@@ -195,10 +203,9 @@
       <Watch />
     {:else if current.name === 'title'}
       <Title id={current.id} />
-    {:else if current.name === 'player'}
-      <Player id={current.id} start={current.start ?? -1} />
     {/if}
     </div>
+    {/if}
   {/key}
 {/if}
 
