@@ -547,3 +547,14 @@ main {
     animation: none;
   }
 }
+
+/* recurso sem captura: só o texto, centrado na coluna */
+.feature.solo {
+  grid-template-columns: minmax(0, 1fr);
+  max-width: 44rem;
+  margin: 0 auto;
+  padding: 1.6rem;
+  border: 2px solid color-mix(in srgb, var(--accent-2) 70%, transparent);
+  box-shadow: 0 0 6px color-mix(in srgb, var(--accent-2) 55%, transparent);
+  background: color-mix(in srgb, var(--surface) 85%, transparent);
+}

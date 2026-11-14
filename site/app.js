@@ -2,7 +2,7 @@
 // fixos (.../releases/latest/download/<arquivo sem versão>): o GitHub sempre
 // entrega o da última release. A API só mostra o número da versão (se cair ou
 // passar do limite, nada quebra).
-const REPO = 'stanleygomes/arkflix-games'
+const REPO = 'stanleygomes/arkflix'
 const LABELS = { windows: 'Baixar pra Windows', macos: 'Baixar pra macOS', linux: 'Baixar pra Linux' }
 const MAIN_ASSET = { windows: 'windows-x86_64-setup.exe', macos: 'macos-universal.dmg', linux: 'linux-x86_64.tar.gz' }
 
@@ -21,7 +21,7 @@ async function latest() {
   return res.json()
 }
 
-const DOWNLOAD = `https://github.com/${REPO}/releases/latest/download/arkflix-games-`
+const DOWNLOAD = `https://github.com/${REPO}/releases/latest/download/arkflix-`
 
 function showVersion(release) {
   document.getElementById('hud-version').textContent = release.tag_name
@@ -63,7 +63,7 @@ document.getElementById('share-link')?.addEventListener('click', async (ev) => {
   const btn = ev.currentTarget
   const url = location.origin + '/'
   try {
-    if (navigator.share) await navigator.share({ title: 'arkflix games', text: 'Baixar no computador:', url })
+    if (navigator.share) await navigator.share({ title: 'arkflix', text: 'Baixar no computador:', url })
     else {
       await navigator.clipboard.writeText(url)
       btn.textContent = 'Link copiado!'

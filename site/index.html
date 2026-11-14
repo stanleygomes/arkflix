@@ -3,10 +3,10 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>arkflix games · seus jogos retrô na TV, com cara de fliperama</title>
-<meta name="description" content="Transforme sua coleção de jogos clássicos num console de verdade: capas, perfis da família, modo infantil, saves na nuvem com o RomM e tudo no controle. Grátis, pra Windows, macOS e Linux.">
-<meta property="og:title" content="arkflix games">
-<meta property="og:description" content="Sua coleção de jogos clássicos com cara de fliperama. Na TV, no controle, pra família toda. Windows, macOS e Linux.">
+<title>arkflix · seus jogos retrô, filmes e séries na TV, com cara de fliperama</title>
+<meta name="description" content="Jogos clássicos e filmes e séries num console de verdade: capas, perfis da família, modo infantil, saves na nuvem com o RomM, player do Jellyfin embutido e tudo no controle. Grátis, pra Windows, macOS e Linux.">
+<meta property="og:title" content="arkflix">
+<meta property="og:description" content="Seus jogos clássicos e seus filmes e séries com cara de fliperama. Na TV, no controle, pra família toda. Windows, macOS e Linux.">
 <meta property="og:image" content="/img/og.jpg">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="theme-color" content="#050008">
@@ -27,14 +27,14 @@
   <nav class="nav" aria-label="Seções">
     <a href="#recursos">Recursos</a>
     <a href="#baixar">Baixar</a>
-    <a href="https://github.com/stanleygomes/arkflix-games">GitHub</a>
+    <a href="https://github.com/stanleygomes/arkflix">GitHub</a>
   </nav>
 </header>
 
 <main>
   <section class="hero" aria-labelledby="titulo">
     <h1 id="titulo" class="marquee">ARK<span>FLIX</span></h1>
-    <p class="tagline">Sua coleção de jogos clássicos virando um console de verdade.<br class="hide-sm"> Com cara de fliperama, no controle, pra família toda.</p>
+    <p class="tagline">Seus jogos clássicos e seus filmes e séries num console de verdade.<br class="hide-sm"> Com cara de fliperama, no controle, pra família toda.</p>
     <div class="cta">
       <a class="btn primary big" id="cta-main" href="#baixar">
         <span aria-hidden="true">▼</span> <span id="cta-label">Baixar grátis</span>
@@ -45,7 +45,7 @@
     <figure class="screen hero-shot">
       <picture>
         <source media="(max-width: 720px)" srcset="/img/inicio-720.webp">
-        <img src="/img/inicio.webp" alt="Tela inicial do arkflix games: Mario Kart 64 em destaque com capa, descrição e botões; abaixo, a fileira de jogos com capas de Super Mario World, Sonic 2, Mega Man X e outros" width="1440" height="810" fetchpriority="high">
+        <img src="/img/inicio.webp" alt="Tela inicial do arkflix: Mario Kart 64 em destaque com capa, descrição e botões; abaixo, a fileira de jogos com capas de Super Mario World, Sonic 2, Mega Man X e outros" width="1440" height="810" fetchpriority="high">
       </picture>
     </figure>
     <ul class="consoles" aria-label="Consoles suportados">
@@ -58,8 +58,8 @@
     <h2 id="como-titulo" class="neon-title">COMO FUNCIONA</h2>
     <ol>
       <li><span class="step" aria-hidden="true">1</span><h3>Instale</h3><p>Um instalador no Windows e no Mac; um comando no Linux, que já traz os emuladores.</p></li>
-      <li><span class="step" aria-hidden="true">2</span><h3>Traga seus jogos</h3><p>Aponte a pasta das suas ROMs, importe de qualquer lugar ou entre no seu servidor RomM.</p></li>
-      <li><span class="step" aria-hidden="true">3</span><h3>Jogue</h3><p>Capas e descrições aparecem sozinhas. Pegue o controle e escolha.</p></li>
+      <li><span class="step" aria-hidden="true">2</span><h3>Traga seus jogos e filmes</h3><p>Aponte a pasta das suas ROMs, importe de qualquer lugar ou entre no seu servidor RomM. Filmes e séries vêm do seu Jellyfin.</p></li>
+      <li><span class="step" aria-hidden="true">3</span><h3>Jogue e assista</h3><p>Capas e descrições aparecem sozinhas. Pegue o controle e escolha.</p></li>
     </ol>
   </section>
 
@@ -96,6 +96,19 @@
       </figure>
     </article>
 
+    <article class="feature solo" id="filmes">
+      <div class="text">
+        <p class="kicker">FILMES E SÉRIES</p>
+        <h2>Sessão de cinema no mesmo controle</h2>
+        <p>Na aba Filmes e séries, entre no seu servidor <a href="https://jellyfin.org">Jellyfin</a> e o acervo de lá fica a um botão dos jogos. O player é embutido: nada de abrir outro programa, tudo no controle ou no teclado.</p>
+        <ul class="ticks">
+          <li>Continue de onde parou</li>
+          <li>Temporadas e episódios em ordem</li>
+          <li>Cada perfil com a própria conta do Jellyfin</li>
+        </ul>
+      </div>
+    </article>
+
     <article class="feature">
       <div class="text">
         <p class="kicker">CADA JOGO</p>
@@ -115,11 +128,12 @@
     <article class="feature flip">
       <div class="text">
         <p class="kicker">PERFIS</p>
-        <h2>Quem vai jogar?</h2>
-        <p>Um perfil pra cada pessoa da casa, com 34 personagens clássicos de avatar: Mario, Sonic, Link, Pac-Man, Mega Man e mais. Cada um com os seus favoritos, listas, histórico, controles e saves.</p>
+        <h2>Quem vai jogar (ou assistir)?</h2>
+        <p>Um perfil pra cada pessoa da casa, com 34 personagens clássicos de avatar: Mario, Sonic, Link, Pac-Man, Mega Man e mais. Cada um com os seus favoritos, listas, histórico, controles, saves e a própria conta do Jellyfin.</p>
         <ul class="ticks">
           <li>PIN opcional de 4 números</li>
           <li>Ninguém apaga o save de ninguém</li>
+          <li>Cada um continua a sua série de onde parou</li>
         </ul>
       </div>
       <figure class="screen" data-crop="center">
@@ -146,6 +160,7 @@
         <ul class="ticks">
           <li>Mesmos atalhos em todos os emuladores: menu e sair</li>
           <li>Teclado na tela pra digitar com o controle</li>
+          <li>O player de filmes e séries também vai no controle</li>
         </ul>
       </div>
       <figure class="screen" data-crop="center">
@@ -175,6 +190,7 @@
 
     <h3 class="list-title">E mais</h3>
     <ul class="checklist">
+      <li>Filmes e séries do Jellyfin, com player embutido</li>
       <li>Ordenar e filtrar por console, gênero, jogadores e ano</li>
       <li>Coleções automáticas e listas pessoais</li>
       <li>Jogo surpresa</li>
@@ -192,48 +208,49 @@
 
   <section id="baixar" class="downloads" aria-labelledby="baixar-titulo">
     <h2 id="baixar-titulo" class="neon-title">PRESS START</h2>
-    <p class="muted center" id="release-line">Última versão: <a href="https://github.com/stanleygomes/arkflix-games/releases/latest">página de releases</a></p>
-    <p class="mobile-only center notice">O arkflix games é pra computador ligado na TV. <button class="btn small" type="button" id="share-link">Mandar o link pro computador</button></p>
+    <p class="muted center" id="release-line">Última versão: <a href="https://github.com/stanleygomes/arkflix/releases/latest">página de releases</a></p>
+    <p class="mobile-only center notice">O arkflix é pra computador ligado na TV. <button class="btn small" type="button" id="share-link">Mandar o link pro computador</button></p>
     <ul class="os">
       <li class="os-card" data-os="windows">
         <h3>Windows</h3>
         <p class="muted">10 e 11, 64 bits</p>
-        <a class="btn primary" data-asset="windows-x86_64-setup.exe" href="https://github.com/stanleygomes/arkflix-games/releases/latest/download/arkflix-games-windows-x86_64-setup.exe">Instalador (.exe)</a>
-        <a class="btn" data-asset="windows-x86_64.zip" href="https://github.com/stanleygomes/arkflix-games/releases/latest/download/arkflix-games-windows-x86_64.zip">Portátil (.zip)</a>
-        <p class="small muted">Instale também o <a href="https://www.retroarch.com/?page=platforms">RetroArch</a>, o <a href="https://www.ppsspp.org/download/">PPSSPP</a> e o <a href="https://pcsx2.net/downloads/">PCSX2</a>.</p>
+        <a class="btn primary" data-asset="windows-x86_64-setup.exe" href="https://github.com/stanleygomes/arkflix/releases/latest/download/arkflix-windows-x86_64-setup.exe">Instalador (.exe)</a>
+        <a class="btn" data-asset="windows-x86_64.zip" href="https://github.com/stanleygomes/arkflix/releases/latest/download/arkflix-windows-x86_64.zip">Portátil (.zip)</a>
+        <p class="small muted">Pros jogos, instale também o <a href="https://www.retroarch.com/?page=platforms">RetroArch</a>, o <a href="https://www.ppsspp.org/download/">PPSSPP</a> e o <a href="https://pcsx2.net/downloads/">PCSX2</a>.</p>
       </li>
       <li class="os-card" data-os="macos">
         <h3>macOS</h3>
         <p class="muted">11 ou mais novo · Intel e Apple Silicon</p>
-        <a class="btn primary" data-asset="macos-universal.dmg" href="https://github.com/stanleygomes/arkflix-games/releases/latest/download/arkflix-games-macos-universal.dmg">Baixar (.dmg)</a>
-        <p class="small muted">Primeira vez: botão direito no app › Abrir (não é assinado pela Apple). Instale o RetroArch, o PPSSPP e o PCSX2.</p>
+        <a class="btn primary" data-asset="macos-universal.dmg" href="https://github.com/stanleygomes/arkflix/releases/latest/download/arkflix-macos-universal.dmg">Baixar (.dmg)</a>
+        <p class="small muted">Primeira vez: botão direito no app › Abrir (não é assinado pela Apple). Pros jogos, instale o RetroArch, o PPSSPP e o PCSX2.</p>
       </li>
       <li class="os-card" data-os="linux">
         <h3>Linux</h3>
         <p class="muted">Ubuntu, Debian e derivados · x86_64</p>
         <p class="small">Um comando instala o app e os emuladores (Flatpak):</p>
         <div class="cmd">
-          <code id="linux-cmd" tabindex="0" aria-label="Comando de instalação no Linux">curl -fsSL https://raw.githubusercontent.com/stanleygomes/arkflix-games/master/install.sh | bash</code>
+          <code id="linux-cmd" tabindex="0" aria-label="Comando de instalação no Linux">curl -fsSL https://raw.githubusercontent.com/stanleygomes/arkflix/master/install.sh | bash</code>
           <button class="btn small" type="button" id="copy-cmd">Copiar</button>
         </div>
-        <a class="btn" data-asset="linux-x86_64.tar.gz" href="https://github.com/stanleygomes/arkflix-games/releases/latest/download/arkflix-games-linux-x86_64.tar.gz">Só o app (.tar.gz)</a>
+        <a class="btn" data-asset="linux-x86_64.tar.gz" href="https://github.com/stanleygomes/arkflix/releases/latest/download/arkflix-linux-x86_64.tar.gz">Só o app (.tar.gz)</a>
       </li>
     </ul>
   </section>
 
   <section class="faq" aria-labelledby="faq-titulo">
     <h2 id="faq-titulo" class="neon-title">PERGUNTAS</h2>
-    <details><summary>Vem com jogos?</summary><p>Não. O arkflix games organiza e abre os jogos que você já tem (os seus cartuchos e discos copiados) e as BIOS que você mesmo coloca.</p></details>
+    <details><summary>Vem com jogos ou filmes?</summary><p>Não. O arkflix organiza e abre os jogos que você já tem (os seus cartuchos e discos copiados) e as BIOS que você mesmo coloca. Filmes e séries vêm do seu próprio servidor Jellyfin.</p></details>
     <details><summary>É grátis mesmo?</summary><p>Sim, e de código aberto. Os emuladores que ele usa (RetroArch, PPSSPP e PCSX2) também são gratuitos.</p></details>
-    <details><summary>Precisa de internet?</summary><p>Só pra baixar capas e descrições e pra conversar com o seu RomM. Os jogos abrem offline.</p></details>
+    <details><summary>Precisa de internet?</summary><p>Só pra baixar capas e descrições e pra conversar com o seu RomM e o seu Jellyfin. Os jogos abrem offline.</p></details>
     <details><summary>Que controle eu uso?</summary><p>Qualquer controle de Xbox, PlayStation ou 8BitDo, por fio ou Bluetooth, e o teclado. O app mostra os símbolos certos do seu.</p></details>
-    <details><summary>O que é o RomM?</summary><p>Um servidor de jogos que você instala em casa ou na nuvem pra guardar a coleção e os saves. É opcional: o arkflix games funciona sem ele.</p></details>
+    <details><summary>O que é o RomM?</summary><p>Um servidor de jogos que você instala em casa ou na nuvem pra guardar a coleção e os saves. É opcional: o arkflix funciona sem ele.</p></details>
+    <details><summary>O que é o Jellyfin?</summary><p>Um servidor de mídia que você instala em casa pra guardar seus filmes e séries. É ele que alimenta a aba Filmes e séries; os jogos não dependem dele.</p></details>
   </section>
 </main>
 
 <footer class="foot">
   <p class="coin" aria-hidden="true">INSERT COIN</p>
-  <p class="small muted">Código aberto no <a href="https://github.com/stanleygomes/arkflix-games">GitHub</a>. Personagens e jogos pertencem aos seus donos.</p>
+  <p class="small muted">Código aberto no <a href="https://github.com/stanleygomes/arkflix">GitHub</a>. Personagens e jogos pertencem aos seus donos.</p>
 </footer>
 </body>
 </html>
