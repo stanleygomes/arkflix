@@ -5,8 +5,10 @@
 
 ![Tela inicial do arkflix: Mario Kart 64 em destaque e a fileira de jogos com capas](site/img/inicio.webp)
 
-App de biblioteca de jogos para Linux, Windows e macOS (Go + Svelte), feito
-para controle e TV. Os jogos abrem no [RetroArch](https://www.retroarch.com)
+App desktop de jogos, filmes e séries para Linux, Windows e macOS (Go +
+Svelte), feito para controle e TV, com visual retrô de fliperama. Filmes e
+séries vêm do seu servidor [Jellyfin](https://jellyfin.org), com player
+embutido. Os jogos abrem no [RetroArch](https://www.retroarch.com)
 com oito cores, no [PPSSPP](https://www.ppsspp.org) e no
 [PCSX2](https://pcsx2.net): no Linux, os do [Flathub](https://flathub.org); no
 Windows e no macOS, os dos instaladores oficiais. Este repositório é só o app;
@@ -36,7 +38,12 @@ os emuladores vêm prontos.
   busca, filtros, coleções, listas, estatísticas e importação de ROMs.
 - Pontos salvos com miniatura, mídia em tela cheia, vídeo do jogo e protetor de
   tela retrô.
-- Perfis estilo Netflix, com PIN opcional e modo infantil.
+- Filmes e séries do Jellyfin: continuar assistindo, próximos episódios,
+  temporadas, Minha lista e player embutido (controle, áudio, legendas e
+  próximo episódio automático).
+- Perfis estilo Netflix, com PIN opcional e modo infantil; cada perfil vincula
+  a própria conta do Jellyfin e escolhe se sincroniza os saves do RomM.
+- Janela sem a moldura do sistema: barra de título própria no visual do app.
 - Configuração de controle com prévia ao vivo e opções de acessibilidade.
 - Guia rápido no botão Home, até por cima do jogo: voltar, salvar ou carregar
   estado e fechar o jogo.
@@ -48,7 +55,7 @@ os emuladores vêm prontos.
 - Pareamento de controle Bluetooth pela tela (Linux).
 - Emuladores instalados e atualizados pelo próprio app, nos três sistemas.
 - Atualização automática do app pela última release.
-- Busca global (jogos, consoles, listas e configurações), sons de interface,
+- Busca global (jogos, filmes, séries, consoles, listas e configurações), sons de interface,
   tela de boot e modo descanso.
 - Emuladores do Flathub: mesma configuração, saves e BIOS de quem já usa os
   Flatpaks.
@@ -152,11 +159,13 @@ curl -fsSL https://raw.githubusercontent.com/stanleygomes/arkflix/master/install
 ## Uso
 
 ```bash
-arkflix       # após a instalação
+arkflix             # após a instalação
 make run            # dentro do repositório
 ```
 
-O app abre em tela cheia; F11 alterna. O botão de energia, no topo, minimiza,
+O app abre em tela cheia; F11 alterna. Em janela, a barra do topo é a de título:
+arrasta a janela, o duplo clique maximiza e os botões à direita minimizam,
+maximizam e fecham. O botão de energia, no topo, minimiza,
 sai da tela cheia ou fecha o app (com confirmação), também pelo controle.
 `--windowed` (ou `make run ARGS=--windowed`) abre em janela.
 
@@ -244,6 +253,20 @@ ao fechar, sobe o que mudou. Um arquivo daqui nunca é trocado por um mais velho
 Saves de PSP e PS2 não sincronizam. Sem internet, os jogos baixados abrem
 normalmente. HTTP sem TLS só é aceito pra servidor nesta máquina.
 
+**Filmes e séries (Jellyfin).** No topo do Início, "Filmes e séries" troca de
+seção. A conta é por perfil: em Você › Perfil › Editar perfil › Contas
+vinculadas, informe o endereço, o usuário e a senha do Jellyfin. A senha só
+serve pro login: fica um token em `<pasta do perfil>/jellyfin.json`
+(permissão 600), invalidado no servidor ao desvincular. O que cada perfil
+assistiu, a Minha lista e o controle dos pais vêm da conta dele (pro perfil
+infantil, vincule uma conta com controle dos pais; só um adulto vincula).
+Imagens e vídeo passam por um proxy em 127.0.0.1 com o token no cabeçalho: a
+interface nunca vê o token. O Jellyfin decide se o arquivo toca direto ou se
+transcodifica em HLS (H.264/AAC). No player: A toca/pausa, esquerda e direita
+pulam 10 s, LB/RB 30 s, X abre áudio e legendas, B sai. O progresso vai pro
+servidor ao começar, a cada 10 s, ao pausar e ao sair. HTTP sem TLS só na rede
+de casa (localhost, IP privado, `.local`, `.lan`).
+
 **Primeira vez.** O app abre numa tela de entrada, em tela cheia: entrar com o
 servidor RomM (endereço, usuário e senha) ou jogar offline. Em seguida, monta o
 perfil.
@@ -263,7 +286,8 @@ saves nem edição de metadados, nem por atalho nem pela API. Para sair dele, va
 o PIN do perfil adulto: defina um.
 
 **Dados.** Configurações, favoritos e tempo de jogo ficam em
-`~/.config/arkflix`. O primeiro perfil usa essa pasta (quem já usava o
+`~/.config/arkflix` (antes do nome novo, `~/.config/arkflix-games`: a pasta é
+movida sozinha na primeira vez que o arkflix abre, e o cache também). O primeiro perfil usa essa pasta (quem já usava o
 app não perde nada); os outros ficam em `profiles/<id>/`, com os saves do
 RetroArch em `profiles/<id>/saves/retroarch/`. Apagar um perfil move a pasta
 dele para `profiles/apagados/`. Os saves do primeiro perfil continuam nas pastas
@@ -279,6 +303,8 @@ app/
 │   ├── library/ meta/ saves/  fonte de jogos, metadados e saves (implementações locais)
 │   ├── importer/ archive/ isoinfo/  importação: detecção e cópia
 │   ├── launcher/           comando de cada emulador
+│   ├── jellyfin/           cliente do Jellyfin e proxy local de mídia
+│   ├── romm/               cliente do RomM (jogos e saves no servidor)
 │   ├── gamepad/ input/     controle (evdev) e mapeamento pro RetroArch
 │   ├── httpapi/            a mesma API por HTTP + eventos (SSE)
 │   └── fixture/            ambiente falso dos testes
@@ -434,6 +460,16 @@ Ele também exige uma BIOS em `~/.var/app/net.pcsx2.PCSX2/config/PCSX2/bios`.
 **Jogos de PlayStation não iniciam.** O Beetle PSX exige uma BIOS original, como
 a `scph5501.bin`, em
 `~/.var/app/org.libretro.RetroArch/config/retroarch/system`.
+
+**Filme não toca ("formato que o sistema não abre").** No Linux a webview toca
+vídeo pelo GStreamer: instale `gstreamer1.0-plugins-good`, `-bad` e `-libav`.
+Sem eles, o Jellyfin ainda pode transcodificar (confira se a transcodificação
+está ligada no servidor).
+
+**Atualizei de uma versão "arkflix-games".** O updater antigo baixa a release
+nova pelo nome antigo e o app migra as pastas de dados e cache sozinho. No
+Linux, rodar o `install.sh` de novo troca o comando `arkflix-games` por
+`arkflix` (sem sobrescrever um `arkflix` que já exista e não seja deste app).
 
 **Logs.** Os scripts de evento do app gravam em
 `~/.config/arkflix/logs/scripts.log`.

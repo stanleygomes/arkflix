@@ -24,6 +24,10 @@ Leia o [README](README.md) antes. Resumo do que importa:
 - Fonte de jogos, metadados e saves entram por interface (`GameSource`,
   `MetaProvider`, `SaveStore`). O servidor RomM fica em `internal/romm` (cliente)
   e `internal/core/remote.go`; não acople nada remoto nos pacotes locais.
+- Filmes e séries: cliente e proxy em `internal/jellyfin`, ligação com os perfis
+  em `internal/core/watch.go` (conta por perfil, `jellyfin.json` 0600). O token
+  nunca vai pra interface: imagem e vídeo passam pelo proxy em 127.0.0.1. Teste
+  com `fixture.FakeJellyfin` (também em `/fake-jellyfin` no `--fixture --test`).
 - Nunca guarde senha: o login do RomM vira um token de dispositivo. Teste com o
   RomM falso (`fixture.FakeRomM`, também em `/fake-romm` no `--fixture --test`;
   aceita Range e fica lento com `ARKFLIX_FAKE_ROMM_SLOW=<ms>`). A fila de
