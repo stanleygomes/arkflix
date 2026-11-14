@@ -31,8 +31,13 @@ fi
 
 # antes o app se chamava arkflix-games: aproveita o clone e tira o comando velho
 old=$HOME/.local/share/arkflix-games
-if [[ -z ${ARKFLIX_DIR:-} && ! -e $dir && -d $old/.git ]]; then
+if [[ -z ${ARKFLIX_DIR:-} && ! -d $dir/.git && -d $old/.git ]]; then
   step "renomeando $old para $dir"
+  # o app novo já pode ter aberto: o WebKit cria $dir com os dados dele
+  if [[ -d $dir ]]; then
+    cp -an "$dir/." "$old/"
+    rm -rf "$dir"
+  fi
   mv "$old" "$dir"
   git -C "$dir" remote set-url origin "$repo_url"
 fi
@@ -44,8 +49,14 @@ step "código em $dir"
 if [[ -d $dir/.git ]]; then
   git -C "$dir" pull -q --ff-only
 else
-  mkdir -p "$(dirname "$dir")"
-  git clone -q --depth 1 "$repo_url" "$dir"
+  # init + fetch em vez de clone: funciona com a pasta já existindo (o WebKit
+  # do app guarda os dados dele aqui)
+  mkdir -p "$dir"
+  git -C "$dir" init -q -b master
+  git -C "$dir" remote add origin "$repo_url" 2>/dev/null || git -C "$dir" remote set-url origin "$repo_url"
+  git -C "$dir" fetch -q --depth 1 origin master:refs/remotes/origin/master
+  git -C "$dir" checkout -q -f -B master origin/master
+  git -C "$dir" branch -q --set-upstream-to=origin/master master
 fi
 cd "$dir"
 

@@ -315,21 +315,38 @@ func (s *Store) RecordPlay(id string, d time.Duration, now time.Time) error {
 }
 
 // MoveLegacy leva a pasta de quando o app se chamava arkflix-games (old) pro
-// lugar novo (dir), uma vez: só se dir ainda não existe e old existe. Perfis,
-// saves, contas e capas vêm junto, sem copiar nada (rename na mesma pasta pai).
+// lugar novo (dir). Sem dir: renomeia (perfis, saves, contas e capas vêm
+// juntos, sem copiar). Com dir já criado (o WebKit cria a pasta de cache dele
+// com o nome do programa antes de o app olhar): traz só o que falta lá, nunca
+// sobrescreve, e apaga old se ficar vazia. Devolve se trouxe alguma coisa.
 func MoveLegacy(dir, old string) (bool, error) {
-	if _, err := os.Stat(dir); err == nil || !errors.Is(err, os.ErrNotExist) {
-		return false, nil
-	}
 	info, err := os.Stat(old)
 	if err != nil || !info.IsDir() {
 		return false, nil
 	}
-	if err := os.MkdirAll(filepath.Dir(dir), 0o700); err != nil {
+	if _, err := os.Stat(dir); errors.Is(err, os.ErrNotExist) {
+		if err := os.MkdirAll(filepath.Dir(dir), 0o700); err != nil {
+			return false, err
+		}
+		return true, os.Rename(old, dir)
+	} else if err != nil {
 		return false, err
 	}
-	if err := os.Rename(old, dir); err != nil {
+	entries, err := os.ReadDir(old)
+	if err != nil {
 		return false, err
 	}
-	return true, nil
+	moved := false
+	for _, e := range entries {
+		dst := filepath.Join(dir, e.Name())
+		if _, err := os.Lstat(dst); err == nil {
+			continue // o novo já tem: fica o novo, o antigo fica onde está
+		}
+		if err := os.Rename(filepath.Join(old, e.Name()), dst); err != nil {
+			return moved, err
+		}
+		moved = true
+	}
+	os.Remove(old) // só some se ficou vazia
+	return moved, nil
 }
