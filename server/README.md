@@ -8,8 +8,8 @@ jogos.
 
 Escopo: **consumir** o que já está no disco. Você continua mandando mídia pras
 pastas (o `noah_dev` faz isso); o servidor escaneia, lista, toca, baixa e
-sincroniza saves. Sem provedor de metadados (TMDB/IGDB), sem upload de mídia e
-sem painel de admin.
+sincroniza saves. O que falta no disco (sinopse, pôster, capa) vem da
+internet (veja Metadados).
 
 ## Convivência com os três atuais
 
@@ -36,6 +36,31 @@ da troca, o Caddy aponta os três domínios de hoje pra cá.
 
 O scan roda ao subir e de hora em hora; só relê arquivo que mudou
 (tamanho/mtime). Os clientes também disparam scan (`startScan`, tarefas do RomM).
+
+## Metadados
+
+Depois de cada scan, em segundo plano, o servidor completa pela internet o
+que o disco não trouxe. Só item com dado faltando; o que achou não é buscado
+de novo (revisto no mês se ainda faltar algo) e o que falhou só é tentado no
+outro dia. O painel de admin força um item (`Refresh`).
+
+| Provedor | Itens | O que preenche |
+| --- | --- | --- |
+| TMDB (precisa de `--tmdb-key`) | filmes, séries, temporadas, episódios | sinopse (cai pro inglês se vazia), gêneros no idioma, estreia/ano, pôster, fundo, logo, still e nome do episódio sem título |
+| libretro thumbnails | ROMs | capa (`Named_Boxarts`) e fundo (`Named_Snaps`/`Named_Titles`) pelo nome No-Intro/Redump |
+| MusicBrainz + Cover Art Archive | álbuns sem capa | capa da frente |
+
+- `--metadata=false` (`ARKFLIX_SERVER_METADATA=0`) desliga toda busca na internet.
+- `--tmdb-key` aceita a chave v3 ou o token v4 (Bearer). Sem chave, filmes e
+  séries ficam só com o disco; jogos e música continuam.
+- `--language` (padrão `pt-BR`) é o idioma de sinopses, gêneros e logos.
+- **O disco ganha sempre**: `.nfo`, imagem ao lado e tag nunca são trocados.
+  O que veio da internet fica anotado em `extra.meta` do item (fonte, data,
+  campos) e sobrevive aos rescans; se o disco passar a ter o campo, ele ganha.
+- Imagens baixadas vão pra `<data>/metadata/<id do item>/` (`poster`,
+  `backdrop`, `logo`, `still`; `.jpg` ou `.png`); item que sai do acervo
+  leva a pasta junto. Ids e extras: `tmdb_id`, `imdb_id`, `rating`,
+  `tagline`, `mbid` no `extra` do item.
 
 ## Login
 
