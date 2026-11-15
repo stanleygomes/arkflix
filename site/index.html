@@ -3,71 +3,110 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>arkflix · seus jogos retrô, filmes e séries na TV, com cara de fliperama</title>
-<meta name="description" content="Jogos clássicos e filmes e séries num console de verdade: capas, perfis da família, modo infantil, saves na nuvem com o RomM, player do Jellyfin embutido e tudo no controle. Grátis, pra Windows, macOS e Linux.">
-<meta property="og:title" content="arkflix">
-<meta property="og:description" content="Seus jogos clássicos e seus filmes e séries com cara de fliperama. Na TV, no controle, pra família toda. Windows, macOS e Linux.">
+<title>arkflix · jogos clássicos, filmes e séries na TV, numa sessão só</title>
+<meta name="description" content="Jogos clássicos e filmes e séries na TV, no controle, pra família toda: capas, perfis, modo infantil, saves na nuvem com o RomM e player do Jellyfin embutido. Grátis, pra Windows, macOS e Linux.">
+<meta property="og:title" content="arkflix · hoje tem sessão">
+<meta property="og:description" content="Seus jogos clássicos e seus filmes e séries numa sessão de cinema em casa. Na TV, no controle, pra família toda. Windows, macOS e Linux.">
 <meta property="og:image" content="/img/og.jpg">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="theme-color" content="#050008">
+<meta name="theme-color" content="#17110C">
 <link rel="icon" href="/img/icon.svg" type="image/svg+xml">
-<link rel="preload" href="/fonts/PressStart2P-Regular.ttf" as="font" type="font/ttf" crossorigin>
+<link rel="preload" href="/fonts/limelight-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/alegreya-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="/styles.css">
 <script src="/app.js" defer></script>
 </head>
 <body>
-<a class="skip" href="#baixar">Pular pro download</a>
+<a class="skip" href="#bilheteria">Pular pra bilheteria</a>
+
+<!-- Contorno à mão (noemi-ui): parado, semente fixa; só nos componentes de
+     desenho, nunca em texto. -->
+<svg class="defs" aria-hidden="true" focusable="false" width="0" height="0">
+  <filter id="sketch" x="-10%" y="-10%" width="120%" height="120%">
+    <feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="2" seed="7" result="noise"/>
+    <feDisplacementMap in="SourceGraphic" in2="noise" scale="1.2" xChannelSelector="R" yChannelSelector="G"/>
+  </filter>
+</svg>
 
 <header class="top">
-  <div class="hud" aria-hidden="true">
-    <p><span>1UP</span> VOCÊ</p>
-    <p class="hide-sm"><span>HI-SCORE</span> <span id="hud-version">v?.?.?</span></p>
-    <p><span>CREDIT</span> 00</p>
+  <div class="wrap top-in">
+    <a class="brand" href="/" aria-label="arkflix, início">arkflix</a>
+    <nav class="nav" aria-label="Seções">
+      <a href="#programa">Programa</a>
+      <a href="#bilheteria">Bilheteria</a>
+      <a class="ext" href="#perguntas">Perguntas</a>
+      <a class="ext" href="https://github.com/stanleygomes/arkflix">GitHub</a>
+    </nav>
+    <p class="meta now-showing">em cartaz <span id="site-version">· última versão</span></p>
   </div>
-  <nav class="nav" aria-label="Seções">
-    <a href="#recursos">Recursos</a>
-    <a href="#baixar">Baixar</a>
-    <a href="https://github.com/stanleygomes/arkflix">GitHub</a>
-  </nav>
 </header>
 
 <main>
-  <section class="hero" aria-labelledby="titulo">
-    <h1 id="titulo" class="marquee">ARK<span>FLIX</span></h1>
-    <p class="tagline">Seus jogos clássicos e seus filmes e séries num console de verdade.<br class="hide-sm"> Com cara de fliperama, no controle, pra família toda.</p>
-    <div class="cta">
-      <a class="btn primary big" id="cta-main" href="#baixar">
-        <span aria-hidden="true">▼</span> <span id="cta-label">Baixar grátis</span>
-      </a>
-      <a class="btn" href="#recursos">Ver o que ele faz</a>
+  <section class="hero wrap" aria-labelledby="titulo">
+    <div class="hero-copy">
+      <p class="kicker">Agora em cartaz, na sua sala</p>
+      <h1 id="titulo" class="title">arkflix</h1>
+      <p class="tagline">Seus jogos clássicos e seus filmes e séries numa sessão só. Na TV, no controle, pra família toda.</p>
+      <div class="cta">
+        <a class="ticket" id="cta-main" href="#bilheteria">
+          <span class="ticket-ink" aria-hidden="true"></span>
+          <span class="ticket-body"><span id="cta-label">Baixar grátis</span></span>
+        </a>
+        <a class="btn" href="#programa">Ver o programa</a>
+      </div>
+      <p class="meta" id="cta-note">Grátis e de código aberto · Windows, macOS e Linux</p>
     </div>
-    <p class="muted small" id="cta-note">Grátis e de código aberto · Windows, macOS e Linux</p>
-    <figure class="screen hero-shot">
+    <figure class="reel">
       <picture>
         <source media="(max-width: 720px)" srcset="/img/inicio-720.webp">
         <img src="/img/inicio.webp" alt="Tela inicial do arkflix: Mario Kart 64 em destaque com capa, descrição e botões; abaixo, a fileira de jogos com capas de Super Mario World, Sonic 2, Mega Man X e outros" width="1440" height="810" fetchpriority="high">
       </picture>
+      <figcaption class="meta">quadro 01 · tela inicial</figcaption>
     </figure>
-    <ul class="consoles" aria-label="Consoles suportados">
+  </section>
+
+  <div class="ticker">
+    <ul class="wrap" aria-label="Consoles suportados">
       <li>NES</li><li>Super Nintendo</li><li>Mega Drive</li><li>Game Boy Color</li><li>Nintendo 64</li>
       <li>Nintendo DS</li><li>PlayStation</li><li>PSP</li><li>PlayStation 2</li><li>Arcade</li>
     </ul>
+  </div>
+
+  <section class="wrap" id="programa" aria-labelledby="como-titulo">
+    <div class="grid split">
+      <div class="cell">
+        <p class="tag">como funciona</p>
+        <h2 id="como-titulo">Três atos, nenhum manual</h2>
+        <ol class="acts">
+          <li><p class="act">1º ato</p><h3>Instale</h3><p>Um instalador no Windows e no Mac; um comando no Linux, que já traz os emuladores.</p></li>
+          <li><p class="act">2º ato</p><h3>Traga seus jogos e filmes</h3><p>Aponte a pasta das suas ROMs, importe de qualquer lugar ou entre no seu servidor RomM. Filmes e séries vêm do seu Jellyfin.</p></li>
+          <li><p class="act">3º ato</p><h3>Pegue o controle</h3><p>Capas e descrições aparecem sozinhas. É só escolher e apertar o play.</p></li>
+        </ol>
+      </div>
+      <div class="cell">
+        <p class="tag">programa da sessão</p>
+        <nav class="program" aria-label="Programa">
+          <ol>
+            <li><a href="#biblioteca">Biblioteca</a><span class="meta">jogos</span></li>
+            <li><a href="#romm">Servidor RomM</a><span class="meta">nuvem</span></li>
+            <li><a href="#filmes">Filmes e séries</a><span class="meta">intervalo</span></li>
+            <li><a href="#jogo">Cada jogo</a><span class="meta">ficha</span></li>
+            <li><a href="#perfis">Perfis</a><span class="meta">família</span></li>
+            <li><a href="#infantil">Modo infantil</a><span class="meta">matinê</span></li>
+            <li><a href="#controle">Controle</a><span class="meta">sofá</span></li>
+            <li><a href="#estatisticas">Estatísticas</a><span class="meta">balanço</span></li>
+            <li><a href="#bilheteria">Bilheteria</a><span class="meta">grátis</span></li>
+          </ol>
+        </nav>
+      </div>
+    </div>
   </section>
 
-  <section class="steps" aria-labelledby="como-titulo">
-    <h2 id="como-titulo" class="neon-title">COMO FUNCIONA</h2>
-    <ol>
-      <li><span class="step" aria-hidden="true">1</span><h3>Instale</h3><p>Um instalador no Windows e no Mac; um comando no Linux, que já traz os emuladores.</p></li>
-      <li><span class="step" aria-hidden="true">2</span><h3>Traga seus jogos e filmes</h3><p>Aponte a pasta das suas ROMs, importe de qualquer lugar ou entre no seu servidor RomM. Filmes e séries vêm do seu Jellyfin.</p></li>
-      <li><span class="step" aria-hidden="true">3</span><h3>Jogue e assista</h3><p>Capas e descrições aparecem sozinhas. Pegue o controle e escolha.</p></li>
-    </ol>
-  </section>
-
-  <div id="recursos" class="features">
-    <article class="feature">
+  <div class="features">
+    <article class="feature wrap" id="biblioteca" aria-labelledby="f-biblioteca">
       <div class="text">
-        <p class="kicker">BIBLIOTECA</p>
-        <h2>Uma estante que dá vontade de jogar</h2>
+        <p class="tag">biblioteca</p>
+        <h2 id="f-biblioteca">Uma estante que dá vontade de jogar</h2>
         <p>Cada jogo com capa, ano, gênero e descrição, baixados automaticamente. Organizado por console, com coleções prontas: favoritos, continuar jogando, mais jogados e nunca jogados.</p>
         <ul class="ticks">
           <li>Capas do acervo aberto do libretro, sem conta</li>
@@ -75,15 +114,16 @@
           <li>"Surpresa" escolhe um jogo pra você</li>
         </ul>
       </div>
-      <figure class="screen" data-crop="left">
+      <figure class="shot tilted">
         <picture><source media="(max-width: 720px)" srcset="/img/inicio-720.webp"><img src="/img/inicio.webp" alt="Início com jogo em destaque e fileiras de capas" loading="lazy" width="1440" height="810"></picture>
+        <figcaption class="meta">quadro 02 · início</figcaption>
       </figure>
     </article>
 
-    <article class="feature flip">
+    <article class="feature flip wrap" id="romm" aria-labelledby="f-romm">
       <div class="text">
-        <p class="kicker">SERVIDOR ROMM</p>
-        <h2>Seu RomM, na sala</h2>
+        <p class="tag">servidor romm</p>
+        <h2 id="f-romm">Seu RomM, na sala</h2>
         <p>Entre no seu servidor <a href="https://romm.app">RomM</a> e toda a coleção de lá aparece na biblioteca, com selo de nuvem. Um botão baixa o jogo; os saves sobem ao fechar e descem antes de jogar, em qualquer computador da casa.</p>
         <ul class="ticks">
           <li>A senha só serve pra entrar: o app guarda um token</li>
@@ -91,15 +131,16 @@
           <li>Sem internet? Os jogos baixados abrem normalmente</li>
         </ul>
       </div>
-      <figure class="screen" data-crop="left">
+      <figure class="shot">
         <picture><source media="(max-width: 720px)" srcset="/img/servidor-720.webp"><img src="/img/servidor.webp" alt="Coleção do servidor RomM: Crash Bandicoot em destaque com o botão Baixar do servidor e a fileira de jogos de PlayStation, PSP e PS2" loading="lazy" width="1440" height="810"></picture>
+        <figcaption class="meta">quadro 03 · servidor</figcaption>
       </figure>
     </article>
 
-    <article class="feature solo" id="filmes">
-      <div class="text">
-        <p class="kicker">FILMES E SÉRIES</p>
-        <h2>Sessão de cinema no mesmo controle</h2>
+    <section class="block" id="filmes" aria-labelledby="f-filmes">
+      <div class="wrap block-in">
+        <p class="tag">intervalo</p>
+        <h2 id="f-filmes">Sessão de cinema no mesmo controle</h2>
         <p>Na aba Filmes e séries, entre no seu servidor <a href="https://jellyfin.org">Jellyfin</a> e o acervo de lá fica a um botão dos jogos. O player é embutido: nada de abrir outro programa, tudo no controle ou no teclado.</p>
         <ul class="ticks">
           <li>Continue de onde parou</li>
@@ -107,12 +148,12 @@
           <li>Cada perfil com a própria conta do Jellyfin</li>
         </ul>
       </div>
-    </article>
+    </section>
 
-    <article class="feature">
+    <article class="feature wrap" id="jogo" aria-labelledby="f-jogo">
       <div class="text">
-        <p class="kicker">CADA JOGO</p>
-        <h2>Tudo sobre o jogo, num lugar só</h2>
+        <p class="tag">cada jogo</p>
+        <h2 id="f-jogo">Tudo sobre o jogo, num lugar só</h2>
         <p>Nota, completo, tempo jogado, partidas e a última vez que você jogou. Continue de onde parou, carregue pontos salvos pela miniatura e veja capa, prints e manual em tela cheia.</p>
         <ul class="ticks">
           <li>Pontos salvos com miniatura e retomada automática</li>
@@ -120,15 +161,16 @@
           <li>Listas suas: "Futebol da galera", "Zerar em 2027"...</li>
         </ul>
       </div>
-      <figure class="screen" data-crop="right">
+      <figure class="shot">
         <picture><source media="(max-width: 720px)" srcset="/img/jogo-720.webp"><img src="/img/jogo.webp" alt="Página do Super Mario World com nota cinco estrelas, completo, 13 partidas e 8 horas e 57 minutos jogados" loading="lazy" width="1440" height="810"></picture>
+        <figcaption class="meta">quadro 04 · ficha do jogo</figcaption>
       </figure>
     </article>
 
-    <article class="feature flip">
+    <article class="feature flip wrap" id="perfis" aria-labelledby="f-perfis">
       <div class="text">
-        <p class="kicker">PERFIS</p>
-        <h2>Quem vai jogar (ou assistir)?</h2>
+        <p class="tag">perfis</p>
+        <h2 id="f-perfis">Quem vai jogar (ou assistir)?</h2>
         <p>Um perfil pra cada pessoa da casa, com 34 personagens clássicos de avatar: Mario, Sonic, Link, Pac-Man, Mega Man e mais. Cada um com os seus favoritos, listas, histórico, controles, saves e a própria conta do Jellyfin.</p>
         <ul class="ticks">
           <li>PIN opcional de 4 números</li>
@@ -136,26 +178,28 @@
           <li>Cada um continua a sua série de onde parou</li>
         </ul>
       </div>
-      <figure class="screen" data-crop="center">
+      <figure class="shot tilted">
         <picture><source media="(max-width: 720px)" srcset="/img/perfis-720.webp"><img src="/img/perfis.webp" alt="Tela Quem vai jogar com os perfis Stanley (Sonic), Bia (Peach), Leo (Link), Vovó (Kirby) e Nina (Yoshi, infantil)" loading="lazy" width="1440" height="810"></picture>
+        <figcaption class="meta">quadro 05 · quem vai jogar</figcaption>
       </figure>
     </article>
 
-    <article class="feature">
+    <article class="feature wrap" id="infantil" aria-labelledby="f-infantil">
       <div class="text">
-        <p class="kicker">MODO INFANTIL</p>
-        <h2>Pode deixar a criança sozinha</h2>
-        <p>No perfil infantil só aparecem os jogos que você liberou, no mesmo console de botões grandes que todo mundo usa. Nada de configurações, importar, apagar saves ou editar: travado no próprio app, não só escondido. Pra sair, o PIN do adulto.</p>
+        <p class="tag">modo infantil</p>
+        <h2 id="f-infantil">Matinê: pode deixar a criança sozinha</h2>
+        <p>No perfil infantil só aparecem os jogos que você liberou, na mesma tela de botões grandes que todo mundo usa. Nada de configurações, importar, apagar saves ou editar: travado no próprio app, não só escondido. Pra sair, o PIN do adulto.</p>
       </div>
-      <figure class="screen" data-crop="left">
+      <figure class="shot">
         <picture><source media="(max-width: 720px)" srcset="/img/infantil-720.webp"><img src="/img/infantil.webp" alt="Perfil infantil da Nina com só quatro jogos liberados" loading="lazy" width="1440" height="810"></picture>
+        <figcaption class="meta">quadro 06 · matinê</figcaption>
       </figure>
     </article>
 
-    <article class="feature flip">
+    <article class="feature flip wrap" id="controle" aria-labelledby="f-controle">
       <div class="text">
-        <p class="kicker">CONTROLE</p>
-        <h2>Feito pro sofá, não pro mouse</h2>
+        <p class="tag">controle</p>
+        <h2 id="f-controle">Feito pro sofá, não pro mouse</h2>
         <p>Xbox, PlayStation, 8BitDo ou teclado, com os símbolos certos de cada um. Remapeie botão a botão com a prévia do controle acendendo ao vivo.</p>
         <ul class="ticks">
           <li>Mesmos atalhos em todos os emuladores: menu e sair</li>
@@ -163,29 +207,32 @@
           <li>O player de filmes e séries também vai no controle</li>
         </ul>
       </div>
-      <figure class="screen" data-crop="center">
+      <figure class="shot">
         <picture><source media="(max-width: 720px)" srcset="/img/controles-720.webp"><img src="/img/controles.webp" alt="Configuração de controle com o desenho do controle de PlayStation e a lista de botões" loading="lazy" width="1440" height="810"></picture>
+        <figcaption class="meta">quadro 07 · controles</figcaption>
       </figure>
     </article>
 
-    <article class="feature">
+    <article class="feature wrap" id="estatisticas" aria-labelledby="f-estatisticas">
       <div class="text">
-        <p class="kicker">ESTATÍSTICAS</p>
-        <h2>Quanto você jogou de verdade</h2>
-        <p>Tempo total, partidas, os jogos e consoles favoritos da casa, o dia da semana que mais se joga e os últimos 30 dias. O placar de fliperama mostra seu "HI-SCORE" de horas.</p>
+        <p class="tag">estatísticas</p>
+        <h2 id="f-estatisticas">Quanto você jogou de verdade</h2>
+        <p>Tempo total, partidas, os jogos e consoles favoritos da casa, o dia da semana que mais se joga e os últimos 30 dias. O balanço da temporada, sem chute.</p>
       </div>
-      <figure class="screen" data-crop="left">
+      <figure class="shot">
         <picture><source media="(max-width: 720px)" srcset="/img/estatisticas-720.webp"><img src="/img/estatisticas.webp" alt="Estatísticas: 31 horas jogando, 47 partidas, ranking de jogos e de consoles e gráficos por dia" loading="lazy" width="1440" height="810"></picture>
+        <figcaption class="meta">quadro 08 · balanço</figcaption>
       </figure>
     </article>
   </div>
 
-  <section class="extras" aria-labelledby="extras-titulo">
-    <h2 id="extras-titulo" class="neon-title">DETALHES QUE FAZEM DIFERENÇA</h2>
+  <section class="extras wrap" aria-labelledby="extras-titulo">
+    <h2 id="extras-titulo" class="section-title">Curtas antes do filme</h2>
+    <p class="lede">Detalhes pequenos que fazem a sessão.</p>
     <div class="gallery">
-      <figure><picture><source media="(max-width: 720px)" srcset="/img/busca-720.webp"><img src="/img/busca.webp" alt="Busca por mario com teclado na tela e resultados" loading="lazy" width="1440" height="810"></picture><figcaption>Busca com teclado na tela</figcaption></figure>
-      <figure><picture><source media="(max-width: 720px)" srcset="/img/protetor-720.webp"><img src="/img/protetor.webp" alt="Protetor de tela: a cobrinha verde jogando sozinha num monitor de fósforo" loading="lazy" width="1440" height="810"></picture><figcaption>Protetor: a cobrinha joga sozinha</figcaption></figure>
-      <figure><picture><source media="(max-width: 720px)" srcset="/img/entrada-720.webp"><img src="/img/entrada.webp" alt="Tela de entrada: entrar no servidor RomM ou jogar offline" loading="lazy" width="1440" height="810"></picture><figcaption>Entre no RomM ou jogue offline</figcaption></figure>
+      <figure class="card-img"><picture><source media="(max-width: 720px)" srcset="/img/busca-720.webp"><img src="/img/busca.webp" alt="Busca por mario com teclado na tela e resultados" loading="lazy" width="1440" height="810"></picture><figcaption><span class="cap-title">Busca</span><span>Com teclado na tela, no controle</span></figcaption></figure>
+      <figure class="card-img"><picture><source media="(max-width: 720px)" srcset="/img/protetor-720.webp"><img src="/img/protetor.webp" alt="Protetor de tela: a cobrinha verde jogando sozinha num monitor de fósforo" loading="lazy" width="1440" height="810"></picture><figcaption><span class="cap-title">Protetor de tela</span><span>A cobrinha joga sozinha</span></figcaption></figure>
+      <figure class="card-img"><picture><source media="(max-width: 720px)" srcset="/img/entrada-720.webp"><img src="/img/entrada.webp" alt="Tela de entrada: entrar no servidor RomM ou jogar offline" loading="lazy" width="1440" height="810"></picture><figcaption><span class="cap-title">Entrada</span><span>Entre no RomM ou jogue offline</span></figcaption></figure>
     </div>
 
     <h3 class="list-title">E mais</h3>
@@ -197,60 +244,72 @@
       <li>Importar ROMs de qualquer pasta, com detecção do console</li>
       <li>Manual em PDF e prints em tela cheia</li>
       <li>Liberar jogos pro modo infantil</li>
-      <li>Telas que deslizam, capas que acendem, "PLAYER 1 START"</li>
-      <li>Trilha chiptune e sons de menu (desligáveis)</li>
-      <li>Alto contraste, texto até 175% e reduzir animações</li>
-      <li>Fonte de leitura fácil pra baixa visão</li>
+      <li>Trilha e sons de menu (desligáveis)</li>
+      <li>Alto contraste, texto maior e reduzir animações</li>
       <li>Tela cheia, minimizar e fechar pelo controle</li>
       <li>Scripts seus ao abrir e fechar jogos</li>
     </ul>
   </section>
 
-  <section id="baixar" class="downloads" aria-labelledby="baixar-titulo">
-    <h2 id="baixar-titulo" class="neon-title">PRESS START</h2>
-    <p class="muted center" id="release-line">Última versão: <a href="https://github.com/stanleygomes/arkflix/releases/latest">página de releases</a></p>
-    <p class="mobile-only center notice">O arkflix é pra computador ligado na TV. <button class="btn small" type="button" id="share-link">Mandar o link pro computador</button></p>
+  <section id="bilheteria" class="box-office wrap" aria-labelledby="baixar-titulo">
+    <h2 id="baixar-titulo" class="section-title">Bilheteria</h2>
+    <div class="price">
+      <p class="giant" aria-label="Ingresso: zero reais">R$&nbsp;0<span>,00</span></p>
+      <p class="meta">o ingresso · grátis e de código aberto</p>
+    </div>
+    <p class="release" id="release-line">Última versão: <a href="https://github.com/stanleygomes/arkflix/releases/latest">página de releases</a></p>
+    <p class="mobile-only notice">O arkflix é pra computador ligado na TV. <button class="btn small" type="button" id="share-link">Mandar o link</button></p>
     <ul class="os">
       <li class="os-card" data-os="windows">
         <h3>Windows</h3>
-        <p class="muted">10 e 11, 64 bits</p>
-        <a class="btn primary" data-asset="windows-x86_64-setup.exe" href="https://github.com/stanleygomes/arkflix/releases/latest/download/arkflix-windows-x86_64-setup.exe">Instalador (.exe)</a>
-        <a class="btn" data-asset="windows-x86_64.zip" href="https://github.com/stanleygomes/arkflix/releases/latest/download/arkflix-windows-x86_64.zip">Portátil (.zip)</a>
-        <p class="small muted">Pros jogos, instale também o <a href="https://www.retroarch.com/?page=platforms">RetroArch</a>, o <a href="https://www.ppsspp.org/download/">PPSSPP</a> e o <a href="https://pcsx2.net/downloads/">PCSX2</a>.</p>
+        <p class="meta">10 e 11, 64 bits</p>
+        <div class="os-actions">
+          <a class="btn primary" data-asset="windows-x86_64-setup.exe" href="https://github.com/stanleygomes/arkflix/releases/latest/download/arkflix-windows-x86_64-setup.exe">Instalador (.exe)</a>
+          <a class="btn" data-asset="windows-x86_64.zip" href="https://github.com/stanleygomes/arkflix/releases/latest/download/arkflix-windows-x86_64.zip">Portátil (.zip)</a>
+        </div>
+        <p class="small">Pros jogos, instale também o <a href="https://www.retroarch.com/?page=platforms">RetroArch</a>, o <a href="https://www.ppsspp.org/download/">PPSSPP</a> e o <a href="https://pcsx2.net/downloads/">PCSX2</a>.</p>
       </li>
       <li class="os-card" data-os="macos">
         <h3>macOS</h3>
-        <p class="muted">11 ou mais novo · Intel e Apple Silicon</p>
-        <a class="btn primary" data-asset="macos-universal.dmg" href="https://github.com/stanleygomes/arkflix/releases/latest/download/arkflix-macos-universal.dmg">Baixar (.dmg)</a>
-        <p class="small muted">Primeira vez: botão direito no app › Abrir (não é assinado pela Apple). Pros jogos, instale o RetroArch, o PPSSPP e o PCSX2.</p>
+        <p class="meta">11 ou mais novo · Intel e Apple Silicon</p>
+        <div class="os-actions">
+          <a class="btn primary" data-asset="macos-universal.dmg" href="https://github.com/stanleygomes/arkflix/releases/latest/download/arkflix-macos-universal.dmg">Baixar (.dmg)</a>
+        </div>
+        <p class="small">Primeira vez: botão direito no app › Abrir (não é assinado pela Apple). Pros jogos, instale o RetroArch, o PPSSPP e o PCSX2.</p>
       </li>
       <li class="os-card" data-os="linux">
         <h3>Linux</h3>
-        <p class="muted">Ubuntu, Debian e derivados · x86_64</p>
+        <p class="meta">Ubuntu, Debian e derivados · x86_64</p>
         <p class="small">Um comando instala o app e os emuladores (Flatpak):</p>
         <div class="cmd">
           <code id="linux-cmd" tabindex="0" aria-label="Comando de instalação no Linux">curl -fsSL https://raw.githubusercontent.com/stanleygomes/arkflix/master/install.sh | bash</code>
-          <button class="btn small" type="button" id="copy-cmd">Copiar</button>
+          <button class="btn small flat" type="button" id="copy-cmd">Copiar</button>
         </div>
-        <a class="btn" data-asset="linux-x86_64.tar.gz" href="https://github.com/stanleygomes/arkflix/releases/latest/download/arkflix-linux-x86_64.tar.gz">Só o app (.tar.gz)</a>
+        <div class="os-actions">
+          <a class="btn" data-asset="linux-x86_64.tar.gz" href="https://github.com/stanleygomes/arkflix/releases/latest/download/arkflix-linux-x86_64.tar.gz">Só o app (.tar.gz)</a>
+        </div>
       </li>
     </ul>
   </section>
 
-  <section class="faq" aria-labelledby="faq-titulo">
-    <h2 id="faq-titulo" class="neon-title">PERGUNTAS</h2>
-    <details><summary>Vem com jogos ou filmes?</summary><p>Não. O arkflix organiza e abre os jogos que você já tem (os seus cartuchos e discos copiados) e as BIOS que você mesmo coloca. Filmes e séries vêm do seu próprio servidor Jellyfin.</p></details>
-    <details><summary>É grátis mesmo?</summary><p>Sim, e de código aberto. Os emuladores que ele usa (RetroArch, PPSSPP e PCSX2) também são gratuitos.</p></details>
-    <details><summary>Precisa de internet?</summary><p>Só pra baixar capas e descrições e pra conversar com o seu RomM e o seu Jellyfin. Os jogos abrem offline.</p></details>
-    <details><summary>Que controle eu uso?</summary><p>Qualquer controle de Xbox, PlayStation ou 8BitDo, por fio ou Bluetooth, e o teclado. O app mostra os símbolos certos do seu.</p></details>
-    <details><summary>O que é o RomM?</summary><p>Um servidor de jogos que você instala em casa ou na nuvem pra guardar a coleção e os saves. É opcional: o arkflix funciona sem ele.</p></details>
-    <details><summary>O que é o Jellyfin?</summary><p>Um servidor de mídia que você instala em casa pra guardar seus filmes e séries. É ele que alimenta a aba Filmes e séries; os jogos não dependem dele.</p></details>
+  <section id="perguntas" class="faq wrap" aria-labelledby="faq-titulo">
+    <h2 id="faq-titulo" class="section-title">Perguntas na fila</h2>
+    <div class="accordion">
+      <details name="faq"><summary>Vem com jogos ou filmes?</summary><p>Não. O arkflix organiza e abre os jogos que você já tem (os seus cartuchos e discos copiados) e as BIOS que você mesmo coloca. Filmes e séries vêm do seu próprio servidor Jellyfin.</p></details>
+      <details name="faq"><summary>É grátis mesmo?</summary><p>Sim, e de código aberto. Os emuladores que ele usa (RetroArch, PPSSPP e PCSX2) também são gratuitos.</p></details>
+      <details name="faq"><summary>Precisa de internet?</summary><p>Só pra baixar capas e descrições e pra conversar com o seu RomM e o seu Jellyfin. Os jogos abrem offline.</p></details>
+      <details name="faq"><summary>Que controle eu uso?</summary><p>Qualquer controle de Xbox, PlayStation ou 8BitDo, por fio ou Bluetooth, e o teclado. O app mostra os símbolos certos do seu.</p></details>
+      <details name="faq"><summary>O que é o RomM?</summary><p>Um servidor de jogos que você instala em casa ou na nuvem pra guardar a coleção e os saves. É opcional: o arkflix funciona sem ele.</p></details>
+      <details name="faq"><summary>O que é o Jellyfin?</summary><p>Um servidor de mídia que você instala em casa pra guardar seus filmes e séries. É ele que alimenta a aba Filmes e séries; os jogos não dependem dele.</p></details>
+    </div>
   </section>
 </main>
 
 <footer class="foot">
-  <p class="coin" aria-hidden="true">INSERT COIN</p>
-  <p class="small muted">Código aberto no <a href="https://github.com/stanleygomes/arkflix">GitHub</a>. Personagens e jogos pertencem aos seus donos.</p>
+  <div class="wrap foot-in">
+    <p class="the-end" aria-hidden="true">Fim</p>
+    <p class="small">Código aberto no <a href="https://github.com/stanleygomes/arkflix">GitHub</a>. Personagens e jogos pertencem aos seus donos.</p>
+  </div>
 </footer>
 </body>
 </html>
