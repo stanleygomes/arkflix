@@ -135,8 +135,9 @@ já tem senha fica com ela, a não ser com `--passwords=overwrite`. Por isso o
 Navidrome vai primeiro. Usuário sem senha na fonte (OIDC no RomM, sem senha
 no Jellyfin) precisa de `user passwd`.
 
-Playlists e coleções ainda não têm destino no arkflix: por enquanto o
-import só lista quais seriam trazidas.
+Playlists do Navidrome e coleções do RomM viram listas do dono (as mesmas
+do painel do app, das playlists do Jellyfin/Subsonic e das coleções do
+RomM). Rodar de novo junta pelo nome e só acrescenta o que faltar.
 
 Na VPS (stack em `/opt/media-stack`, com o serviço `arkflix-server` montando
 `/var/lib/arkflix-server` em `/data` e `/var/media` em `/media`):
