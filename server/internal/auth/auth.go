@@ -2,6 +2,11 @@
 // bcrypt (pra conferir login) e cifrada com AES-GCM (o token do Subsonic é
 // md5(senha+sal) e só dá pra conferir com a senha em mãos, igual o
 // Navidrome faz). A chave mora em <data>/secret.key (0600).
+//
+// Usuário importado pode chegar só com um hash (bcrypt do RomM ou o
+// PBKDF2 do Jellyfin, em legacy_hash): o login normal confere esse hash e,
+// dando certo, regrava a senha em bcrypt + cifrada. Até esse primeiro login
+// o token do Subsonic (t=md5) não funciona, porque falta a senha em mãos.
 package auth
 
 import (
@@ -198,7 +203,7 @@ func (a *Auth) SetPassword(ctx context.Context, userID, pass string) error {
 	if err != nil {
 		return err
 	}
-	_, err = a.st.DB.ExecContext(ctx, `UPDATE users SET pass_hash = ?, pass_enc = ? WHERE id = ?`, string(hash), enc, userID)
+	_, err = a.st.DB.ExecContext(ctx, `UPDATE users SET pass_hash = ?, pass_enc = ?, legacy_hash = NULL WHERE id = ?`, string(hash), enc, userID)
 	return err
 }
 
@@ -241,10 +246,14 @@ func (a *Auth) DeleteUser(ctx context.Context, id string) error {
 	return err
 }
 
-// Login confere nome e senha e marca o último login.
+// Login confere nome e senha e marca o último login. Senha guardada só
+// como hash importado (legado ou bcrypt sem a cópia cifrada) é regravada
+// no primeiro login certo.
 func (a *Auth) Login(ctx context.Context, name, pass string) (*User, error) {
-	var id, hash string
-	err := a.st.DB.QueryRowContext(ctx, `SELECT id, pass_hash FROM users WHERE name = ?`, name).Scan(&id, &hash)
+	var id string
+	var c creds
+	err := a.st.DB.QueryRowContext(ctx, `SELECT id, pass_hash, pass_enc, COALESCE(legacy_hash,'') FROM users WHERE name = ?`, name).
+		Scan(&id, &c.hash, &c.enc, &c.legacy)
 	if errors.Is(err, sql.ErrNoRows) {
 		bcrypt.CompareHashAndPassword(dummy, []byte(pass)) // mesmo tempo de quem existe
 		return nil, ErrBadLogin
@@ -252,8 +261,13 @@ func (a *Auth) Login(ctx context.Context, name, pass string) (*User, error) {
 	if err != nil {
 		return nil, err
 	}
-	if bcrypt.CompareHashAndPassword([]byte(hash), []byte(pass)) != nil {
+	if !c.check(pass) {
 		return nil, ErrBadLogin
+	}
+	if c.hash == "" || c.enc == "" {
+		if err := a.SetPassword(ctx, id, pass); err != nil {
+			return nil, err
+		}
 	}
 	a.st.DB.ExecContext(ctx, `UPDATE users SET last_login = ? WHERE id = ?`, store.Now(), id)
 	return a.User(ctx, id)
@@ -292,6 +306,9 @@ func (a *Auth) password(ctx context.Context, name string) (pass, id string, err 
 	}
 	if err != nil {
 		return "", "", err
+	}
+	if enc == "" {
+		return "", "", ErrBadLogin // importado, ainda sem o 1º login
 	}
 	pass, err = a.open(enc)
 	return pass, id, err
