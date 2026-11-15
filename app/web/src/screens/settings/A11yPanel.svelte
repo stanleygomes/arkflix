@@ -86,7 +86,7 @@
         <span class="knob" aria-hidden="true"></span>
         <span class="label">Ligar quando parado</span>
       </button>
-      <p class="muted help" id="help-saver">A cobrinha joga sozinha, ou as capas passam como num fliperama. Nunca com jogo aberto; qualquer botão volta.</p>
+      <p class="muted help" id="help-saver">A cobrinha joga sozinha, ou as capas passam como cartaz de cinema. Nunca com jogo aberto; qualquer botão volta.</p>
       {#if saver.enabled}
         <div class="segmented" role="group" aria-label="Minutos parado">
           {#each minutes as m (m)}

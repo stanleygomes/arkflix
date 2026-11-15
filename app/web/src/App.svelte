@@ -145,12 +145,12 @@
 
 {#if app.error}
   <main class="fatal">
-    <h1 class="pixel">Não deu pra abrir</h1>
+    <h1>Não deu pra abrir</h1>
     <p>{app.error}</p>
     <button class="btn primary" data-nav data-nav-default onclick={() => location.reload()}>Tentar de novo</button>
   </main>
 {:else if !app.ready}
-  <main class="loading" aria-busy="true"><p class="pixel">Carregando…</p></main>
+  <main class="loading" aria-busy="true"><p>Carregando…</p></main>
 {:else}
   {#key app.stack.length + current.name + ('id' in current ? (current.id ?? '') : current.name === 'library' ? current.source : '') + (app.profile?.current ?? '')}
     {#if current.name === 'player'}
@@ -220,11 +220,34 @@
     height: 100vh;
     display: grid;
     place-content: center;
+    justify-items: center;
     gap: 1rem;
+    padding: var(--safe);
     text-align: center;
   }
+  /* erro não toma a tela: título e uma caixa com a borda vermelha */
+  .fatal {
+    place-content: start center;
+    padding-block-start: 18vh;
+  }
+  .fatal h1 {
+    font-size: clamp(2rem, 5vw, 3.4rem);
+  }
+  .fatal p {
+    max-width: 36rem;
+    background: var(--surface);
+    border: var(--edge) solid var(--outline);
+    border-inline-start: 8px solid var(--danger);
+    border-radius: var(--radii-sm);
+    box-shadow: var(--hard);
+    padding: 0.9rem 1.1rem;
+    text-align: start;
+  }
+  /* parado, sem piscar */
   .loading p {
-    font-size: 1.6rem;
-    animation: blink 1s steps(2) infinite;
+    font-family: var(--font-hud);
+    font-size: 1.2rem;
+    color: var(--muted);
+    letter-spacing: 0.08em;
   }
 </style>

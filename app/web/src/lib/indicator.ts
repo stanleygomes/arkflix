@@ -1,4 +1,4 @@
-// Luz neon que desliza até a aba ativa ([aria-current="page"]) dentro do
+// Sublinhado que pula até a aba ativa ([aria-current="page"]) dentro do
 // contêiner. Uso: <nav use:indicator={chave}> (a chave muda quando a aba muda).
 export function indicator(node: HTMLElement, _key?: unknown) {
   const light = document.createElement('span')
