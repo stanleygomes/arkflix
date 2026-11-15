@@ -2,6 +2,7 @@
 //
 //	/rest/...                 Subsonic/OpenSubsonic (Navidrome)
 //	/api/..., /assets/romm/... RomM
+//	/arkflix/api/...          API própria (admin, listas: api/admin/API.md)
 //	/health                   saúde (sem login)
 //	todo o resto              Jellyfin
 //
@@ -15,6 +16,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/stanleygomes/arkflix/server/internal/api/admin"
 	"github.com/stanleygomes/arkflix/server/internal/api/jellyfin"
 	"github.com/stanleygomes/arkflix/server/internal/api/romm"
 	"github.com/stanleygomes/arkflix/server/internal/api/subsonic"
@@ -23,13 +25,15 @@ import (
 
 // New devolve o handler raiz.
 func New(d *deps.Deps) http.Handler {
-	sub, rm, jf := subsonic.New(d), romm.New(d), jellyfin.New(d)
+	sub, rm, jf, adm := subsonic.New(d), romm.New(d), jellyfin.New(d), admin.New(d)
 	mux := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		p := strings.ToLower(r.URL.Path)
 		switch {
 		case p == "/health":
 			w.Header().Set("Content-Type", "text/plain")
 			w.Write([]byte("ok"))
+		case strings.HasPrefix(p, "/arkflix/"):
+			adm.ServeHTTP(w, r)
 		case strings.HasPrefix(p, "/rest/") || p == "/rest":
 			sub.ServeHTTP(w, r)
 		case strings.HasPrefix(p, "/api/") || p == "/api" || strings.HasPrefix(p, "/assets/romm/"):

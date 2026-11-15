@@ -7,6 +7,7 @@
 //	arkflix-server [flags] user passwd NOME
 //	arkflix-server [flags] user del NOME
 //	arkflix-server [flags] user list
+//	arkflix-server [flags] import jellyfin|navidrome|romm [flags]   traz dados dos servidores antigos
 package main
 
 import (
@@ -26,8 +27,10 @@ import (
 	"github.com/stanleygomes/arkflix/server/internal/auth"
 	"github.com/stanleygomes/arkflix/server/internal/config"
 	"github.com/stanleygomes/arkflix/server/internal/deps"
+	"github.com/stanleygomes/arkflix/server/internal/importer"
 	"github.com/stanleygomes/arkflix/server/internal/library"
 	"github.com/stanleygomes/arkflix/server/internal/media"
+	"github.com/stanleygomes/arkflix/server/internal/metadata"
 	"github.com/stanleygomes/arkflix/server/internal/store"
 	"github.com/stanleygomes/arkflix/server/internal/web"
 )
@@ -59,7 +62,9 @@ func run(args []string) error {
 	if err != nil {
 		return err
 	}
-	d := &deps.Deps{Config: cfg, Store: st, Auth: au, Library: library.New(cfg, st), Media: media.New(cfg), Version: version}
+	d := &deps.Deps{Config: cfg, Store: st, Auth: au, Library: library.New(cfg, st), Media: media.New(cfg), Meta: metadata.New(cfg, st), Version: version}
+	// depois de cada scan, completa pela internet o que faltar
+	d.Library.OnScanned = func() { go d.Meta.Run(context.Background()) }
 
 	rest := fs.Args()
 	if len(rest) == 0 {
@@ -75,6 +80,8 @@ func run(args []string) error {
 		return nil
 	case "user":
 		return user(ctx, au, rest[1:])
+	case "import":
+		return importer.Run(ctx, d, rest[1:])
 	}
 	return fmt.Errorf("comando desconhecido: %s", rest[0])
 }

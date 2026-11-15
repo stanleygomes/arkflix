@@ -6,6 +6,7 @@ import (
 	"github.com/stanleygomes/arkflix/server/internal/config"
 	"github.com/stanleygomes/arkflix/server/internal/library"
 	"github.com/stanleygomes/arkflix/server/internal/media"
+	"github.com/stanleygomes/arkflix/server/internal/metadata"
 	"github.com/stanleygomes/arkflix/server/internal/store"
 )
 
@@ -16,5 +17,6 @@ type Deps struct {
 	Auth    *auth.Auth
 	Library *library.Library
 	Media   *media.Media
-	Version string // versão do arkflix-server
+	Meta    *metadata.Fetcher // completa o acervo pela internet
+	Version string            // versão do arkflix-server
 }

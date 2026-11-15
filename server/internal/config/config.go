@@ -23,6 +23,21 @@ type Config struct {
 	FFprobe string // binário do ffprobe ("" = sem faixas de áudio/legenda)
 
 	Name string // nome que os clientes mostram
+
+	// Writable libera escrever nas pastas de mídia (envio de arquivo e
+	// esconder item pelo painel de admin). Desligado = só leitura, o modo
+	// de quando o Jellyfin/Navidrome/RomM ainda estão no ar.
+	Writable bool
+	// Hidden é pra onde "esconder" move um arquivo (mesmo caminho relativo,
+	// fora das bibliotecas). Padrão: <pai da pasta de filmes>/escondidos.
+	Hidden string
+
+	// Metadados da internet (internal/metadata). Sem chave do TMDB, filmes e
+	// séries ficam só com o que tem no disco; capas de jogos (libretro) e de
+	// música (MusicBrainz/Cover Art Archive) não pedem chave.
+	TMDBKey  string
+	Metadata bool   // false desliga toda busca na internet
+	Language string // idioma dos metadados (pt-BR)
 }
 
 func env(k, def string) string {
@@ -52,6 +67,11 @@ func Flags(fs *flag.FlagSet) *Config {
 	fs.StringVar(&c.FFmpeg, "ffmpeg", env("FFMPEG", lookPath("ffmpeg")), "binário do ffmpeg")
 	fs.StringVar(&c.FFprobe, "ffprobe", env("FFPROBE", lookPath("ffprobe")), "binário do ffprobe")
 	fs.StringVar(&c.Name, "name", env("NAME", "arkflix"), "nome do servidor")
+	fs.BoolVar(&c.Writable, "writable", env("WRITABLE", "") == "1" || env("WRITABLE", "") == "true", "deixa o painel de admin escrever nas pastas de mídia")
+	fs.StringVar(&c.Hidden, "hidden", env("HIDDEN", ""), "pasta pra onde \"esconder\" move arquivos")
+	fs.StringVar(&c.TMDBKey, "tmdb-key", env("TMDB_KEY", ""), "chave da API do TMDB (filmes e séries)")
+	fs.BoolVar(&c.Metadata, "metadata", env("METADATA", "1") != "0", "busca capas e descrições na internet")
+	fs.StringVar(&c.Language, "language", env("LANGUAGE", "pt-BR"), "idioma dos metadados")
 	return c
 }
 
@@ -60,7 +80,10 @@ func (c *Config) Check() error {
 	if c.Data == "" {
 		return errors.New("falta --data")
 	}
-	for _, p := range []*string{&c.Data, &c.Movies, &c.Shows, &c.Music, &c.Games} {
+	if c.Hidden == "" && c.Movies != "" {
+		c.Hidden = filepath.Join(filepath.Dir(c.Movies), "escondidos")
+	}
+	for _, p := range []*string{&c.Data, &c.Movies, &c.Shows, &c.Music, &c.Games, &c.Hidden} {
 		if *p == "" {
 			continue
 		}
