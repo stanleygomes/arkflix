@@ -1,0 +1,21 @@
+# Exemplo pra subir junto da stack atual (/opt/media-stack) sem mexer nela:
+# mesmas pastas, só leitura; dados próprios em /var/lib/arkflix-server.
+# O Caddy pode apontar um domínio novo (ou, no phase-out, os três atuais)
+# pra arkflix-server:8097.
+services:
+  arkflix-server:
+    build: .
+    restart: unless-stopped
+    environment:
+      ARKFLIX_SERVER_MOVIES: /media/Movies
+      ARKFLIX_SERVER_SHOWS: /media/Shows
+      ARKFLIX_SERVER_MUSIC: /media/musicas
+      ARKFLIX_SERVER_GAMES: /media/jogos
+      # só na 1ª subida, pra criar o admin; depois pode tirar
+      ARKFLIX_SERVER_ADMIN_USER: ${ARKFLIX_SERVER_ADMIN_USER:-}
+      ARKFLIX_SERVER_ADMIN_PASSWORD: ${ARKFLIX_SERVER_ADMIN_PASSWORD:-}
+    volumes:
+      - /var/lib/arkflix-server:/data
+      - /var/media:/media:ro
+    ports:
+      - "127.0.0.1:8097:8097"
