@@ -10,24 +10,35 @@ test('animações: telas, abas, capa em foco, título, estrela e PLAYER 1 START'
   await open(page, app)
   const card = page.locator('.shelf [data-game][aria-label^="Super Mario World"]').first()
   await card.focus()
-  // capa acende e respira; título digitado
-  await expect.poll(() => card.evaluate((el) => getComputedStyle(el).animationName)).toContain('breathe')
-  await expect(page.locator('#hero-title')).toHaveClass(/typing/)
+  // capa em foco sobe (-2px, -2px) com a sombra maior; nada de loop nela
+  await expect.poll(() => card.evaluate((el) => getComputedStyle(el).transform)).toBe('matrix(1, 0, 0, 1, -2, -2)')
+  expect(await card.evaluate((el) => getComputedStyle(el).animationName)).toBe('none')
+  // título do destaque troca em dois degraus, uma vez só
+  const title = page.locator('#hero-title')
+  await expect(title).toHaveClass(/swap/)
+  const anim = await title.evaluate((el) => {
+    const cs = getComputedStyle(el)
+    return { name: cs.animationName, count: cs.animationIterationCount, timing: cs.animationTimingFunction }
+  })
+  expect(anim).toEqual({ name: expect.stringMatching(/title-in$/), count: '1', timing: expect.stringMatching(/^steps\(2/) })
 
   // estrela em pixels ao favoritar
   await page.keyboard.press('f')
   await expect(page.locator('.burst-pixel')).toHaveCount(8)
   await expect(page.locator('.burst-pixel')).toHaveCount(0, { timeout: 2000 })
 
-  // aba: a luz desliza até o console
+  // aba: o traço mostarda pula pro console novo em degraus e para lá
   await page.keyboard.press('e')
   const light = page.locator('.tab-light')
   await expect(light).toHaveCount(1)
+  expect(await light.evaluate((el) => getComputedStyle(el).transitionTimingFunction)).toMatch(/^steps\(2/)
   const current = page.locator('nav.tabs [aria-current="page"]')
   await expect.poll(async () => {
     const [l, c] = await Promise.all([light.boundingBox(), current.boundingBox()])
     return l && c ? Math.abs(l.x - c.x) < 2 && Math.abs(l.width - c.width) < 2 : false
   }).toBe(true)
+  // tudo acabou: no Início nada anima em loop (WebKit gastaria CPU)
+  await expect.poll(() => running(page), { timeout: 2000 }).toBe(0)
 
   // troca de tela curta (swap); durante a troca, a tela que sai fica inerte
   const seen = page.evaluate(

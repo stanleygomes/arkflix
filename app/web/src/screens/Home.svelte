@@ -11,7 +11,6 @@
   import { api } from '../lib/api'
   import { pushHandler } from '../lib/input'
   import { current, focusEl } from '../lib/nav'
-  import { applyPalette, highContrastPalette, homePalette } from '../lib/palette'
   import { play } from '../lib/sound'
   import { toggleFavorite } from '../lib/actions'
   import { downloadGame, downloadText, downloads } from '../lib/downloads.svelte'
@@ -104,13 +103,6 @@
     return () => clearTimeout(t)
   })
   const nextTrophy = $derived(trophies?.list?.find((c) => !c.unlocked))
-
-  // paleta: a do console da aba; no Início, a do jogo selecionado
-  $effect(() => {
-    if (app.settings?.a11y.highContrast) return applyPalette(highContrastPalette)
-    const sys = app.homeTab === 'home' || app.homeTab.includes(':') ? selSystem : system(app.homeTab)
-    applyPalette(sys?.palette ?? homePalette)
-  })
 
   function selectTab(slug: string) {
     if (app.homeTab === slug) return
@@ -248,6 +240,7 @@
     <div class="top-nav">
     <Sections current="games" />
     {#if !isKids()}
+      <span class="divider" aria-hidden="true"></span>
       <nav class="views" aria-label="Visão">
         <button class="view" data-nav data-view="games" aria-current={!store ? 'page' : undefined} onclick={() => setView('games')}>Biblioteca</button>
         <button class="view" data-nav data-view="store" aria-current={store ? 'page' : undefined} onclick={() => setView('store')}>
@@ -257,7 +250,8 @@
     {/if}
     </div>
   </TopBar>
-  <!-- consoles como no PS5: blocos com o desenho de cada um; o escolhido cresce e mostra o nome -->
+  <!-- consoles: blocos com a silhueta e o nome curto; o escolhido ganha o
+       traço mostarda embaixo (lib/indicator.ts), que pula em degraus -->
   <nav class="tabs" aria-label="Consoles" use:indicator={app.homeTab}>
     {#each tabs as t (t.slug)}
       <button
@@ -271,9 +265,8 @@
         onfocus={() => selectTab(t.slug)}
         onclick={() => selectTab(t.slug)}
       >
-        <span class="sr-only">{t.short}{#if t.name !== t.short} ({t.name}){/if}</span>
-        <ConsoleIcon slug={t.slug} size={t.slug === app.homeTab ? '4.2rem' : '3rem'} />
-        {#if t.slug === app.homeTab}<span class="caption" aria-hidden="true">{t.name}</span>{/if}
+<span class="short">{t.short}</span>{#if t.name !== t.short}<span class="sr-only">{` (${t.name})`}</span>{/if}
+        <ConsoleIcon slug={t.slug} size="2.1rem" />
       </button>
     {/each}
   </nav>
@@ -281,7 +274,7 @@
   <main class="content" aria-labelledby="hero-title">
     {#if visible.length === 0 && store}
       <section class="empty panel">
-        <h1 class="pixel" id="hero-title">Catálogo vazio</h1>
+        <h1 id="hero-title">Catálogo vazio</h1>
         <p class="muted">O Catálogo mostra os jogos do seu servidor RomM que ainda não estão neste PC. Conecte o servidor (ou já baixou tudo).</p>
         <div class="actions">
           <button class="btn primary" data-nav data-nav-default onclick={() => go({ name: 'you', item: 'server' })}><Icon name="cloud" /> Servidor RomM</button>
@@ -290,7 +283,7 @@
       </section>
     {:else if visible.length === 0}
       <section class="empty panel">
-        <h1 class="pixel" id="hero-title">Nenhum jogo ainda</h1>
+        <h1 id="hero-title">Nenhum jogo ainda</h1>
         <p class="muted">{remoteCount ? `Tem ${remoteCount} jogo${remoteCount === 1 ? '' : 's'} no servidor esperando: baixe pelo Catálogo.` : 'Importe ROMs ou aponte suas pastas de jogos nas configurações.'}</p>
         <div class="actions">
           {#if remoteCount && !isKids()}<button class="btn primary" data-nav data-nav-default onclick={() => setView('store')}><Icon name="download" /> Abrir o Catálogo</button>{/if}
@@ -301,12 +294,12 @@
     {:else if selected}
       <div class="stage">
       <section class="hero">
-        <p class="system-pill pixel">
-          {selSystem?.name ?? selected.system}{#if fresh}<span class="sticker">Novo</span>{/if}
+        <p class="system-pill">
+          <span class="chip">{selSystem?.name ?? selected.system}</span>{#if fresh}<span class="stamp fresh">Novo</span>{/if}
         </p>
         {#key selected.id}
-          <!-- título digitado letra por letra (um degrau por letra) -->
-          <h1 class="pixel title typing" id="hero-title" style:--letters={selected.name.length} style:animation-timing-function={`steps(${Math.max(1, selected.name.length)})`}>{selected.name}</h1>
+          <!-- título de cartaz: troca em dois degraus quando o destaque muda -->
+          <h1 class="title swap" id="hero-title">{selected.name}</h1>
         {/key}
         <p class="meta">
           {#if selected.year}<span>{selected.year}</span>{/if}
@@ -341,7 +334,7 @@
         <div class="cards" data-nav-group="cards">
             {#if autoState && canResume}
               <button class="card-act" data-nav onclick={() => launch(selected, 'auto')}>
-                {#if autoState.thumb}<img src={`/media/thumb/${autoState.id}`} alt="" />{:else}<span class="nothumb pixel" aria-hidden="true">AUTO</span>{/if}
+                {#if autoState.thumb}<img src={`/media/thumb/${autoState.id}`} alt="" />{:else}<span class="nothumb" aria-hidden="true">AUTO</span>{/if}
                 <span class="text">
                   <span class="label">Continuar de onde parou</span>
                   <span class="muted">salvo {ago(autoState.modified)} · {playTime(selected.playTime)} jogados</span>
@@ -393,7 +386,7 @@
               {/each}
               {#if row.source}
                 <li>
-                  <button class="card see-all pixel" data-nav data-nav-inline="center" onclick={() => go({ name: 'library', source: row.source! })}>
+                  <button class="card see-all" data-nav data-nav-inline="center" onclick={() => go({ name: 'library', source: row.source! })}>
                     <Icon name="sliders" size="1.6em" /> Ver tudo
                   </button>
                 </li>
@@ -406,7 +399,6 @@
   </main>
 
   <HelpBar
-    coin
     hints={[
       { button: 'south', label: 'Abrir' },
       { button: 'north', label: 'Favorito' },
@@ -428,20 +420,19 @@
     flex-direction: column;
     position: relative;
   }
+  /* capa do jogo em destaque, bem apagada no fundo (só clima) */
   .backdrop {
     position: fixed;
     inset: 0;
     background-size: cover;
     background-position: center 30%;
-    image-rendering: pixelated;
-    filter: blur(2px) saturate(1.1);
-    opacity: 0.32;
+    filter: blur(3px);
+    opacity: 0.22;
     transform: scale(1.05);
     z-index: -1;
     mask-image: linear-gradient(to bottom, #000 30%, transparent 85%);
   }
-  /* contraste sem sombra: a arte do fundo apaga onde tem texto (esquerda e
-     fileiras), como a "janela" escura dos jogos 16-bit; à direita ela respira */
+  /* contraste: o fundo apaga onde tem texto (esquerda e fileiras) */
   .scrim {
     position: fixed;
     inset: 0;
@@ -451,137 +442,138 @@
       linear-gradient(to top, var(--bg) 0%, color-mix(in srgb, var(--bg) 88%, transparent) 30%, transparent 55%),
       linear-gradient(90deg, var(--bg) 0%, color-mix(in srgb, var(--bg) 90%, transparent) 30%, color-mix(in srgb, var(--bg) 55%, transparent) 62%, color-mix(in srgb, var(--bg) 25%, transparent) 100%);
   }
+
+  /* barra de cima: seções | visões, nav sóbria (traço mostarda no atual) */
   .top-nav {
     display: flex;
     align-items: center;
-    gap: 1.4rem;
-    flex-wrap: wrap;
+    gap: 0.8rem;
+  }
+  .divider {
+    width: var(--edge);
+    height: 1.8rem;
+    background: color-mix(in srgb, var(--outline) 30%, transparent);
   }
   .views {
     display: flex;
     gap: 0.4rem;
   }
-  /* fonte de texto (não pixel) aqui: nome curto e pequeno precisa ser lido de longe */
   .view {
-    font-family: var(--font-body);
-    font-weight: 700;
-    letter-spacing: 0.04em;
+    font-family: var(--font-label);
+    font-size: 0.85rem;
+    letter-spacing: 0.06em;
     text-transform: uppercase;
-    font-size: 1.15rem;
-    color: #d8cfe6;
+    white-space: nowrap;
+    color: var(--muted);
     background: none;
-    border: 3px solid transparent;
-    padding: 0.4rem 0.9rem;
+    border: none;
+    border-bottom: var(--edge) solid transparent;
+    border-radius: 0;
+    padding: 0.55rem 0.55rem 0.45rem;
     cursor: pointer;
     display: inline-flex;
     gap: 0.5rem;
     align-items: center;
+    transition:
+      color var(--t) var(--ease),
+      border-color var(--t) var(--ease);
+  }
+  .view:hover {
+    color: var(--text);
+    border-bottom-color: var(--outline);
   }
   .view[aria-current='page'] {
-    color: #fff;
-    text-shadow: 0 0 10px var(--accent);
+    color: var(--text);
+    border-bottom-color: var(--accent);
   }
+  /* contagem: badge "count" (tinta creme, número em mono) */
   .view .count {
-    font-size: 0.95rem;
+    font-family: var(--font-mono);
+    font-weight: 700;
+    font-size: 0.85rem;
     line-height: 1;
-    color: var(--on-accent);
-    background: var(--accent);
-    padding: 0.15rem 0.35rem;
+    min-width: 1.4rem;
+    text-align: center;
+    color: var(--bg);
+    background: var(--text);
+    border-radius: 4px;
+    padding: 0.2rem 0.3rem;
   }
+
+  /* consoles: blocos sóbrios, silhueta + nome curto */
   .tabs {
     position: relative;
     display: flex;
-    align-items: flex-start;
+    align-items: stretch;
     gap: 0.9rem;
     overflow-x: auto;
     scrollbar-width: none;
-    padding: 0.4rem 2.5rem 2.2rem;
-    min-height: 9.4rem;
+    padding: 1rem 2.5rem 1.5rem;
   }
-  /* luz do console escolhido: desliza entre os blocos (lib/indicator.ts) */
+  .tab {
+    flex: none;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.3rem;
+    min-width: 5.4rem;
+    padding: 0.5rem 0.8rem 0.45rem;
+    color: var(--muted);
+    background: var(--surface);
+    border: var(--edge) solid var(--outline);
+    border-radius: var(--radii-sm);
+    box-shadow: var(--hard-sm);
+    cursor: pointer;
+    transition:
+      transform var(--t) var(--ease),
+      box-shadow var(--t) var(--ease),
+      background var(--t) var(--ease);
+  }
+  .tab .short {
+    order: 2;
+    font-family: var(--font-label);
+    font-size: 0.78rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    line-height: 1.1;
+    color: var(--text);
+    white-space: nowrap;
+  }
+  /* console escolhido: silhueta mostarda (destaque) e fundo de balão */
+  .tab[aria-current='page'] {
+    color: var(--accent);
+    background: var(--balloon);
+  }
+  .tab:hover,
+  .tab:focus {
+    transform: translate(-2px, -2px);
+    box-shadow: var(--hard-up);
+  }
+  .tab.first-system {
+    margin-inline-start: 0.8rem;
+  }
+  /* traço mostarda debaixo do console escolhido (lib/indicator.ts): pula
+     pro novo console em dois degraus, uma vez por troca */
   .tabs :global(.tab-light) {
     position: absolute;
     left: 0;
-    top: 0;
-    border: 3px solid var(--accent);
-    border-radius: 6px;
-    /* console escolhido = destaque: aqui o fósforo acende */
-    box-shadow: 0 0 1px var(--accent), 0 0 10px color-mix(in srgb, var(--accent) 70%, transparent);
+    top: 0.95rem;
+    border-bottom: 4px solid var(--accent);
     transition:
-      transform 200ms steps(5),
-      width 200ms steps(5),
-      height 200ms steps(5),
-      border-color 300ms;
+      transform var(--t) steps(2),
+      width var(--t) steps(2),
+      height var(--t) steps(2);
     pointer-events: none;
   }
-  .typing {
-    animation: typing calc(var(--letters) * 28ms + 60ms) both;
-  }
-  @keyframes typing {
-    from {
-      clip-path: inset(0 100% 0 0);
-    }
-    to {
-      clip-path: inset(0 -1em 0 0);
-    }
-  }
-  .tab {
-    position: relative;
-    z-index: 1;
-    flex: none;
-    display: grid;
-    place-items: center;
-    width: 5rem;
-    height: 5rem;
-    background: color-mix(in srgb, var(--surface) 75%, transparent);
-    border: 2px solid color-mix(in srgb, var(--text) 18%, transparent);
-    cursor: pointer;
-  }
-  .tab[aria-current='page'] {
-    width: 6.8rem;
-    height: 6.8rem;
-    background: color-mix(in srgb, var(--accent) 22%, var(--surface));
-    border-color: transparent;
-  }
-  /* tela baixa (notebook): faixa dos consoles mais compacta */
-  @media (max-height: 820px) {
-    .hero .cta {
-      min-height: 0;
-    }
-    .tabs {
-      min-height: 7.4rem;
-      padding-bottom: 1.8rem;
-    }
-    .tab {
-      width: 4rem;
-      height: 4rem;
-    }
-    .tab[aria-current='page'] {
-      width: 5.2rem;
-      height: 5.2rem;
-    }
-  }
-  .tab.first-system {
-    margin-left: 0.8rem;
-  }
-  .caption {
-    font-family: var(--font-sub);
-    font-weight: 700;
-    position: absolute;
-    top: calc(100% + 0.5rem);
-    left: 0;
-    white-space: nowrap;
-    font-size: 1.15rem;
-    color: #fff;
-    text-shadow: 0 0 8px var(--accent);
-  }
+
   .content {
     flex: 1;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
     min-height: 0;
-    padding: 0.8rem 2.5rem 0;
+    padding: 0.6rem 2.5rem 0;
     overflow-y: auto;
   }
   .stage {
@@ -593,82 +585,68 @@
        (o foco leva a fileira até a vista) em vez de uma cobrir a outra */
     flex: 1 0 auto;
   }
-  .hero-art {
-    width: clamp(8rem, min(13vw, 22vh), 13rem);
-    flex: none;
-    margin-top: 2vh;
-    transform: rotate(-2deg);
-    filter: drop-shadow(10px 10px 0 var(--shadow));
-    animation: rise 260ms var(--ease);
-  }
-  @keyframes rise {
-    from {
-      transform: rotate(-2deg) translateY(16px);
-      opacity: 0;
-    }
-  }
-  @media (max-height: 820px) {
-    .hero-art {
-      display: none;
-    }
-  }
   .hero {
     max-width: 68rem;
     display: flex;
     flex-direction: column;
-    gap: 1.25rem;
+    gap: 1.1rem;
   }
+  /* console do destaque: etiqueta datilografada; o NOVO é o único carimbo */
   .system-pill {
-    color: var(--accent-2);
-    font-size: 1rem;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
     display: flex;
     align-items: center;
-    gap: 1.2rem;
+    gap: 1.4rem;
   }
-  /* selo colado e torto (neobrutalismo): só um por tela */
-  .sticker {
-    font-family: 'Press Start 2P', monospace;
-    font-size: 16px;
-    font-size-adjust: none;
-    letter-spacing: 0.04em;
-    color: #1b1b1f;
-    background: #f7b500;
-    border: 3px solid #1b1b1f;
-    border-radius: 6px;
-    padding: 6px 8px;
-    box-shadow: 4px 4px 0 #000;
-    transform: rotate(3deg);
+  .system-pill .chip {
+    font-size: 0.9rem;
+    min-height: 1.9rem;
+    padding: 0.35rem 0.65rem 0.2rem;
   }
-  /* nome do jogo como o logo no destaque do PS5: bem grande */
+  .stamp.fresh {
+    color: var(--accent);
+    border-color: var(--accent);
+    font-size: 0.95rem;
+    animation: thunk 240ms steps(3) both;
+  }
+  @keyframes thunk {
+    from {
+      transform: scale(1.5) rotate(-8deg);
+      opacity: 0;
+    }
+  }
+  /* nome do jogo em letra de cartaz (h1 do app.css), grande */
   .title {
-    font-size: clamp(2.2rem, min(5.2vw, 7vh), 5rem);
-    line-height: 1;
-    color: #fff;
-    /* sombra dura de pixel (a dos 16-bit), sem brilho borrado */
-    text-shadow: 5px 5px 0 color-mix(in srgb, var(--accent) 55%, #000);
+    font-size: clamp(2.2rem, min(5vw, 7vh), 4.6rem);
+    line-height: 1.05;
     max-width: 24ch;
-    margin: 0.2rem 0 0.3rem;
+    margin: 0.1rem 0 0.2rem;
+  }
+  .swap {
+    animation: title-in 160ms steps(2) both;
+  }
+  @keyframes title-in {
+    from {
+      opacity: 0;
+    }
   }
   .meta {
     display: flex;
     flex-wrap: wrap;
     gap: 0.6rem 1.6rem;
-    color: #e6deef;
-    font-size: 1.05rem;
+    color: var(--text);
+    font-size: 1rem;
   }
   .meta .fav {
     color: var(--accent);
     display: inline-flex;
-    gap: 0.3rem;
+    gap: 0.35rem;
     align-items: center;
   }
   .summary {
     max-width: 44rem;
-    color: #fff;
+    color: var(--text);
     font-size: 1.08rem;
-    line-height: 1.65;
+    line-height: 1.6;
     display: -webkit-box;
     -webkit-line-clamp: 3;
     line-clamp: 3;
@@ -686,26 +664,37 @@
     align-items: center;
     gap: 1.2rem 2rem;
     min-height: 4.8rem;
-    margin-top: 0.6rem;
+    margin-top: 0.4rem;
   }
   .cards {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.9rem;
+    gap: 1rem;
   }
+  /* item sóbrio clicável: miniatura + texto */
   .card-act {
     display: grid;
     grid-template-columns: auto 1fr;
     gap: 0.8rem;
     align-items: center;
     max-width: 22rem;
-    padding: 0.5rem 0.9rem 0.5rem 0.5rem;
+    padding: 0.45rem 0.9rem 0.45rem 0.45rem;
     font: inherit;
     color: var(--text);
-    text-align: left;
-    background: color-mix(in srgb, var(--surface) 80%, transparent);
-    border: 2px solid color-mix(in srgb, var(--accent-2) 50%, transparent);
+    text-align: start;
+    background: var(--surface);
+    border: var(--edge) solid var(--outline);
+    border-radius: var(--radii-sm);
+    box-shadow: var(--hard-sm);
     cursor: pointer;
+    transition:
+      transform var(--t) var(--ease),
+      box-shadow var(--t) var(--ease);
+  }
+  .card-act:hover,
+  .card-act:focus {
+    transform: translate(-2px, -2px);
+    box-shadow: var(--hard-up);
   }
   .card-act img,
   .card-act .nothumb,
@@ -713,11 +702,17 @@
     width: 5.5rem;
     height: 3.6rem;
     object-fit: cover;
-    image-rendering: pixelated;
     display: grid;
     place-items: center;
-    background: #000;
-    color: var(--focus);
+    background: var(--bg);
+    border: 2px solid var(--outline);
+    border-radius: 4px;
+    color: var(--accent);
+  }
+  .card-act .nothumb {
+    font-family: var(--font-hud);
+    letter-spacing: 0.1em;
+    color: var(--muted);
   }
   .card-act .text {
     display: flex;
@@ -726,7 +721,7 @@
     min-width: 0;
   }
   .card-act .label {
-    font-weight: 700;
+    font-size: 0.8rem;
   }
   .card-act .muted {
     font-size: 0.85rem;
@@ -734,27 +729,58 @@
     text-overflow: ellipsis;
     white-space: nowrap;
   }
+  /* capa do destaque, reta, com a sombra dura de cartaz */
+  .hero-art {
+    width: clamp(8rem, min(13vw, 22vh), 13rem);
+    flex: none;
+    margin-top: 1vh;
+    border-radius: var(--radii-sm);
+    box-shadow: var(--hard-cartoon);
+    animation: rise 240ms steps(3) both;
+  }
+  @keyframes rise {
+    from {
+      transform: translateY(12px);
+      opacity: 0;
+    }
+  }
+  @media (max-height: 820px) {
+    .hero .cta {
+      min-height: 0;
+    }
+    .hero-art {
+      display: none;
+    }
+    .tabs {
+      padding-block: 0.7rem 1.3rem;
+    }
+    .tabs :global(.tab-light) {
+      top: 0.65rem;
+    }
+  }
+
+  /* fileiras: cartões de imagem sóbrios e clicáveis */
   .shelves {
     display: flex;
     flex-direction: column;
-    gap: 2rem;
-    padding: 0.4rem 0 0.5rem;
-  }
-  .row-title .smart {
-    margin-left: 0.5rem;
-    opacity: 0.7;
+    gap: 1.6rem;
+    padding: 1rem 0 0.5rem;
   }
   .row-title {
-    font-size: 1.2rem;
-    color: #fff;
-    margin-bottom: 0.4rem;
+    font-size: 1.1rem;
+    color: var(--text);
+    margin-bottom: 0.2rem;
+  }
+  .row-title .smart {
+    margin-inline-start: 0.5rem;
+    color: var(--muted);
   }
   .row {
     list-style: none;
     margin: 0;
-    padding: 0.8rem 0.5rem 1.4rem;
+    padding: 0.9rem 0.6rem 1.5rem;
     display: flex;
-    gap: 1.8rem;
+    gap: 1.6rem;
     overflow-x: auto;
     scroll-snap-type: x proximity;
     scrollbar-width: none;
@@ -765,14 +791,31 @@
     padding: 0;
     border: none;
     background: none;
-    border-radius: 6px;
-    /* borda grossa na cor do console + sombra dura (o foco troca por amarelo) */
-    box-shadow:
-      0 0 0 3px color-mix(in srgb, var(--accent) 80%, #000),
-      6px 6px 0 3px var(--press);
+    border-radius: var(--radii-sm);
+    box-shadow: var(--hard);
     cursor: pointer;
     scroll-snap-align: center;
-    transition: transform var(--t) var(--ease);
+    transition:
+      transform var(--t) var(--ease),
+      box-shadow var(--t) var(--ease);
+  }
+  .card:hover,
+  .card:focus {
+    transform: translate(-2px, -2px);
+    box-shadow: var(--hard-up);
+  }
+  .card:active {
+    transform: translate(4px, 4px);
+    box-shadow: none;
+  }
+  /* o jogo do destaque (foco em outro lugar): traço mostarda embaixo */
+  .card.selected:not(:focus)::after {
+    content: '';
+    position: absolute;
+    inset-inline: 0;
+    bottom: -0.85rem;
+    border-bottom: 4px solid var(--accent);
+    pointer-events: none;
   }
   .see-all {
     aspect-ratio: 3 / 4;
@@ -781,68 +824,40 @@
     align-items: center;
     justify-content: center;
     gap: 0.6rem;
+    font-family: var(--font-label);
+    font-size: 0.85rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
     color: var(--text);
-    background: color-mix(in srgb, var(--surface) 80%, transparent);
-    border: 3px dashed color-mix(in srgb, var(--text) 40%, transparent);
-    font-size: 1rem;
+    background: transparent;
+    border: var(--edge) dashed var(--muted);
+    box-shadow: none;
   }
-  .card.selected,
-  .card:focus {
-    transform: translateY(-0.5rem) scale(1.06);
+  .see-all:hover,
+  .see-all:focus {
+    background: var(--surface);
+    border-style: solid;
+    border-color: var(--outline);
   }
-  /* foco: a borda acende piscando como letreiro e depois "respira" */
-  .card:focus {
-    animation:
-      neon-on 0.24s steps(1) both,
-      breathe 1.6s ease-in-out 0.24s infinite;
-  }
-  /* sombra de luz no "chão" debaixo da capa em foco */
-  .card:focus::after {
-    content: '';
-    position: absolute;
-    left: 8%;
-    right: 8%;
-    bottom: -1.1rem;
-    height: 0.6rem;
-    background: radial-gradient(ellipse at center, color-mix(in srgb, var(--focus) 45%, transparent), transparent 70%);
-    pointer-events: none;
-  }
-  @keyframes neon-on {
-    0%,
-    50% {
-      outline-color: transparent;
-      box-shadow: none;
-    }
-    25%,
-    75% {
-      outline-color: var(--focus);
-      box-shadow: var(--glow-focus);
-    }
-  }
-  @keyframes breathe {
-    0%,
-    100% {
-      box-shadow: 0 0 8px var(--focus), 0 0 20px color-mix(in srgb, var(--focus) 40%, transparent);
-    }
-    50% {
-      box-shadow: 0 0 14px var(--focus), 0 0 40px color-mix(in srgb, var(--focus) 65%, transparent);
-    }
-  }
+  /* etiquetas no canto da capa: favorito (mostarda) e no servidor (info) */
   .badge {
     position: absolute;
-    top: -0.5rem;
-    right: -0.5rem;
+    top: 0.45rem;
+    inset-inline-start: 0.45rem;
     color: var(--on-accent);
     background: var(--accent);
-    border: 2px solid #05040a;
+    border: 2px solid var(--on-accent);
+    border-radius: 4px;
     padding: 0.2rem;
     display: grid;
     place-items: center;
   }
   .badge.cloud {
-    right: auto;
-    left: -0.5rem;
+    inset-inline-start: auto;
+    inset-inline-end: 0.45rem;
+    color: var(--bg);
     background: var(--accent-2);
+    border-color: var(--bg);
   }
   .empty {
     margin: auto;
@@ -850,5 +865,8 @@
     flex-direction: column;
     gap: 1rem;
     max-width: 36rem;
+  }
+  .empty h1 {
+    font-size: 2.6rem;
   }
 </style>
