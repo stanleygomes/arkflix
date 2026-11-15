@@ -131,17 +131,17 @@
       <header>
         {#if me}<Avatar avatar={me.avatar} color={me.color} size="3rem" />{/if}
         <div>
-          <h2 id="guide-title" class="pixel">{me?.name ?? 'Guia'}</h2>
-          <p class="muted">{now.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })} · {app.pads.length ? app.pads.map((p) => p.name).join(', ') : 'sem controle'}</p>
+          <h2 id="guide-title">{me?.name ?? 'Guia'}</h2>
+          <p class="muted meta">{now.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })} · {app.pads.length ? app.pads.map((p) => p.name).join(', ') : 'sem controle'}</p>
         </div>
       </header>
 
       {#if playing}
         <section aria-label="Jogo aberto" class="game">
           {#if current?.cover}<img src={current.cover} alt="" />{/if}
-          <p class="now pixel">Jogando</p>
+          <p class="now label">Jogando</p>
           <p class="name">{playing.name || current?.name}</p>
-          {#if info.started}<p class="muted session">Jogando há {minutes < 60 ? `${minutes} min` : `${Math.floor(minutes / 60)} h ${minutes % 60} min`}{info.recording ? ' · ● gravando' : ''}</p>{/if}
+          {#if info.started}<p class="muted meta session">Jogando há {minutes < 60 ? `${minutes} min` : `${Math.floor(minutes / 60)} h ${minutes % 60} min`}{info.recording ? ' · ● gravando' : ''}</p>{/if}
           <div class="actions">
             <button class="btn primary" data-nav data-nav-default onclick={close}><Icon name="play" /> Voltar ao jogo</button>
             {#if info.commands}
@@ -162,7 +162,7 @@
         </section>
         {#if recent.length}
           <section aria-labelledby="switch-title" class="switch">
-            <h3 id="switch-title" class="pixel">Trocar de jogo</h3>
+            <h3 id="switch-title" class="label">Trocar de jogo</h3>
             {#each recent as g (g.id)}
               <button class="tile row" data-nav onclick={() => switchTo(g.id)}>
                 {#if g.cover}<img src={g.cover} alt="" />{/if}
@@ -177,7 +177,7 @@
             <button class="tile" data-nav data-nav-default={i === 0 ? '' : undefined} onclick={t.run}>
               <Icon name={t.icon} size="1.5em" />
               <span>{t.label}</span>
-              {#if t.badge}<span class="badge pixel">{t.badge}</span>{/if}
+              {#if t.badge}<span class="chip warn">{t.badge}</span>{/if}
             </button>
           {/each}
         </nav>
@@ -186,7 +186,7 @@
       {#if busy.length}
         <section aria-label="Em andamento" class="busy">
           {#each busy.slice(0, 2) as t (t.id)}
-            <p class="muted">{t.label} · {Math.round(t.progress * 100)}%</p>
+            <p class="muted meta">{t.label} · {Math.round(t.progress * 100)}%</p>
             <div class="energy" role="progressbar" aria-label={t.label} aria-valuemin="0" aria-valuemax="100" aria-valuenow={Math.round(t.progress * 100)}>
               <span style:width={`${Math.floor(t.progress * 20) * 5}%`}></span>
             </div>
@@ -205,25 +205,30 @@
 {/if}
 
 <style>
+  /* Guia = folha lateral (drawer da noemi-ui) colada na borda esquerda:
+     fundo de cartão, linha de 3px só na borda de dentro, sem sombra.
+     Entra da esquerda em 4 degraus. */
   .backdrop {
     position: fixed;
     inset: 0;
     z-index: 95;
-    background: rgba(0, 0, 0, 0.55);
+    /* tinta (#24170f, o contorno do tema claro) a 55%, sem blur: o creme
+       do contorno escuro lavaria a tela */
+    background: color-mix(in srgb, var(--on-accent) 55%, transparent);
   }
   .guide {
     position: absolute;
-    inset: 0 auto 0 0;
-    width: min(26rem, 92vw);
+    inset-block: 0;
+    inset-inline-start: 0;
+    width: min(27rem, 100% - 2rem);
     overflow-y: auto;
     display: flex;
     flex-direction: column;
-    gap: 1.4rem;
-    padding: 1.6rem 1.5rem;
+    gap: 1.3rem;
+    padding: 1.4rem 1.4rem 1.6rem;
     background: var(--surface);
-    border-right: 3px solid var(--accent);
-    box-shadow: 0 0 24px color-mix(in srgb, var(--accent) 60%, transparent);
-    animation: guide-in 200ms var(--ease);
+    border-inline-end: var(--edge) solid var(--outline);
+    animation: guide-in 200ms steps(4) both;
   }
   @keyframes guide-in {
     from {
@@ -237,6 +242,8 @@
     display: flex;
     gap: 0.9rem;
     align-items: center;
+    padding-block-end: 1.1rem;
+    border-block-end: var(--edge) solid var(--outline);
   }
   h2 {
     font-size: 1.2rem;
@@ -253,23 +260,21 @@
     width: 100%;
     max-height: 9rem;
     object-fit: cover;
-    image-rendering: pixelated;
-    border: 2px solid var(--accent-2);
+    border: var(--edge) solid var(--outline);
+    border-radius: var(--radii-sm);
   }
   .now {
-    color: var(--focus);
-    font-size: 0.8rem;
-    margin: 0;
+    color: var(--accent);
   }
   .name {
     font-weight: 700;
-    font-size: 1.2rem;
-    margin: 0;
+    font-size: 1.25rem;
+    line-height: 1.25;
   }
   .actions,
   .tiles {
     display: grid;
-    gap: 0.6rem;
+    gap: 0.9rem;
   }
   .actions .btn {
     justify-content: flex-start;
@@ -277,56 +282,72 @@
   .tiles {
     grid-template-columns: 1fr 1fr;
   }
+  /* atalho: cartão sóbrio, sobe no foco como os botões */
   .tile {
     display: grid;
     justify-items: start;
-    gap: 0.4rem;
+    align-content: start;
+    gap: 0.45rem;
     padding: 0.9rem;
     font: inherit;
     font-weight: 700;
     color: var(--text);
-    text-align: left;
-    background: color-mix(in srgb, var(--surface) 70%, #000);
-    border: 2px solid color-mix(in srgb, var(--accent-2) 45%, transparent);
+    text-align: start;
+    background: var(--bg);
+    border: var(--edge) solid var(--outline);
+    border-radius: var(--radii-sm);
+    box-shadow: var(--hard-sm);
     cursor: pointer;
+    transition:
+      transform var(--t) var(--ease),
+      box-shadow var(--t) var(--ease);
+  }
+  .tile:hover,
+  .tile:focus-visible {
+    transform: translate(-2px, -2px);
+    box-shadow: var(--hard);
+  }
+  .tile:active {
+    transform: translate(3px, 3px);
+    box-shadow: none;
   }
   .tile :global(svg) {
     color: var(--accent);
   }
-  .badge {
-    font-size: 0.65rem;
-    color: var(--focus);
-  }
   .busy p {
-    margin: 0.4rem 0 0.2rem;
+    margin: 0.4rem 0 0.3rem;
     font-size: 0.85rem;
   }
+  .busy .energy {
+    width: 100%;
+  }
   .session {
-    margin: 0;
     font-size: 0.85rem;
   }
   .tools {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 0.5rem;
+    gap: 0.75rem;
   }
   .tools .btn {
     justify-content: flex-start;
   }
   .note {
-    margin: 0;
-    font-size: 0.85rem;
+    font-size: 0.95rem;
     white-space: pre-line;
-    padding: 0.5rem 0.7rem;
-    border-left: 3px solid var(--focus);
+    padding: 0.5rem 0.75rem;
+    background: var(--balloon);
+    border: 2px solid var(--outline);
+    border-inline-start-width: 8px;
+    border-inline-start-color: var(--accent-2);
+    border-radius: var(--radii-sm);
   }
   .switch {
     display: grid;
-    gap: 0.5rem;
+    gap: 0.6rem;
   }
   .switch h3 {
-    font-size: 0.75rem;
-    color: var(--accent-2);
+    color: var(--muted);
   }
   .tile.row {
     grid-template-columns: auto 1fr;
@@ -337,12 +358,15 @@
     width: 2.6rem;
     height: 2.6rem;
     object-fit: cover;
-    image-rendering: pixelated;
+    border: 2px solid var(--outline);
+    border-radius: 4px;
   }
   .quick {
     display: flex;
-    gap: 0.6rem;
+    gap: 0.75rem;
     flex-wrap: wrap;
     margin-top: auto;
+    padding-block-start: 1.1rem;
+    border-block-start: 2px solid color-mix(in srgb, var(--outline) 25%, transparent);
   }
 </style>

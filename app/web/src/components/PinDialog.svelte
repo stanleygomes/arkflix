@@ -12,6 +12,7 @@
   const ask = $derived(app.pin)
   let digits = $state('')
   let busy = $state(false)
+  let shake = $state(false) // errou: a fileira treme uma vez
   let previous: HTMLElement | null = null
 
   function close(v: string | null) {
@@ -35,6 +36,7 @@
       play('error')
       app.pin.error = err
       digits = ''
+      shake = true
       return
     }
     play('accept')
@@ -78,69 +80,121 @@
 
 {#if ask}
   <div class="backdrop" in:shade out:shade={{ out: true }}>
-    <div class="dialog panel" in:panelIn out:panelOut role="dialog" aria-modal="true" aria-labelledby="pin-title" data-nav-scope>
+    <div class="dialog" in:panelIn out:panelOut role="dialog" aria-modal="true" aria-labelledby="pin-title" data-nav-scope>
       <h2 id="pin-title">{ask.title}</h2>
-      <p class="dots" aria-live="polite">
+      <p class="dots" class:shake class:bad={!!ask.error && !digits} aria-live="polite" onanimationend={() => (shake = false)}>
         <span class="sr-only">{digits.length} de 4 números</span>
-        {#each [0, 1, 2, 3] as i (i)}<span class="dot" class:on={i < digits.length} aria-hidden="true"></span>{/each}
+        {#each [0, 1, 2, 3] as i (i)}<span class="cell" class:on={i < digits.length} class:next={i === digits.length && !busy} aria-hidden="true">{i < digits.length ? '•' : ''}</span>{/each}
       </p>
       {#if ask.error}<p class="error" role="alert">{ask.error}</p>{/if}
       <div class="keys">
         {#each ['1', '2', '3', '4', '5', '6', '7', '8', '9'] as d (d)}
-          <button class="btn key pixel" data-nav data-nav-default={d === '1' ? '' : undefined} onclick={() => type(d)}>{d}</button>
+          <button class="btn key digit" data-nav data-nav-default={d === '1' ? '' : undefined} onclick={() => type(d)}>{d}</button>
         {/each}
         <button class="btn key" data-nav onclick={erase} aria-label="Apagar número"><Icon name="back" /></button>
-        <button class="btn key pixel" data-nav onclick={() => type('0')}>0</button>
-        <button class="btn key" data-nav onclick={() => close(null)}>Cancelar</button>
+        <button class="btn key digit" data-nav onclick={() => type('0')}>0</button>
+        <button class="btn key flat" data-nav onclick={() => close(null)}>Cancelar</button>
       </div>
     </div>
   </div>
 {/if}
 
 <style>
+  /* Diálogo sóbrio com o PIN em casas de código (input otp da noemi-ui) e
+     o teclado numérico grande, pra mirar do sofá. */
   .backdrop {
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, 0.7);
+    /* tinta (#24170f, o contorno do tema claro) a 55%, sem blur: o creme
+       do contorno escuro lavaria a tela */
+    background: color-mix(in srgb, var(--on-accent) 55%, transparent);
     display: grid;
     place-items: center;
+    padding: var(--safe);
     z-index: 95;
   }
   .dialog {
     display: grid;
-    gap: 1rem;
+    gap: 1.1rem;
     justify-items: center;
-    padding: 1.6rem 2rem;
+    padding: 1.4rem 1.8rem 1.6rem;
+    background: var(--surface);
+    border: var(--edge) solid var(--outline);
+    border-radius: var(--radii-sm);
+    box-shadow: 8px 8px 0 var(--outline);
   }
   h2 {
-    font-size: 1.4rem;
+    font-size: 1.2rem;
   }
   .dots {
     display: flex;
-    gap: 0.8rem;
-    margin: 0;
+    gap: 0.5rem;
   }
-  .dot {
-    width: 1.2rem;
-    height: 1.2rem;
-    border: 3px solid var(--text);
+  .cell {
+    width: 3rem;
+    height: 3.5rem;
+    display: grid;
+    place-items: center;
+    font-family: var(--font-mono);
+    font-weight: 700;
+    font-size: 2.6rem;
+    line-height: 1;
+    background: var(--balloon);
+    border: var(--edge) solid var(--outline);
+    border-radius: var(--radii-sm);
+    box-shadow: var(--hard-sm);
   }
-  .dot.on {
-    background: var(--accent);
-    border-color: var(--accent);
+  /* casa da vez: borda e sombra verde-azuladas */
+  .cell.next {
+    border-color: var(--focus);
+    box-shadow: 4px 4px 0 var(--focus);
+  }
+  .cell.on {
+    animation: cell-pop 120ms steps(2);
+  }
+  .bad .cell {
+    border-color: var(--danger);
+    box-shadow: 3px 3px 0 var(--danger);
+  }
+  .shake {
+    animation: shake 0.3s steps(4);
+  }
+  @keyframes cell-pop {
+    from {
+      transform: scale(0.85);
+    }
+  }
+  @keyframes shake {
+    25% {
+      transform: translateX(-4px);
+    }
+    75% {
+      transform: translateX(4px);
+    }
   }
   .error {
-    color: #ff9c9c;
+    color: var(--danger);
     font-weight: 700;
+    max-width: 18rem;
+    text-align: center;
   }
   .keys {
     display: grid;
     grid-template-columns: repeat(3, 5.5rem);
-    gap: 0.6rem;
+    gap: 0.75rem;
   }
   .key {
     justify-content: center;
-    font-size: 1.3rem;
-    min-height: 3.2rem;
+    min-height: 3.4rem;
+    padding-inline: 0.5rem;
+  }
+  .key.flat {
+    font-size: 0.68rem;
+    padding-inline: 0.2rem;
+  }
+  .digit {
+    font-family: var(--font-mono);
+    font-weight: 700;
+    font-size: 1.5rem;
   }
 </style>

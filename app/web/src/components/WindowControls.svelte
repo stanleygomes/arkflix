@@ -55,36 +55,43 @@
 <style>
   .win {
     display: flex;
-    gap: 0.4rem;
+    gap: 0.5rem;
     --wails-draggable: no-drag;
   }
-  /* blocos de console, menores que os da barra: não competem com o conteúdo */
+  /* botões de ícone sóbrios, menores que os da barra: não competem com o
+     conteúdo. Fechar fica vermelho só no hover/foco. */
   .wbtn {
     width: 2.2rem;
     height: 2.2rem;
     display: grid;
     place-items: center;
     color: var(--text);
-    background: color-mix(in srgb, var(--surface) 70%, transparent);
-    border: 2px solid color-mix(in srgb, var(--text) 18%, transparent);
-    box-shadow: 2px 2px 0 #000;
+    background: var(--surface);
+    border: 2px solid var(--outline);
+    border-radius: var(--radii-sm);
+    box-shadow: 2px 2px 0 var(--outline);
     cursor: pointer;
+    transition:
+      transform var(--t) var(--ease),
+      box-shadow var(--t) var(--ease);
   }
   .wbtn:hover,
   .wbtn:focus-visible {
-    border-color: var(--accent);
     transform: translate(-1px, -1px);
-    box-shadow: 3px 3px 0 #000;
+    box-shadow: 3px 3px 0 var(--outline);
+  }
+  .wbtn:focus-visible {
+    outline: 3px solid var(--focus);
+    outline-offset: 3px;
   }
   .wbtn:active {
-    transform: translate(1px, 1px);
+    transform: translate(2px, 2px);
     box-shadow: none;
   }
   .close:hover,
   .close:focus-visible {
-    color: #fff;
-    background: #c4253f;
-    border-color: #ff6b81;
+    color: var(--bg);
+    background: var(--danger);
   }
   :global(.reduce-motion) .wbtn {
     transform: none !important;

@@ -1,15 +1,18 @@
 <script lang="ts">
   // Protetor de tela: liga depois de X minutos parado (nunca com jogo aberto).
-  // "Cobrinha": jogo da cobrinha jogando sozinho em fósforo verde. "Vitrine":
-  // capas da coleção em estilo attract mode de fliperama. Qualquer entrada sai.
+  // Cartaz de "Intervalo" de cinema dos anos 30. "Cobrinha": a cobrinha joga
+  // sozinha num quadro, um passo por segundo. "Vitrine": uma capa da coleção
+  // em cartaz, trocada a cada 8 s. Nada anima em loop: só o relógio do JS
+  // muda o quadro, e ele para quando o protetor fecha. Qualquer entrada sai.
   import { idle, idleFor, sleep, watchPointer } from '../lib/idle.svelte'
   import { choose, newGame, rng, step, stuck, type Snake } from '../lib/snake'
   import { app, shown as visible, system } from '../lib/state.svelte'
   import type { Game } from '../lib/types'
 
-  const W = 32
-  const H = 18
-  const TICK = 85
+  const W = 16
+  const H = 9
+  const TICK = 1000 // um passo por segundo: CPU parada entre um quadro e outro
+  const CELL = 48
 
   const cfg = $derived(app.settings?.screensaver)
   const reduce = $derived(
@@ -47,29 +50,61 @@
   let snake = $state<Snake | null>(null)
   let hi = $state(0)
 
-  function draw(s: Snake, blink: boolean) {
+  // cores dos tokens (alto contraste troca os tokens, o quadro acompanha)
+  function ink(name: string, fallback: string) {
+    return (canvas && getComputedStyle(canvas).getPropertyValue(name).trim()) || fallback
+  }
+
+  function box(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, r: number) {
+    ctx.beginPath()
+    // WebKit antigo não tem roundRect: cai no retângulo
+    const round = (ctx as Partial<Pick<CanvasRenderingContext2D, 'roundRect'>>).roundRect
+    if (round) round.call(ctx, x, y, w, h, r)
+    else ctx.rect(x, y, w, h)
+    ctx.fill()
+    ctx.stroke()
+  }
+
+  function draw(s: Snake) {
     const ctx = canvas?.getContext('2d')
     if (!ctx || !canvas) return
-    const cell = canvas.width / W
-    ctx.fillStyle = '#020a04'
+    const card = ink('--surface', '#241a13')
+    const line = ink('--outline', '#e9daba')
+    const paper = ink('--text', '#f1e4c6')
+    const dark = ink('--bg', '#17110c')
+    const food = ink('--accent', '#e8b34a')
+    const c = CELL
+    ctx.fillStyle = card
     ctx.fillRect(0, 0, canvas.width, canvas.height)
-    // grade bem fraquinha, como fósforo queimado
-    ctx.fillStyle = 'rgba(51, 255, 102, 0.05)'
-    for (let i = 0; i < W * H; i++) ctx.fillRect((i % W) * cell + cell / 2 - 1, Math.floor(i / W) * cell + cell / 2 - 1, 2, 2)
-    ctx.shadowColor = '#33ff66'
-    ctx.shadowBlur = cell * 0.6
-    s.body.forEach((c, i) => {
-      ctx.fillStyle = i === 0 ? '#b6ffc8' : `rgba(51, 255, 102, ${Math.max(0.45, 1 - i / (s.body.length * 1.4))})`
-      ctx.fillRect((c % W) * cell + 1, Math.floor(c / W) * cell + 1, cell - 2, cell - 2)
-    })
-    if (s.food >= 0 && blink) {
-      ctx.shadowColor = '#ffb000'
-      ctx.fillStyle = '#ffb000'
-      const x = (s.food % W) * cell
-      const y = Math.floor(s.food / W) * cell
-      ctx.fillRect(x + cell * 0.2, y + cell * 0.2, cell * 0.6, cell * 0.6)
+    // marcas de giz bem fracas no quadro
+    ctx.globalAlpha = 0.12
+    ctx.fillStyle = line
+    for (let i = 0; i < W * H; i++) ctx.fillRect((i % W) * c + c / 2 - 2, Math.floor(i / W) * c + c / 2 - 2, 4, 4)
+    ctx.globalAlpha = 1
+    ctx.lineWidth = 3
+    ctx.strokeStyle = dark
+    if (s.food >= 0) {
+      ctx.fillStyle = food
+      ctx.beginPath()
+      ctx.arc((s.food % W) * c + c / 2, Math.floor(s.food / W) * c + c / 2, c * 0.3, 0, Math.PI * 2)
+      ctx.fill()
+      ctx.stroke()
     }
-    ctx.shadowBlur = 0
+    // corpo de borracha: gomos claros com contorno de tinta, cabeça por cima
+    for (let i = s.body.length - 1; i >= 0; i--) {
+      const at = s.body[i]
+      ctx.fillStyle = paper
+      box(ctx, (at % W) * c + 4, Math.floor(at / W) * c + 4, c - 8, c - 8, i === 0 ? 14 : 10)
+    }
+    const head = s.body[0]
+    if (head !== undefined) {
+      ctx.fillStyle = dark
+      for (const dx of [0.36, 0.64]) {
+        ctx.beginPath()
+        ctx.arc((head % W) * c + c * dx, Math.floor(head / W) * c + c * 0.42, 4, 0, Math.PI * 2)
+        ctx.fill()
+      }
+    }
   }
 
   $effect(() => {
@@ -79,16 +114,17 @@
     if (reduce) {
       // versão parada: um quadro de uma partida já em andamento
       for (let i = 0; i < 400 && s.alive; i++) s = step(s, rnd)
+      hi = Math.max(hi, s.score)
       snake = s
-      draw(s, true)
+      draw(s)
       return
     }
-    let t = 0
     let dead = 0
+    snake = s
+    draw(s)
     const iv = setInterval(() => {
-      t++
       if (!s.alive || stuck(s) || choose(s) === null) {
-        if (++dead > 18) {
+        if (++dead > 4) {
           s = newGame(W, H, rnd)
           dead = 0
         }
@@ -97,7 +133,7 @@
         hi = Math.max(hi, s.score)
       }
       snake = s
-      draw(s, t % 6 < 4)
+      draw(s)
     }, TICK)
     return () => clearInterval(iv)
   })
@@ -112,7 +148,7 @@
     const pick = () => (shown = pool[Math.floor(Math.random() * pool.length)])
     pick()
     if (reduce) return
-    const iv = setInterval(pick, 5000)
+    const iv = setInterval(pick, 8000)
     return () => clearInterval(iv)
   })
 </script>
@@ -123,13 +159,15 @@
   </div>
 {:else if idle.active && cfg}
   <div class="saver" class:reduce role="dialog" aria-modal="true" aria-label="Protetor de tela" data-mode={cfg.mode}>
+    <p class="kicker meta" aria-hidden="true">arkflix apresenta</p>
+    <p class="title intermission" aria-hidden="true">Intervalo</p>
     {#if cfg.mode === 'snake'}
-      <div class="crt">
-        <p class="score pixel" aria-hidden="true">
-          <span>SCORE {String(snake?.score ?? 0).padStart(4, '0')}</span>
-          <span>HI {String(hi).padStart(4, '0')}</span>
+      <div class="board">
+        <canvas bind:this={canvas} width={W * CELL} height={H * CELL} aria-hidden="true"></canvas>
+        <p class="score" aria-hidden="true">
+          <span>PLACAR {String(snake?.score ?? 0).padStart(4, '0')}</span>
+          <span>RECORDE {String(hi).padStart(4, '0')}</span>
         </p>
-        <canvas bind:this={canvas} width={W * 24} height={H * 24} aria-hidden="true"></canvas>
       </div>
     {:else if shown}
       {@const sys = system(shown.system)}
@@ -137,96 +175,106 @@
         {#key shown.id}
           <img src={shown.cover} alt="" />
         {/key}
-        <p class="name pixel">{shown.name}</p>
-        <p class="sys">{sys?.name ?? shown.system}</p>
+        <p class="label now">Em cartaz</p>
+        <p class="name">{shown.name}</p>
+        <p class="chip">{sys?.name ?? shown.system}</p>
       </div>
-    {:else}
-      <p class="name pixel">ARKFLIX</p>
     {/if}
-    <p class="coin pixel">{cfg.mode === 'snake' ? 'PRESS ANY BUTTON' : 'INSERT COIN'}</p>
+    <p class="coin meta">Aperte qualquer botão pra voltar à sessão</p>
     <p class="sr-only">Protetor de tela. Aperte qualquer botão ou tecla para voltar.</p>
   </div>
 {/if}
 
 <style>
+  /* Cartaz de intervalo: fundo de cinema escuro, "Intervalo" em letreiro,
+     um quadro sóbrio no meio e o recado datilografado embaixo. */
   .saver {
     position: fixed;
     inset: 0;
-    z-index: 10000; /* acima das camadas de tubo (o protetor tem as próprias) */
-    background: #000;
-    color: #33ff66;
-    display: grid;
-    place-content: center;
-    justify-items: center;
-    gap: 1.2rem;
+    z-index: 10000; /* acima das camadas de tubo */
+    background:
+      radial-gradient(ellipse at 0% 0%, rgb(232 179 74 / 0.1), transparent 55%),
+      radial-gradient(ellipse at 100% 100%, rgb(95 168 161 / 0.1), transparent 55%),
+      var(--bg);
+    color: var(--text);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    padding: var(--safe);
     cursor: none;
+    overflow: hidden;
   }
   .rest {
-    cursor: none;
+    background: #000;
   }
-  .saver[data-mode='showcase'] {
-    color: #fff;
+  .kicker {
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    color: var(--muted);
   }
-  .crt {
+  .intermission {
+    font-size: clamp(3rem, 9vh, 6rem);
+    margin-block-end: 0.4rem;
+  }
+  .board {
     display: grid;
     gap: 0.6rem;
-    padding: 1rem;
-    border-radius: 18px;
-    box-shadow:
-      0 0 0 4px #0a2a12,
-      0 0 60px rgba(51, 255, 102, 0.18);
+  }
+  canvas {
+    display: block;
+    height: min(54vh, 48vw);
+    aspect-ratio: 16 / 9;
+    border: var(--edge) solid var(--outline);
+    border-radius: var(--radii-sm);
+    box-shadow: var(--hard-up);
   }
   .score {
     display: flex;
     justify-content: space-between;
-    font-size: 1.1rem;
-    text-shadow: 0 0 8px #33ff66;
-  }
-  canvas {
-    width: min(86vw, 150vh);
-    max-height: 72vh;
-    aspect-ratio: 32 / 18;
-    image-rendering: pixelated;
-    border-radius: 10px;
+    font-family: var(--font-mono);
+    font-weight: 700;
+    font-size: 1.05rem;
+    color: var(--muted);
   }
   .showcase {
     display: grid;
     justify-items: center;
-    gap: 0.8rem;
+    gap: 0.5rem;
   }
   .showcase img {
-    height: 58vh;
-    max-width: 80vw;
+    height: 46vh;
+    max-width: 70vw;
     object-fit: contain;
-    image-rendering: pixelated;
-    box-shadow: 10px 10px 0 #222;
-    animation: slide 0.5s steps(5);
+    border: var(--edge) solid var(--outline);
+    border-radius: var(--radii-sm);
+    box-shadow: var(--hard-up);
+    margin-block-end: 0.8rem;
+    animation: cut 0.36s steps(3) both;
+  }
+  .now {
+    color: var(--accent);
   }
   .name {
-    font-size: 1.6rem;
+    font-family: var(--font-label);
+    font-size: clamp(1.3rem, 3vh, 2rem);
     text-align: center;
-  }
-  .sys {
-    color: #bbb;
+    max-width: 80vw;
   }
   .coin {
-    color: #ffd23f;
-    font-size: 1.2rem;
-    letter-spacing: 0.15em;
-    animation: blink 1.1s steps(1) infinite; /* liga/desliga, sem meio-termo */
+    font-size: 1rem;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    margin-block-start: 0.6rem;
   }
-  .reduce .coin,
   .reduce img {
     animation: none;
   }
-  @keyframes slide {
+  /* troca de capa: corte em 3 quadros, uma vez por troca */
+  @keyframes cut {
     from {
-      transform: translateX(12%);
-      opacity: 0;
-    }
-  }
-  @keyframes blink {
-    50% {
       opacity: 0;
     }
   }
