@@ -22,6 +22,7 @@ import (
 
 	"github.com/stanleygomes/arkflix/server/internal/auth"
 	"github.com/stanleygomes/arkflix/server/internal/deps"
+	"github.com/stanleygomes/arkflix/server/internal/lists"
 
 	// as tabelas do RomM (saves, props) e do Subsonic (fila, marcadores)
 	_ "github.com/stanleygomes/arkflix/server/internal/api/romm"
@@ -58,7 +59,7 @@ func Run(ctx context.Context, d *deps.Deps, args []string) error {
 	}
 	src := args[0]
 	fs := flag.NewFlagSet("import "+src, flag.ContinueOnError)
-	im := &Importer{D: d, Lists: pendingLists{w: os.Stdout}, Out: os.Stdout}
+	im := &Importer{D: d, Lists: storeLists{lists.New(d.Store)}, Out: os.Stdout}
 	fs.Var(&im.Maps, "map", "ANTIGO=NOVO: troca o prefixo dos caminhos da fonte (repete)")
 	fs.BoolVar(&im.Dry, "dry-run", false, "só mostra o que mudaria")
 	pw := fs.String("passwords", "keep", "keep: não troca a senha de quem já existe; overwrite: troca")
@@ -117,7 +118,7 @@ func (im *Importer) begin(ctx context.Context, source string) error {
 		im.Out = io.Discard
 	}
 	if im.Lists == nil {
-		im.Lists = pendingLists{w: im.Out}
+		im.Lists = storeLists{lists.New(im.D.Store)}
 	}
 	idx, err := loadIndex(ctx, im.D.Store)
 	if err != nil {

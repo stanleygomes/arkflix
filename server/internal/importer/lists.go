@@ -2,8 +2,9 @@ package importer
 
 import (
 	"context"
-	"fmt"
-	"io"
+	"strings"
+
+	"github.com/stanleygomes/arkflix/server/internal/lists"
 )
 
 // ListSink recebe as listas de cada usuário (playlists do Navidrome,
@@ -14,13 +15,28 @@ type ListSink interface {
 	AddList(ctx context.Context, userID, name string, itemIDs []string) error
 }
 
-// pendingLists só anota as listas: o destino (internal/lists) ainda não
-// existe neste ramo.
-type pendingLists struct{ w io.Writer }
+// storeLists grava nas listas do servidor (internal/lists): junta por
+// (usuário, nome), então rodar de novo só acrescenta o que faltar.
+type storeLists struct{ l *lists.Lists }
 
-func (p pendingLists) AddList(_ context.Context, userID, name string, itemIDs []string) error {
-	fmt.Fprintf(p.w, "lista pendente (sem destino ainda): usuário %s, %q, %d itens\n", userID, name, len(itemIDs))
-	return nil
+func (s storeLists) AddList(ctx context.Context, userID, name string, itemIDs []string) error {
+	own, err := s.l.Own(ctx, userID)
+	if err != nil {
+		return err
+	}
+	var target *lists.List
+	for _, l := range own {
+		if strings.EqualFold(l.Name, strings.TrimSpace(name)) {
+			target = l
+			break
+		}
+	}
+	if target == nil {
+		if target, err = s.l.Create(ctx, userID, name); err != nil {
+			return err
+		}
+	}
+	return s.l.Add(ctx, target.ID, itemIDs)
 }
 
 // list manda a lista pro destino (no dry-run só conta).

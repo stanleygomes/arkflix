@@ -58,6 +58,7 @@ func New(d *deps.Deps) http.Handler {
 	h("POST /users", admin, a.createUser)
 	h("PATCH /users/{id}", admin, a.patchUser)
 	h("DELETE /users/{id}", admin, a.deleteUser)
+	h("GET /platforms", admin, a.platforms)
 	h("POST /upload", admin, a.upload)
 	h("POST /items/{id}/hide", admin, a.hide)
 	h("POST /items/{id}/refresh", admin, a.refresh)
@@ -226,15 +227,44 @@ func (a *api) scan(w http.ResponseWriter, r *http.Request, _ *auth.User) {
 	writeJSON(w, http.StatusAccepted, map[string]any{})
 }
 
-// POST /items/{id}/refresh: busca os metadados de novo (o Fetcher só
-// completa o que falta; aqui ele roda já, em segundo plano).
+// POST /items/{id}/refresh: busca os metadados desse item de novo, já, em
+// segundo plano (o que veio do disco continua valendo).
 func (a *api) refresh(w http.ResponseWriter, r *http.Request, _ *auth.User) {
-	if _, err := a.item(r.Context(), r.PathValue("id")); err != nil {
+	it, err := a.item(r.Context(), r.PathValue("id"))
+	if err != nil {
 		internal(w, err)
 		return
 	}
 	if a.d.Meta != nil {
-		go a.d.Meta.Run(context.Background())
+		go func() {
+			if err := a.d.Meta.Refresh(context.Background(), it.ID); err != nil {
+				slog.Warn("metadados", "item", it.ID, "err", err)
+			}
+		}()
 	}
 	writeJSON(w, http.StatusAccepted, map[string]any{})
+}
+
+// GET /platforms: consoles do acervo (o app usa pra escolher onde vai uma
+// ROM ou BIOS enviada).
+func (a *api) platforms(w http.ResponseWriter, r *http.Request, _ *auth.User) {
+	rows, err := a.d.Store.DB.QueryContext(r.Context(), `SELECT p.platform, p.name,
+  (SELECT COUNT(*) FROM items i WHERE i.parent_id = p.id AND i.kind = ?)
+FROM items p WHERE p.kind = ? ORDER BY p.sort_name`, store.KindRom, store.KindPlatform)
+	if err != nil {
+		internal(w, err)
+		return
+	}
+	defer rows.Close()
+	out := []map[string]any{}
+	for rows.Next() {
+		var slug, name string
+		var n int
+		if err := rows.Scan(&slug, &name, &n); err != nil {
+			internal(w, err)
+			return
+		}
+		out = append(out, map[string]any{"slug": slug, "name": name, "count": n})
+	}
+	writeJSON(w, http.StatusOK, out)
 }
