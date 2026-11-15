@@ -155,6 +155,7 @@ type itemDto struct {
 	MovieCount              *int        `json:",omitempty"`
 	SeriesCount             *int        `json:",omitempty"`
 	EpisodeCount            *int        `json:",omitempty"`
+	PlaylistItemId          string      `json:",omitempty"`
 }
 
 // userDataDto é o UserItemDataDto.

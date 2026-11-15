@@ -152,6 +152,8 @@ func (s *Server) itemImage(c *rc) {
 		}
 	} else if it := c.lookup(id); it != nil {
 		src = c.imageSrc(it, c.p["type"])
+	} else if p, ok := c.userList(id); ok && strings.EqualFold(c.p["type"], "primary") {
+		src = c.playlistImage(p)
 	}
 	if src == "" {
 		c.notFound()

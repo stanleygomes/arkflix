@@ -56,6 +56,9 @@ func (c *rc) itemsQuery() (query, string) {
 
 // GET /Items e /Users/{userId}/Items
 func (s *Server) getItems(c *rc) {
+	if s.playlistQuery(c) {
+		return
+	}
 	q, mode := c.itemsQuery()
 	switch mode {
 	case "views":
@@ -71,6 +74,8 @@ func (s *Server) getItems(c *rc) {
 		for _, id := range ids {
 			if v, ok := s.viewByID(id); ok {
 				views = append(views, c.viewDto(v))
+			} else if p, ok := c.userList(id); ok {
+				views = append(views, c.playlistDto(p))
 			}
 		}
 		if len(views) > 0 {
@@ -91,6 +96,19 @@ func (s *Server) getItem(c *rc) {
 	id := c.pid("id")
 	if id == rootID {
 		c.json(c.rootDto())
+		return
+	}
+	if id == playlistsViewID {
+		ps, err := c.playlists()
+		if err != nil {
+			c.err(err)
+			return
+		}
+		c.json(c.playlistsViewDto(len(ps)))
+		return
+	}
+	if p, ok := c.userList(id); ok {
+		c.json(c.playlistDto(p))
 		return
 	}
 	d, err := c.itemDtoByID(id)
