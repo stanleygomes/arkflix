@@ -757,6 +757,26 @@
     .tabs :global(.tab-light) {
       top: 0.65rem;
     }
+    /* TV 16:9 (1920×1080 ≈ 1440×810): consoles numa linha só (ícone ao
+       lado do nome) e destaque mais junto, pra fileira caber inteira */
+    .tab {
+      flex-direction: row;
+      gap: 0.45rem;
+      min-width: 0;
+      padding: 0.45rem 0.75rem;
+    }
+    .hero {
+      gap: 0.7rem;
+    }
+    .cta {
+      margin-top: 0;
+    }
+    .shelves {
+      padding-top: 0.4rem;
+    }
+    .row {
+      padding-block: 0.7rem 1.2rem;
+    }
   }
 
   /* fileiras: cartões de imagem sóbrios e clicáveis */
