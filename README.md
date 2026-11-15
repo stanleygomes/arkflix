@@ -5,10 +5,11 @@
 
 ![Tela inicial do arkflix: Mario Kart 64 em destaque e a fileira de jogos com capas](site/img/inicio.webp)
 
-App desktop de jogos, filmes e séries para Linux, Windows e macOS (Go +
-Svelte), feito para controle e TV, com visual de cinema antigo. Filmes e
+App desktop de jogos, filmes, séries e músicas para Linux, Windows e macOS
+(Go + Svelte), feito para controle e TV, com visual de cinema antigo. Filmes e
 séries vêm do seu servidor [Jellyfin](https://jellyfin.org), com player
-embutido. Os jogos abrem no [RetroArch](https://www.retroarch.com)
+embutido; músicas, do [Navidrome](https://www.navidrome.org) (ou outro
+servidor Subsonic). Os jogos abrem no [RetroArch](https://www.retroarch.com)
 com oito cores, no [PPSSPP](https://www.ppsspp.org) e no
 [PCSX2](https://pcsx2.net): no Linux, os do [Flathub](https://flathub.org); no
 Windows e no macOS, os dos instaladores oficiais. Este repositório é só o app;
@@ -41,8 +42,12 @@ os emuladores vêm prontos.
 - Filmes e séries do Jellyfin: continuar assistindo, próximos episódios,
   temporadas, Minha lista e player embutido (controle, áudio, legendas e
   próximo episódio automático).
+- Músicas do Navidrome/Subsonic: artistas, álbuns, playlists, favoritas,
+  fila com aleatório e repetir, barrinha que segue em toda tela e cópia no PC
+  pra ouvir sem internet.
 - Perfis estilo Netflix, com PIN opcional e modo infantil; cada perfil vincula
-  a própria conta do Jellyfin e escolhe se sincroniza os saves do RomM.
+  a própria conta do Jellyfin e do Navidrome e escolhe se sincroniza os saves
+  do RomM.
 - Janela sem a moldura do sistema: barra de título própria no visual do app.
 - Configuração de controle com prévia ao vivo e opções de acessibilidade.
 - Guia rápido no botão Home, até por cima do jogo: voltar, salvar ou carregar
@@ -267,6 +272,39 @@ pulam 10 s, LB/RB 30 s, X abre áudio e legendas, B sai. O progresso vai pro
 servidor ao começar, a cada 10 s, ao pausar e ao sair. HTTP sem TLS só na rede
 de casa (localhost, IP privado, `.local`, `.lan`).
 
+**Músicas (Navidrome/Subsonic).** No topo do Início, "Músicas" é a terceira
+seção. A conta é por perfil (Você › Perfil › Editar perfil › Contas
+vinculadas, ou "Músicas · Navidrome" na tela de entrada): endereço, usuário e
+senha de um servidor Subsonic (Navidrome 0.64 ou o arkflix-server). A senha
+só confere o login: fica em `<pasta do perfil>/subsonic.json` (permissão 600)
+o par salgado do Subsonic (`t` = md5(senha + sal), `s`), e nenhuma chamada
+depois do login leva a senha. Áudio e capas passam pelo mesmo tipo de proxy
+em 127.0.0.1 dos filmes, que põe a autenticação: a interface nunca vê o
+token. Abas: Início (adicionados, tocados há pouco, mais tocados, favoritos,
+aleatório), Artistas (índice por letra), Álbuns (com ordem), Playlists,
+Favoritas e No PC; a busca global também acha artista, álbum e faixa. Na
+página do álbum, do artista e da playlist: tocar, aleatório, tocar a seguir,
+pôr na fila, favoritar e adicionar à playlist (criar, renomear, apagar, tirar
+e mudar faixa de lugar; no arkflix-server, são as mesmas listas do servidor).
+O áudio toca o arquivo original; se o sistema não abre o formato, pede mp3 ao
+servidor. Enquanto toca, uma barrinha fica embaixo de toda tela (faixa,
+tocar/pausar, próxima, progresso); "Tocando agora" (R3 ou R) tem a linha do
+tempo, a fila, aleatório, repetir e favorita. No controle, igual ao player de
+filmes: A toca/pausa, Start também, esquerda e direita na linha do tempo
+pulam 10 s, LB/RB trocam de faixa, Y favorita, X abre as opções da faixa, B
+volta. O servidor fica sabendo do que tocou (scrobble: "tocando" no começo,
+"tocou" depois de metade ou 4 min) e guarda a fila ao parar e ao sair, pra
+continuar de onde parou. Abrir um jogo ou começar um filme pausa a música, que
+volta depois. "Baixar pro PC" (álbum ou playlist) baixa os arquivos originais
+pra `~/Music/arkflix/<Artista>/<Álbum>/` (playlist: as faixas e um `.m3u8` em
+`Playlists/`), na Central, cancelável e continuando o que ficou pela metade;
+o que está no PC ganha o selo "No PC", toca do disco e abre sem internet.
+Conta admin num perfil adulto ganha Você › Músicas: escanear (acompanhado na
+Central), o último scan e os usuários (no Navidrome só leitura: ele cuida
+deles na interface web dele; no arkflix-server, o painel do Servidor arkflix
+cuida dos usuários e do envio de músicas). O perfil infantil ouve com a conta
+que o adulto vinculou, sem mexer em playlists, downloads nem no servidor.
+
 **Servidor arkflix.** Se a conta do Jellyfin do perfil (ou o RomM) for um
 `arkflix-server`, o app percebe sozinho (pelo `/arkflix/api/info`) e usa o
 mesmo token, sem guardar nada novo. Conta admin num perfil adulto ganha o item
@@ -279,8 +317,8 @@ aba Listas em Filmes e séries, fileiras no Início dos jogos e "Adicionar à
 lista" nas páginas (o perfil infantil só vê).
 
 **Primeira vez.** O app abre numa tela de entrada, em tela cheia: entrar com o
-servidor RomM (endereço, usuário e senha) ou jogar offline. Em seguida, monta o
-perfil.
+servidor RomM (endereço, usuário e senha), no Jellyfin, no Navidrome ou
+jogar offline. Em seguida, monta o perfil.
 
 **Perfis.** Na primeira vez, o app pede nome e avatar (34 personagens clássicos,
 de Pac-Man e Mario a Sonic e Mega Man, ou um desenho em pixel art). Com mais de
@@ -315,6 +353,7 @@ app/
 │   ├── importer/ archive/ isoinfo/  importação: detecção e cópia
 │   ├── launcher/           comando de cada emulador
 │   ├── jellyfin/           cliente do Jellyfin e proxy local de mídia
+│   ├── subsonic/           cliente Subsonic (Navidrome) e proxy local de áudio
 │   ├── romm/               cliente do RomM (jogos e saves no servidor)
 │   ├── arkserver/          cliente da API própria do arkflix-server (admin e listas)
 │   ├── gamepad/ input/     controle (evdev) e mapeamento pro RetroArch

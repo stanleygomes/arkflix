@@ -28,6 +28,10 @@ Leia o [README](README.md) antes. Resumo do que importa:
   em `internal/core/watch.go` (conta por perfil, `jellyfin.json` 0600). O token
   nunca vai pra interface: imagem e vídeo passam pelo proxy em 127.0.0.1. Teste
   com `fixture.FakeJellyfin` (também em `/fake-jellyfin` no `--fixture --test`).
+- Músicas: cliente Subsonic e proxy em `internal/subsonic`, ligação em
+  `internal/core/music.go` (conta por perfil, `subsonic.json` 0600 só com
+  t/s, nunca `p=`; cópias no PC em `musiclocal.go`). Teste com
+  `fixture.FakeSubsonic` (`/fake-navidrome` no `--fixture --test`).
 - arkflix-server: cliente em `internal/arkserver`, ligação em
   `internal/core/arkserver.go` (detecta pelo `/info`, usa o token do Jellyfin
   ou do RomM; contrato em `server/internal/api/admin/API.md`). Teste com
