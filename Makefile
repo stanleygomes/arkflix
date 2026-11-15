@@ -24,7 +24,7 @@ BUILDBOT  := https://buildbot.libretro.com/nightly/linux/x86_64/latest
 APT_DEPS := build-essential pkg-config curl unzip flatpak \
   libgtk-3-dev libwebkit2gtk-4.1-dev
 
-.PHONY: help deps emulators build app-deps app-web app desktop-entry run run-web \
+.PHONY: server check-server help deps emulators build app-deps app-web app desktop-entry run run-web \
         check check-app check-app-desktop check-emulators clean \
         release-notes release-binaries release-install package
 
@@ -126,6 +126,15 @@ check-emulators: ## Os 3 Flatpaks e os 8 cores estão instalados
 
 clean: ## Apaga o build
 	rm -rf $(BUILD)
+
+##@ Servidor (server/)
+
+server: ## Compila o arkflix-server em build/arkflix-server
+	cd server && CGO_ENABLED=0 go build -trimpath -o $(BUILD)/arkflix-server ./cmd/arkflix-server
+
+check-server: ## Servidor: vet, testes com race e os clientes do app contra o binário
+	cd server && test -z "$$(gofmt -l .)" && go vet ./... && go test -race ./...
+	cd app && go test -tags compat ./internal/compat/
 
 ##@ Release
 

@@ -39,6 +39,16 @@ Leia o [README](README.md) antes. Resumo do que importa:
   controle e teclado (`data-nav`).
 - Dependência nova (Go ou npm): versão exata, publicada há pelo menos duas semanas.
 
+## Servidor (server/)
+
+- `arkflix-server` substitui Jellyfin, Navidrome e RomM falando a API dos três
+  (leia `server/README.md`). Só lê as pastas de mídia; escreve só em `--data`.
+- Núcleo em `internal/{store,auth,library,media}`; cada API no seu pacote
+  (`internal/api/{jellyfin,subsonic,romm}`), com tabelas próprias via
+  `store.Register`. Nunca copie código do Jellyfin/Navidrome/RomM (GPL/AGPL).
+- Mudou o servidor? `make check-server` (inclui os clientes do app contra o
+  binário). Commits de `server/` não entram no changelog do app.
+
 ## Visual
 
 Segue a skill `retro-design` (Noemi), com estas decisões já tomadas:
