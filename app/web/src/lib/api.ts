@@ -45,6 +45,13 @@ import type {
   WatchDetails,
   WatchItem,
   WatchStream,
+  ArkInfo,
+  ArkKind,
+  ArkList,
+  ArkPlatform,
+  ArkStatus,
+  ArkUploadKind,
+  ArkUser,
 } from './types'
 
 type Service = Record<string, (...args: unknown[]) => Promise<unknown>>
@@ -230,4 +237,24 @@ export const api = {
     call<void>('WatchReport', event, id, session, source, position, paused),
   watchFavorite: (id: string, fav: boolean) => call<WatchItem>('WatchFavorite', id, fav),
   watchPlayed: (id: string, played: boolean) => call<WatchItem>('WatchPlayed', id, played),
+  // arkflix-server: administração e listas (com o token que o app já tem)
+  arkServer: () => call<ArkInfo>('ArkServer'),
+  arkStatus: () => call<ArkStatus>('ArkStatus'),
+  arkScan: () => call<void>('ArkScan'),
+  arkUsers: () => call<ArkUser[]>('ArkUsers'),
+  arkCreateUser: (name: string, password: string, admin: boolean) => call<ArkUser>('ArkCreateUser', name, password, admin),
+  arkSetPassword: (id: string, password: string) => call<ArkUser>('ArkSetPassword', id, password),
+  arkSetAdmin: (id: string, admin: boolean) => call<ArkUser>('ArkSetAdmin', id, admin),
+  arkDeleteUser: (id: string) => call<void>('ArkDeleteUser', id),
+  arkPickFiles: () => call<string[] | null>('ArkPickFiles'),
+  arkPlatforms: () => call<ArkPlatform[]>('ArkPlatforms'),
+  arkUpload: (kind: ArkUploadKind, fields: Record<string, string>, paths: string[]) => call<void>('ArkUpload', kind, fields, paths),
+  arkHide: (kind: ArkKind, id: string) => call<void>('ArkHide', kind, id),
+  arkLists: () => call<ArkList[]>('ArkLists'),
+  arkList: (id: string) => call<ArkList>('ArkList', id),
+  arkCreateList: (name: string) => call<ArkList>('ArkCreateList', name),
+  arkRenameList: (id: string, name: string) => call<ArkList>('ArkRenameList', id, name),
+  arkDeleteList: (id: string) => call<void>('ArkDeleteList', id),
+  arkListsFor: (kind: ArkKind, id: string) => call<ArkList[]>('ArkListsFor', kind, id),
+  arkSetInList: (list: string, kind: ArkKind, id: string, inList: boolean) => call<void>('ArkSetInList', list, kind, id, inList),
 }

@@ -28,6 +28,10 @@ Leia o [README](README.md) antes. Resumo do que importa:
   em `internal/core/watch.go` (conta por perfil, `jellyfin.json` 0600). O token
   nunca vai pra interface: imagem e vídeo passam pelo proxy em 127.0.0.1. Teste
   com `fixture.FakeJellyfin` (também em `/fake-jellyfin` no `--fixture --test`).
+- arkflix-server: cliente em `internal/arkserver`, ligação em
+  `internal/core/arkserver.go` (detecta pelo `/info`, usa o token do Jellyfin
+  ou do RomM; contrato em `server/internal/api/admin/API.md`). Teste com
+  `fixture.FakeArkServer` (`/fake-arkflix` no `--fixture --test`).
 - Nunca guarde senha: o login do RomM vira um token de dispositivo. Teste com o
   RomM falso (`fixture.FakeRomM`, também em `/fake-romm` no `--fixture --test`;
   aceita Range e fica lento com `ARKFLIX_FAKE_ROMM_SLOW=<ms>`). A fila de

@@ -205,6 +205,7 @@ func (s *Service) ConnectRemote(host, user, pass string) (RemoteInfo, error) {
 	s.remote.conn, s.remote.roms = conn, nil
 	s.remote.mu.Unlock()
 	s.startRemoteRefresh()
+	s.arkDetect(acc.Base)
 	return s.RemoteStatus(), nil
 }
 

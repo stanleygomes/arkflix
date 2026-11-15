@@ -15,6 +15,7 @@
   import { app, back, confirm, prompt, putList, toast } from '../lib/state.svelte'
   import type { Settings } from '../lib/types'
   import { saveSoon } from './settings/save.svelte'
+  import { loadArkLists } from '../lib/ark'
 
   let { source }: { source: string } = $props()
   let options = $state(false)
@@ -37,6 +38,11 @@
   const setSort = (key: string) => saveUI(key, filters)
   const toggleFilter = (id: string) => saveUI(sort, filters.includes(id) ? filters.filter((f) => f !== id) : [...filters, id])
   const clearFilters = () => saveUI(sort, [])
+
+  // lista do servidor: busca de novo (alguém pode ter mexido em outro aparelho)
+  $effect(() => {
+    if (source.startsWith('arklist:')) loadArkLists().catch((err) => toast((err as Error).message, 'error'))
+  })
 
   const listId = $derived(source.startsWith('list:') ? source.slice(5) : '')
   const smart = $derived(isSmart(app.lists.find((l) => l.id === listId)))

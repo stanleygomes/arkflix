@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/http/httputil"
 	"net/url"
+	"regexp"
 	"strings"
 	"sync"
 )
@@ -14,7 +15,8 @@ import (
 // Proxy serve imagens, vídeo, HLS e legendas do Jellyfin em 127.0.0.1 com o
 // token no cabeçalho: a interface nunca vê o token, não depende do CORS do
 // servidor nem esbarra em conteúdo misto (http em página segura). Só GET e
-// HEAD de /Items/ e /Videos/, atrás de um prefixo secreto por execução: outro
+// HEAD de /Items/ e /Videos/ (e a capa de item da API do arkflix-server,
+// /arkflix/api/items/<id>/image), atrás de um prefixo secreto por execução: outro
 // programa da máquina não usa a conta pelo proxy.
 type Proxy struct {
 	// Account dá a conta do perfil em uso (false = sem conta vinculada).
@@ -57,6 +59,9 @@ func (p *Proxy) Close() error {
 }
 
 var allowed = []string{"/Items/", "/Videos/"}
+
+// arkImage: a única rota da API do arkflix-server que passa (capa de item).
+var arkImage = regexp.MustCompile(`^/arkflix/api/items/[A-Za-z0-9_-]+/image$`)
 
 func (p *Proxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodOptions {
@@ -112,6 +117,9 @@ func (p *Proxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 func permitted(p string) bool {
 	if strings.Contains(p, "..") {
 		return false
+	}
+	if arkImage.MatchString(p) {
+		return true
 	}
 	for _, a := range allowed {
 		if strings.HasPrefix(p, a) {

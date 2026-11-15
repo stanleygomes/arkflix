@@ -178,6 +178,7 @@ func (s *Service) ConnectWatch(profile, host, user, pass string) (WatchInfo, err
 	if old != nil {
 		go s.watchLogout(old.Account)
 	}
+	s.arkDetect(acc.Base)
 	return watchInfo(l), nil
 }
 

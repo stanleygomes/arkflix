@@ -39,6 +39,8 @@
   import You from './screens/You.svelte'
   import Activity from './screens/Activity.svelte'
   import Watch from './screens/Watch.svelte'
+  import ArkListScreen from './screens/ArkList.svelte'
+  import { refreshArk } from './lib/ark'
   import Title from './screens/Title.svelte'
   import Player from './screens/Player.svelte'
 
@@ -126,6 +128,14 @@
     lastProfile = p ?? ''
   })
 
+  // arkflix-server do perfil: de novo ao trocar de perfil ou de conta
+  $effect(() => {
+    if (!app.ready) return
+    void app.profile?.current
+    void app.watch?.base
+    refreshArk()
+  })
+
   // som de troca de tela (o da primeira tela é o do boot)
   let lastNav = 0
   $effect(() => {
@@ -188,6 +198,8 @@
       <Watch />
     {:else if current.name === 'title'}
       <Title id={current.id} />
+    {:else if current.name === 'arklist'}
+      <ArkListScreen id={current.id} />
     {/if}
     </div>
     {/if}

@@ -22,6 +22,7 @@ const CANCELLABLE = [
   'emulators',
   'move',
   'meta',
+  'arkupload',
 ]
 
 /** Ainda não terminou (em andamento, na fila, esperando ou pausado). */

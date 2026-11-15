@@ -267,6 +267,17 @@ pulam 10 s, LB/RB 30 s, X abre áudio e legendas, B sai. O progresso vai pro
 servidor ao começar, a cada 10 s, ao pausar e ao sair. HTTP sem TLS só na rede
 de casa (localhost, IP privado, `.local`, `.lan`).
 
+**Servidor arkflix.** Se a conta do Jellyfin do perfil (ou o RomM) for um
+`arkflix-server`, o app percebe sozinho (pelo `/arkflix/api/info`) e usa o
+mesmo token, sem guardar nada novo. Conta admin num perfil adulto ganha o item
+Você › Servidor arkflix: estado (bibliotecas, scan, metadados, quem está
+usando), "Escanear agora", usuários (criar, trocar senha, admin, apagar) e,
+com o servidor gravável, enviar arquivos (filme, episódio, ROM, BIOS, música,
+legenda; em segundo plano, cancelável na Central) e "Esconder do servidor" na
+página do filme, da série e do jogo. As listas são do usuário do servidor:
+aba Listas em Filmes e séries, fileiras no Início dos jogos e "Adicionar à
+lista" nas páginas (o perfil infantil só vê).
+
 **Primeira vez.** O app abre numa tela de entrada, em tela cheia: entrar com o
 servidor RomM (endereço, usuário e senha) ou jogar offline. Em seguida, monta o
 perfil.
@@ -305,6 +316,7 @@ app/
 │   ├── launcher/           comando de cada emulador
 │   ├── jellyfin/           cliente do Jellyfin e proxy local de mídia
 │   ├── romm/               cliente do RomM (jogos e saves no servidor)
+│   ├── arkserver/          cliente da API própria do arkflix-server (admin e listas)
 │   ├── gamepad/ input/     controle (evdev) e mapeamento pro RetroArch
 │   ├── httpapi/            a mesma API por HTTP + eventos (SSE)
 │   └── fixture/            ambiente falso dos testes

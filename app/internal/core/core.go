@@ -77,6 +77,7 @@ type Window interface {
 	Hide()
 	Show()
 	PickFiles() ([]string, error)
+	PickAnyFiles(title string) ([]string, error)
 	ToggleFullscreen()
 	IsFullscreen() bool
 	ToggleMaximise()
@@ -102,6 +103,9 @@ func (noWindow) OpenFile(string) error {
 	return errors.New("abrir no sistema só no app desktop")
 }
 func (noWindow) PickFiles() ([]string, error) {
+	return nil, errors.New("seletor de arquivos só no app desktop")
+}
+func (noWindow) PickAnyFiles(string) ([]string, error) {
 	return nil, errors.New("seletor de arquivos só no app desktop")
 }
 
@@ -134,7 +138,8 @@ type GameView struct {
 	Broken     bool     `json:"broken"`
 	Edited     bool     `json:"edited"`
 	KidsOK     bool     `json:"kidsOk"`
-	Remote     bool     `json:"remote"` // só no servidor (baixar antes de jogar)
+	Remote     bool     `json:"remote"`   // só no servidor (baixar antes de jogar)
+	OnServer   bool     `json:"onServer"` // está no servidor RomM (baixado ou não)
 }
 
 // Options vem de quem inicia o app (main). Fonte, metadados e saves vazios
@@ -192,6 +197,7 @@ type Service struct {
 	cheevos  *cheevosState
 	wiki     *wikiState
 	watch    *watchState // filmes e séries (Jellyfin) por perfil
+	ark      *arkState   // arkflix-server: /info em cache por endereço
 
 	umu    sync.RWMutex
 	u      *user // perfil em uso
@@ -262,6 +268,7 @@ func New(opt Options) (*Service, error) {
 	s.cheevos = newCheevos(opt.Cache, opt.Version)
 	s.wiki = newWikiState(opt.Cache, opt.Version)
 	s.watch = newWatchState(s)
+	s.ark = newArkState()
 	if opt.Pads != nil {
 		opt.Pads.Subscribe(func(e gamepad.Event) { s.opt.Emitter.Emit("pad", e) })
 		opt.Pads.OnPadsChanged(func(p []gamepad.Pad) { s.opt.Emitter.Emit("pads", p) })
@@ -316,7 +323,7 @@ func (s *Service) view(e entry, st settings.State) GameView {
 		Players: e.info.Players, Favorite: st.Favorites[g.ID], Hidden: st.Hidden[g.ID], LastPlayed: st.LastPlay[g.ID], PlayTime: st.PlayTime[g.ID],
 		Plays: s.cur().plays[g.ID], HasSaves: e.hasSaves, Developer: e.info.Developer,
 		Rating: e.edit.Rating, Completed: e.edit.Completed, Broken: e.edit.Broken, Edited: !e.edit.Empty(),
-		KidsOK: e.edit.KidsOK, Remote: e.remote,
+		KidsOK: e.edit.KidsOK, Remote: e.remote, OnServer: e.romID > 0,
 	}
 	if e.info.Name != "" {
 		v.Name = e.info.Name

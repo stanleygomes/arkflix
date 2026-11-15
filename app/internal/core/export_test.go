@@ -77,3 +77,6 @@ func SetDownloadClock(s *Service, now func() time.Time) {
 	s.dl.mu.Unlock()
 	s.dlPump()
 }
+
+// SetArkScanPoll encurta a espera entre as conferências do scan.
+func SetArkScanPoll(d time.Duration) { arkScanPoll = d }
