@@ -120,14 +120,19 @@ func (a *api) routes(mux *http.ServeMux) {
 		a.assetRoutes(mux, k)
 	}
 
-	// coleções: não tem, mas o formato vale
-	a.handle(mux, "GET /api/collections", need(scopeCollectionsRead), emptyList)
-	a.handle(mux, "GET /api/collections/identifiers", need(scopeCollectionsRead), emptyList)
+	// coleções = listas (internal/lists); virtuais e inteligentes não tem
+	a.handle(mux, "GET /api/collections", need(scopeCollectionsRead), a.collections)
+	a.handle(mux, "GET /api/collections/identifiers", need(scopeCollectionsRead), a.collectionIDs)
+	a.handle(mux, "POST /api/collections", need(scopeCollectionsWrite), a.addCollection)
+	a.handle(mux, "PUT /api/collections/{id}", need(scopeCollectionsWrite), a.updateCollection)
+	a.handle(mux, "DELETE /api/collections/{id}", need(scopeCollectionsWrite), a.deleteCollection)
+	a.handle(mux, "POST /api/collections/{id}/roms", need(scopeCollectionsWrite), a.collectionRoms(true))
+	a.handle(mux, "DELETE /api/collections/{id}/roms", need(scopeCollectionsWrite), a.collectionRoms(false))
 	a.handle(mux, "GET /api/collections/virtual", need(scopeCollectionsRead), emptyList)
 	a.handle(mux, "GET /api/collections/virtual/identifiers", need(scopeCollectionsRead), emptyList)
 	a.handle(mux, "GET /api/collections/smart", need(scopeCollectionsRead), emptyList)
 	a.handle(mux, "GET /api/collections/smart/identifiers", need(scopeCollectionsRead), emptyList)
-	a.handle(mux, "GET /api/collections/{id}", need(scopeCollectionsRead), collectionNotFound)
+	a.handle(mux, "GET /api/collections/{id}", need(scopeCollectionsRead), a.getCollection)
 	a.handle(mux, "GET /api/collections/virtual/{id}", need(scopeCollectionsRead), collectionNotFound)
 	a.handle(mux, "GET /api/collections/smart/{id}", need(scopeCollectionsRead), collectionNotFound)
 

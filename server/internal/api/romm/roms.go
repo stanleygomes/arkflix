@@ -298,8 +298,17 @@ func parseRomQuery(r *http.Request, c *caller) (*romQuery, error) {
 	if term := strings.TrimSpace(r.URL.Query().Get("search_term")); term != "" {
 		add(`(instr(lower(i.name), lower(?)) > 0 OR instr(lower(i.rel_path), lower(?)) > 0)`, term, term)
 	}
-	// coleções não existem aqui: filtrar por uma = nada
-	for _, k := range []string{"collection_id", "virtual_collection_id", "smart_collection_id"} {
+	// coleção = lista (só as ROMs dela, se o usuário pode ver)
+	if v := r.URL.Query().Get("collection_id"); v != "" {
+		cid, err := strconv.ParseInt(v, 10, 64)
+		if err != nil {
+			return nil, errors.New("Invalid collection_id")
+		}
+		add(`i.id IN (SELECT li.item_id FROM lists_items li JOIN lists l ON l.id = li.list_id
+WHERE l.rid = ? AND (l.user_id = ? OR l.public = 1))`, cid, c.user.ID)
+	}
+	// virtuais e inteligentes não existem aqui: filtrar por uma = nada
+	for _, k := range []string{"virtual_collection_id", "smart_collection_id"} {
 		if r.URL.Query().Get(k) != "" {
 			add(`0 = 1`)
 		}
