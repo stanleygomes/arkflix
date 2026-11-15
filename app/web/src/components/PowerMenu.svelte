@@ -60,12 +60,14 @@
 
 {#if app.power}
   <div class="backdrop" in:shade out:shade={{ out: true }}>
-    <div class="dialog panel" in:panelIn out:panelOut role="dialog" aria-modal="true" aria-labelledby="power-title" data-nav-scope={app.confirm ? undefined : ''}>
+    <div class="dialog" in:panelIn out:panelOut role="dialog" aria-modal="true" aria-labelledby="power-title" data-nav-scope={app.confirm ? undefined : ''}>
       <h2 id="power-title">Energia</h2>
       <div class="options">
         <button class="btn" data-nav data-nav-default onclick={minimize}><Icon name="back" /> Minimizar</button>
         <button class="btn" data-nav onclick={toggle}><Icon name="sliders" /> {fullscreen ? 'Sair da tela cheia' : 'Tela cheia'}</button>
         <button class="btn danger" data-nav onclick={quit}><Icon name="power" /> Fechar o app</button>
+      </div>
+      <div class="actions">
         <button class="btn" data-nav onclick={close}>Cancelar</button>
       </div>
     </div>
@@ -73,28 +75,42 @@
 {/if}
 
 <style>
+  /* Diálogo sóbrio (noemi-ui): uma coluna de botões grandes, o perigoso
+     por último; Cancelar no rodapé. */
   .backdrop {
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, 0.65);
+    /* tinta (#24170f, o contorno do tema claro) a 55%, sem blur: o creme
+       do contorno escuro lavaria a tela */
+    background: color-mix(in srgb, var(--on-accent) 55%, transparent);
     display: grid;
     place-items: center;
+    padding: var(--safe);
     z-index: 85;
   }
   .dialog {
-    display: grid;
-    gap: 1rem;
-    min-width: 20rem;
-    padding: 1.4rem 1.8rem;
+    width: min(24rem, 100%);
+    background: var(--surface);
+    border: var(--edge) solid var(--outline);
+    border-radius: var(--radii-sm);
+    box-shadow: 8px 8px 0 var(--outline);
   }
   h2 {
-    font-size: 1.4rem;
+    font-size: 1.2rem;
+    padding: 1.1rem 1.25rem 0;
   }
   .options {
     display: grid;
-    gap: 0.7rem;
+    gap: 0.9rem;
+    padding: 1rem 1.25rem 1.4rem;
   }
   .options .btn {
     justify-content: flex-start;
+  }
+  .actions {
+    display: flex;
+    justify-content: flex-end;
+    padding: 1rem 1.25rem;
+    border-block-start: var(--edge) solid var(--outline);
   }
 </style>

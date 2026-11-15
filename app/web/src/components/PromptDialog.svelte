@@ -51,8 +51,9 @@
 
 {#if p}
   <div class="backdrop" in:shade out:shade={{ out: true }}>
-    <div class="dialog panel" in:panelIn out:panelOut role="dialog" aria-modal="true" aria-labelledby="prompt-title" data-nav-scope>
-      <h2 id="prompt-title">{p.title}</h2>
+    <div class="dialog" in:panelIn out:panelOut role="dialog" aria-modal="true" aria-labelledby="prompt-title" data-nav-scope>
+      <h2 id="prompt-title" class="head">{p.title}</h2>
+      <div class="body">
       <label class="sr-only" for="prompt-input">{p.title}</label>
       {#if p.multiline}
         <textarea
@@ -87,6 +88,7 @@
       {/if}
       {#if p.error}<p id="prompt-error" class="error" role="alert">{p.error}</p>{/if}
       <Keyboard bind:value={p.value} autofocus={!typing} max={p.max} />
+      </div>
       <div class="actions">
         <button class="btn" data-nav onclick={() => close(null)}>Cancelar</button>
         <button class="btn primary" data-nav disabled={busy} onclick={submit}>{p.ok}</button>
@@ -96,37 +98,50 @@
 {/if}
 
 <style>
+  /* Diálogo sóbrio (noemi-ui) com campo: cabeçalho em Bevan, corpo com o
+     campo e o teclado da tela, rodapé com linha e botões à direita. */
   .backdrop {
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, 0.7);
+    /* tinta (#24170f, o contorno do tema claro) a 55%, sem blur: o creme
+       do contorno escuro lavaria a tela */
+    background: color-mix(in srgb, var(--on-accent) 55%, transparent);
     display: grid;
     place-items: center;
+    padding: var(--safe);
     z-index: 110;
   }
   .dialog {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
+    max-width: 100%;
+    max-height: 100%;
+    overflow-y: auto;
+    background: var(--surface);
+    border: var(--edge) solid var(--outline);
+    border-radius: var(--radii-sm);
+    box-shadow: 8px 8px 0 var(--outline);
+  }
+  .head {
+    font-size: 1.2rem;
+    padding: 1.1rem 1.25rem 0;
+  }
+  .body {
+    display: grid;
+    gap: 0.9rem;
+    padding: 1rem 1.25rem 1.25rem;
   }
   textarea {
-    font: inherit;
-    color: var(--text);
-    background: color-mix(in srgb, var(--bg) 70%, #000);
-    border: 3px solid color-mix(in srgb, var(--text) 30%, var(--surface));
-    padding: 0.55rem 0.7rem;
     width: min(40rem, 80vw);
     resize: vertical;
   }
-  textarea:focus {
-    border-color: var(--accent);
-  }
   .error {
-    color: #ffb4b4;
+    color: var(--danger);
+    font-weight: 700;
   }
   .actions {
     display: flex;
     justify-content: flex-end;
-    gap: 0.8rem;
+    gap: 0.75rem;
+    padding: 1rem 1.25rem;
+    border-block-start: var(--edge) solid var(--outline);
   }
 </style>
