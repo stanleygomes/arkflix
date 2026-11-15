@@ -28,14 +28,14 @@ test('carregar o slot 1 passa --entryslot=1 pro RetroArch', async ({ page, app }
   await page.getByRole('button', { name: /Carregar Slot 1/ }).click()
   await expect(page.getByRole('dialog', { name: /Jogando Super Mario World/ })).toBeVisible()
   await expect(page.getByRole('dialog', { name: /Jogando/ })).toBeHidden({ timeout: 8000 })
-  expect(app.calls()).toContain('--entryslot=1')
+  await expect.poll(() => app.calls()).toContain('--entryslot=1')
 })
 
 test('continuar de onde parei liga o carregamento automático', async ({ page, app }) => {
   await openGame(page, app, 'Super Mario World')
   await page.getByRole('button', { name: 'Continuar de onde parei' }).click()
   await expect(page.getByRole('dialog', { name: /Jogando/ })).toBeHidden({ timeout: 8000 })
-  expect(app.calls()).toMatch(/retroarch-input\.cfg\|.*arkflix-resume\.cfg/)
+  await expect.poll(() => app.calls()).toMatch(/retroarch-input\.cfg\|.*arkflix-resume\.cfg/)
 })
 
 test('apagar ponto salvo pede confirmação e some do disco', async ({ page, app }) => {
@@ -66,7 +66,7 @@ test('PSP: save state achado pelo código da ISO e carregado no PPSSPP', async (
   await expect(page.locator('.files')).toContainText('ULUS10084DATA00')
   await page.getByRole('button', { name: /Carregar Slot 1/ }).click()
   await expect(page.getByRole('dialog', { name: /Jogando/ })).toBeHidden({ timeout: 8000 })
-  expect(app.calls()).toMatch(/ppsspp\|--fullscreen --state=.*ULUS10084_1\.00_0\.ppst .*\.iso/)
+  await expect.poll(() => app.calls()).toMatch(/ppsspp\|--fullscreen --state=.*ULUS10084_1\.00_0\.ppst .*\.iso/)
 })
 
 test('PS2: miniatura vem de dentro do .p2s e memory card aparece como compartilhado', async ({ page, app }) => {
@@ -75,7 +75,7 @@ test('PS2: miniatura vem de dentro do .p2s e memory card aparece como compartilh
   await expect(page.locator('.files')).toContainText('compartilhado entre jogos')
   await page.getByRole('button', { name: 'Jogar do início' }).click()
   await expect(page.getByRole('dialog', { name: /Jogando/ })).toBeHidden({ timeout: 8000 })
-  expect(app.calls()).toMatch(/pcsx2\|-batch -fullscreen -- .*FIFA Soccer 07 \(USA\)\.iso/)
+  await expect.poll(() => app.calls()).toMatch(/pcsx2\|-batch -fullscreen -- .*FIFA Soccer 07 \(USA\)\.iso/)
 })
 
 test.describe('emulador com erro', () => {

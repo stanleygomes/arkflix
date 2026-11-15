@@ -88,6 +88,6 @@ test('configurar este jogo: core, imagem e proporção só pra ele', async ({ pa
 
   await page.getByRole('button', { name: 'Jogar do início' }).click()
   await expect(page.getByRole('dialog', { name: /Jogando/ })).toBeHidden({ timeout: 8000 })
-  expect(app.calls()).toMatch(/retroarch\|.*retroarch-game\.cfg.*-L .*bsnes_libretro\.so/)
+  await expect.poll(() => app.calls()).toMatch(/retroarch\|.*retroarch-game\.cfg.*-L .*bsnes_libretro\.so/)
   expect(app.read(`${app.data}/retroarch-game.cfg`)).toContain('video_scale_integer = "true"')
 })
