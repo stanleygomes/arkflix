@@ -23,8 +23,8 @@ test('cobrinha liga depois de 5 min parado, joga sozinha e qualquer tecla só ac
   await page.clock.fastForward('01:05')
   await expect(saver(page)).toBeVisible()
   await expect(saver(page)).toHaveAttribute('data-mode', 'snake')
-  await page.clock.runFor(60_000) // ~700 passos
-  await expect(saver(page).locator('.score')).not.toContainText('SCORE 0000')
+  await page.clock.runFor(60_000) // 60 passos, um por segundo
+  await expect(saver(page).locator('.score')).not.toContainText('PLACAR 0000')
   await axe(page, 'protetor de tela')
 
   await page.keyboard.press('f') // seria "favoritar": aqui só acorda
@@ -53,7 +53,7 @@ test.describe('com jogo aberto', () => {
   })
 })
 
-test('vitrine com reduzir animações: capa parada, INSERT COIN e clique só acorda', async ({ page, app }) => {
+test('vitrine com reduzir animações: capa parada, Intervalo e clique só acorda', async ({ page, app }) => {
   await patchSettings(page, app, (s) => ({
     ...s,
     a11y: { ...s.a11y, reduceMotion: true },
@@ -63,7 +63,7 @@ test('vitrine com reduzir animações: capa parada, INSERT COIN e clique só aco
   await open(page, app)
   await page.clock.fastForward('01:05')
   await expect(saver(page)).toHaveAttribute('data-mode', 'showcase')
-  await expect(saver(page)).toContainText('INSERT COIN')
+  await expect(saver(page)).toContainText('Aperte qualquer botão')
   const img = saver(page).locator('img')
   const first = await img.getAttribute('src')
   expect(first).toMatch(/^\/media\/cover\//)
