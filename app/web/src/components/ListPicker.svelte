@@ -57,14 +57,14 @@
       <div class="checks" role="group" aria-label="Listas do jogo">
         {#each manual as l, i (l.id)}
           {@const inList = l.games.includes(gameId)}
-          <button class="check" role="checkbox" aria-checked={inList} data-nav data-nav-default={i === 0 ? '' : undefined} onclick={() => toggle(l.id, !inList)}>
-            <span class="box" aria-hidden="true"></span>{l.name}
-            <span class="muted">({l.games.length})</span>
+          <button class="choice" role="checkbox" aria-checked={inList} data-nav data-nav-default={i === 0 ? '' : undefined} onclick={() => toggle(l.id, !inList)}>
+            <span class="mark box" aria-hidden="true"></span>{l.name}
+            <span class="count">{l.games.length}</span>
           </button>
         {/each}
       </div>
     {:else}
-      <p class="muted">Nenhuma lista ainda.</p>
+      <p class="empty">Nenhuma lista ainda. Crie a primeira com “Nova lista”.</p>
     {/if}
     <div class="actions">
       <button class="btn" data-nav data-nav-default={manual.length ? undefined : ''} onclick={create}><Icon name="plus" /> Nova lista</button>
@@ -77,7 +77,7 @@
   .backdrop {
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, 0.65);
+    background: color-mix(in srgb, var(--bg) 78%, transparent);
     display: grid;
     place-items: center;
     z-index: 80;
@@ -86,36 +86,84 @@
     display: flex;
     flex-direction: column;
     gap: 1rem;
-    min-width: 24rem;
+    width: min(30rem, 100% - 2rem);
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 8px 8px 0 var(--outline);
+  }
+  h2 {
+    font-size: 1.25rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
   }
   .checks {
     display: grid;
-    gap: 0.4rem;
+    gap: 0.15rem;
   }
-  .check {
-    font: inherit;
-    color: var(--text);
-    background: color-mix(in srgb, var(--bg) 60%, var(--surface));
-    border: 3px solid transparent;
-    padding: 0.5rem 0.7rem;
+  .choice {
     display: flex;
-    gap: 0.6rem;
     align-items: center;
+    gap: 0.75rem;
+    min-height: 3rem;
+    padding: 0.4rem 0.8rem;
+    font: inherit;
+    font-size: 1.05rem;
+    line-height: 1.3;
+    text-align: start;
+    color: var(--text);
+    background: none;
+    border: 0;
+    border-radius: 4px;
     cursor: pointer;
-    text-align: left;
   }
-  .box {
-    width: 1rem;
-    height: 1rem;
-    border: 2px solid var(--text);
+  .choice:hover {
+    background: color-mix(in srgb, var(--accent) 14%, transparent);
+  }
+  .mark {
     flex: none;
+    position: relative;
+    width: 22px;
+    height: 22px;
+    background: var(--balloon);
+    border: var(--edge) solid var(--outline);
+    box-shadow: 2px 2px 0 var(--outline);
   }
-  .check[aria-checked='true'] .box {
+  .mark.box {
+    border-radius: 4px;
+  }
+  [aria-checked='true'] > .mark.box {
     background: var(--accent);
+  }
+  [aria-checked='true'] > .mark.box::after {
+    content: '';
+    position: absolute;
+    left: 4px;
+    top: 0;
+    width: 6px;
+    height: 11px;
+    border: solid var(--on-accent);
+    border-width: 0 3px 3px 0;
+    transform: rotate(45deg);
+  }
+  .count {
+    margin-inline-start: auto;
+    font-family: var(--font-mono);
+    font-size: 0.9rem;
+    font-variant-numeric: tabular-nums;
+    color: var(--muted);
+  }
+  .empty {
+    padding: 1rem;
+    color: var(--muted);
+    border: var(--edge) dashed var(--muted);
+    border-radius: var(--radii-sm);
   }
   .actions {
     display: flex;
-    gap: 0.8rem;
+    flex-wrap: wrap;
+    gap: 0.75rem;
     justify-content: flex-end;
+    padding-top: 1rem;
+    border-top: var(--edge) solid var(--outline);
   }
 </style>
