@@ -1,6 +1,6 @@
-// Animações de tela, diálogo e efeitos. Todas em degraus (steps), no clima
-// 16-bit, curtas e desligadas com "reduzir animações" (do app ou do sistema).
-// O que sai fica inerte: o foco do controle nunca cai numa tela de saída.
+// Animações de tela e diálogo (noemi-ui): em degraus, curtas, ligadas a um
+// evento e desligadas com "reduzir animações" (do app ou do sistema). O que
+// sai fica inerte: o foco do controle nunca cai numa tela de saída.
 
 export function reduced(): boolean {
   return (
@@ -9,70 +9,46 @@ export function reduced(): boolean {
   )
 }
 
-/** Arredonda o progresso em n degraus (cara de animação de 16 bits). */
+/** Arredonda o progresso em n degraus (animação desenhada, quadro a quadro). */
 export const stepped = (t: number, n: number) => Math.min(1, Math.floor(t * n) / n)
 
 type Css = { duration: number; delay?: number; css?: (t: number, u: number) => string }
 
-export type ScreenMotion = { kind: 'slide' | 'crt' | 'none'; dir: 1 | -1 }
+export type ScreenMotion = { kind: 'swap' | 'none'; dir: 1 | -1 }
 
-const SCREEN_MS = 240
-
-/** Entrada de tela: desliza na direção da navegação, ou liga como uma TV. */
+/** Entrada de tela: chega 8px de lado (na direção da navegação), em 3 degraus. */
 export function screenIn(_node: Element, p: ScreenMotion): Css {
   if (reduced() || p.kind === 'none') return { duration: 0 }
-  if (p.kind === 'crt') {
-    return {
-      duration: 320,
-      css: (t) => {
-        const s = stepped(t, 8)
-        // linha fina que abre na vertical e brilha antes de assentar
-        const y = s < 0.4 ? 0.01 : (s - 0.4) / 0.6
-        return `transform: scaleX(${0.6 + 0.4 * Math.min(1, s * 2)}) scaleY(${Math.max(0.01, y)}); filter: brightness(${1 + (1 - s) * 2.5});`
-      },
-    }
-  }
   return {
-    duration: SCREEN_MS,
-    css: (t) => `transform: translateX(${(1 - stepped(t, 6)) * 22 * p.dir}%); opacity: ${stepped(t, 6)};`,
+    duration: 150,
+    css: (t) => `transform: translateX(${(1 - stepped(t, 3)) * 8 * p.dir}px); opacity: ${stepped(t, 3)};`,
   }
 }
 
-/** Saída de tela: some pro lado oposto (ou apaga), e fica inerte. */
+/** Saída de tela: apaga em 2 degraus e fica inerte. */
 export function screenOut(node: Element, p: ScreenMotion): Css {
   ;(node as HTMLElement).inert = true
   if (reduced() || p.kind === 'none') return { duration: 0 }
-  return {
-    duration: SCREEN_MS,
-    css: (t) => `transform: translateX(${(1 - stepped(t, 6)) * -16 * p.dir}%); opacity: ${stepped(t, 6)};`,
-  }
+  return { duration: 100, css: (t) => `opacity: ${stepped(t, 2)};` }
 }
 
-/** Diálogo: nasce de uma linha neon que abre na vertical, com um piscar no fim. */
+/** Diálogo: cai de 12px em 3 degraus. */
 export function panelIn(_node: Element): Css {
   if (reduced()) return { duration: 0 }
-  return {
-    duration: 220,
-    css: (t) => {
-      const s = stepped(t, 6)
-      const y = Math.max(0.02, s < 0.3 ? 0.02 : (s - 0.3) / 0.7)
-      const flash = s > 0.8 && s < 1 ? 'brightness(1.8) hue-rotate(40deg)' : 'none'
-      return `transform: scaleY(${y}); filter: ${flash};`
-    },
-  }
+  return { duration: 180, css: (t) => `transform: translateY(${(1 - stepped(t, 3)) * -12}px); opacity: ${stepped(t, 3)};` }
 }
 
 export function panelOut(node: Element): Css {
   ;(node as HTMLElement).inert = true
   if (reduced()) return { duration: 0 }
-  return { duration: 160, css: (t) => `transform: scaleY(${Math.max(0.02, stepped(t, 4))}); opacity: ${stepped(t, 4)};` }
+  return { duration: 120, css: (t) => `transform: translateY(${(1 - stepped(t, 2)) * -12}px); opacity: ${stepped(t, 2)};` }
 }
 
 /** Fundo dos diálogos: escurece em degraus. */
 export function shade(node: Element, { out = false } = {}): Css {
   if (out) (node as HTMLElement).inert = true
   if (reduced()) return { duration: 0 }
-  return { duration: 180, css: (t) => `opacity: ${stepped(t, 4)};` }
+  return { duration: 150, css: (t) => `opacity: ${stepped(t, 3)};` }
 }
 
 /** Estrela que explode em pixels a partir do elemento (favoritar). */

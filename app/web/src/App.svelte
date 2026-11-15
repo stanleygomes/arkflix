@@ -2,15 +2,15 @@
   import { onMount, tick } from 'svelte'
   import Boot from './components/Boot.svelte'
   import Crt from './components/Crt.svelte'
-  import Synthwave from './components/Synthwave.svelte'
-  import { glitch, startAmbient } from './lib/glitch'
-  import { idle } from './lib/idle.svelte'
+  import { glitch } from './lib/glitch'
+  import { tubeMoment } from './lib/tube.svelte'
   import ConfirmDialog from './components/ConfirmDialog.svelte'
   import Guide from './components/Guide.svelte'
   import Playing from './components/Playing.svelte'
   import PromptDialog from './components/PromptDialog.svelte'
   import PinDialog from './components/PinDialog.svelte'
-  import PixelWipe from './components/PixelWipe.svelte'
+  import Iris from './components/Iris.svelte'
+  import Sketch from './components/Sketch.svelte'
   import { screenIn, screenOut, type ScreenMotion } from './lib/motion'
   import PowerMenu from './components/PowerMenu.svelte'
   import Screensaver from './components/Screensaver.svelte'
@@ -44,16 +44,12 @@
 
   const current = $derived(screen())
 
-  // chão synthwave só atrás das telas de jogo (nunca atrás de formulário)
-  const FLOOR = new Set(['home', 'profiles', 'welcome'])
-
-  // telas "especiais" ligam como uma TV; o resto desliza na direção da navegação
-  const CRT = new Set(['you', 'profiles', 'welcome'])
-  function motionFor(name: string): ScreenMotion {
+  // troca de tela: chega de lado, na direção da navegação; no recomeço
+  // (trocar de perfil, entrar no app) quem cobre é a íris
+  function motionFor(): ScreenMotion {
     const { dir } = app.nav
-    if (dir === 'reset') return { kind: 'none', dir: 1 } // o mosaico em blocos cobre
-    if (dir === 'fwd' && CRT.has(name)) return { kind: 'crt', dir: 1 }
-    return { kind: 'slide', dir: dir === 'back' ? -1 : 1 }
+    if (dir === 'reset') return { kind: 'none', dir: 1 }
+    return { kind: 'swap', dir: dir === 'back' ? -1 : 1 }
   }
 
   onMount(async () => {
@@ -96,13 +92,11 @@
       } else {
         const min = Math.round((e.seconds ?? 0) / 60)
         toast(min > 0 ? `${e.name}: ${min} min jogados` : `${e.name} fechado`, 'ok')
-        glitch('hold') // a imagem rola ao desligar o jogo
+        tubeMoment('off', 'Fim de jogo') // a TV desliga junto com o jogo
       }
       app.games = await api.refresh()
     })
     startInput(native, padsChanged)
-    // glitches de ambiente: nunca com protetor de tela ou jogo aberto
-    startAmbient(() => idle.active || !!app.playing)
     watchDownloads()
     watchTasks()
     await tick()
@@ -118,15 +112,13 @@
     body.toggle('high-contrast', a.highContrast)
     body.toggle('reduce-motion', a.reduceMotion)
     document.documentElement.classList.toggle('reduce-motion', a.reduceMotion)
-    body.toggle('scanlines', a.scanlines && !a.highContrast)
-    body.toggle('no-pixel', !a.pixelTitles)
     // perfil infantil tem o mesmo visual: só os jogos são filtrados
     document.documentElement.style.setProperty('--font-scale', String(a.fontScale))
     setReducedMotion(a.reduceMotion)
     configure(a)
   })
 
-  // trocar de perfil desmagnetiza o tubo
+  // trocar de perfil desmagnetiza a imagem
   let lastProfile: string | undefined
   $effect(() => {
     const p = app.profile?.current
@@ -140,7 +132,6 @@
     const seq = app.nav.seq
     if (seq !== lastNav && lastNav !== 0) {
       play('swoosh')
-      glitch('snow') // chuvisco rápido na troca de canal
     }
     lastNav = seq || -1
   })
@@ -161,14 +152,12 @@
 {:else if !app.ready}
   <main class="loading" aria-busy="true"><p class="pixel">Carregando…</p></main>
 {:else}
-  <!-- com o protetor de tela ligado, o chão sai (nada animando por trás) -->
-  {#if FLOOR.has(current.name) && !idle.active}<Synthwave />{/if}
   {#key app.stack.length + current.name + ('id' in current ? (current.id ?? '') : current.name === 'library' ? current.source : '') + (app.profile?.current ?? '')}
     {#if current.name === 'player'}
       <!-- o player ocupa a tela inteira: fora da camada (margem do tubo, transições) -->
       <Player id={current.id} start={current.start ?? -1} />
     {:else}
-    <div class="layer" in:screenIn={motionFor(current.name)} out:screenOut={motionFor(current.name)}>
+    <div class="layer" in:screenIn={motionFor()} out:screenOut={motionFor()}>
     {#if current.name === 'home'}
       <Home />
     {:else if current.name === 'game'}
@@ -211,12 +200,13 @@
 <ConfirmDialog />
 <PromptDialog />
 <PinDialog />
-<PixelWipe />
+<Iris />
 <PowerMenu />
 <Guide />
 <Screensaver />
 <Restarting />
-<Crt paused={idle.active} />
+<Crt />
+<Sketch />
 {#if app.ready}<Boot />{/if}
 
 <style>

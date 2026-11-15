@@ -51,22 +51,25 @@ Leia o [README](README.md) antes. Resumo do que importa:
 
 ## Visual
 
-Segue a skill `retro-design` (Noemi), com estas decisões já tomadas:
+Segue a skill `noemi-ui` (Noemi): neobrutalismo sóbrio com tempero de desenho
+animado dos anos 30. Decisões já tomadas:
 
-- **Monitor CRT no app inteiro** (`components/Crt.svelte`): moldura, cantos,
-  bojo, reflexo, grão e linhas que somem no centro. Separação de cor e brilho
-  de fósforo só nos títulos (`h1`) e no foco, nunca no texto corrido.
-- **Chão synthwave** (`components/Synthwave.svelte`) só no Início, Perfis e
-  Boas-vindas (lista `FLOOR` no `App.svelte`). Nunca atrás de formulário.
-- **Glitch analógico** (`lib/glitch.ts`): por evento (erro = estática,
-  trocar perfil = desmagnetizar, fechar jogo = rolagem, trocar tela =
-  chuvisco) e ambiente (títulos a cada 4-9 s, tela a cada 12-20 s).
-  Só em títulos (h1/h2/h3, `.pixel`): texto corrido fica limpo.
-- **Neobrutalismo**: botão pílula com sombra dura que sobe/afunda, painel como
-  janela de RPG 16-bit, um selo "NOVO" por tela, um número gigante (Estatísticas).
-- Fontes do projeto mantidas (Atkinson no texto). Só tema escuro. Paleta neon
-  por console mantida; sombras duras na cor dela, sem blur.
-- Alto contraste desliga tubo, chão e glitch; "reduzir animações" congela tudo.
+- **Tema escuro de cinema antigo, fixo** (tokens em `app.css`, `--n-*`).
+  Três acentos e um sentido cada: mostarda = ação/destaque, verde-azulado =
+  ok/info/foco, vermelho = erro. **Sem cor por console** (`applyPalette` só
+  limpa); o console aparece como etiqueta/nome, nunca pintando a tela.
+- Fontes locais (`@fontsource`): Limelight (títulos), Bevan (rótulos e
+  botões), Alegreya (texto), Special Elite (meta, etiquetas), Courier Prime
+  (código). Nada de fonte pixel, neon ou synthwave.
+- Sóbrio por padrão (borda reta 3px, `--radii-sm`, sombra dura `--hard`); no
+  máximo 2 tipos de componente de desenho (`.sketched`, `.stamp`...) por tela.
+- **CRT só em momento** (`lib/tube.svelte.ts`): abrir o app, começar filme,
+  fechar jogo (~1,6 s, depois some). **Glitch só por evento**: erro =
+  estática, trocar perfil = desmagnetizar. Nada de ambiente.
+- **Nada anima em loop** (WebKit repinta e gasta CPU): animação em degraus
+  (`steps`), curta, ligada a um evento. Troca de tela = swap; recomeço = íris.
+- Sons de navegação ficam. Alto contraste troca os tokens; "reduzir
+  animações" desliga tudo.
 
 ## Git: commit + push sempre
 

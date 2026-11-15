@@ -1,81 +1,78 @@
-/* Visual: monitor CRT + synthwave (skill retro-design da Noemi). O app inteiro
-   roda dentro de um tubo de TV (components/Crt.svelte); atrás das telas de
-   jogo corre o chão synthwave (components/Synthwave.svelte). Estrutura de
-   impresso/16-bit: borda grossa, sombra dura (sem blur), janelas de RPG. O
-   neon vem da paleta do console em foco (lib/palette.ts) e só brilha no que
-   está em destaque (título, foco). Texto corrido na Atkinson Hyperlegible. */
+/* Visual: noemi-ui (skill da Noemi): neobrutalismo sóbrio com tempero de
+   desenho animado dos anos 30. Tema escuro de cinema antigo, três acentos
+   (vermelho = erro, mostarda = ação/destaque, verde-azulado = ok/info),
+   borda reta de 3px, cantos pequenos e irregulares, sombra dura sem blur.
+   Componentes de desenho (contorno à mão: .sketched) no máximo 2 tipos por
+   tela. Nada anima em loop: o app fica parado (WebKit gasta CPU à toa).
+   CRT só em momentos curtos (components/Crt.svelte); glitch só por evento. */
 
-@font-face {
-  font-family: 'Pixelify Sans';
-  src: url('/fonts/PixelifySans.ttf') format('truetype');
-  font-weight: 400 700;
-  font-display: swap;
-}
-@font-face {
-  font-family: 'Press Start 2P';
-  src: url('/fonts/PressStart2P-Regular.ttf') format('truetype');
-  font-display: swap;
-}
-@font-face {
-  font-family: 'Bungee';
-  src: url('/fonts/Bungee-Regular.ttf') format('truetype');
-  font-display: swap;
-}
-@font-face {
-  font-family: 'VT323';
-  src: url('/fonts/VT323-Regular.ttf') format('truetype');
-  font-display: swap;
-}
-@font-face {
-  font-family: 'Atkinson Hyperlegible';
-  src: url('/fonts/AtkinsonHyperlegible-Regular.ttf') format('truetype');
-  font-weight: 400;
-  font-display: swap;
-}
-@font-face {
-  font-family: 'Atkinson Hyperlegible';
-  src: url('/fonts/AtkinsonHyperlegible-Bold.ttf') format('truetype');
-  font-weight: 700;
-  font-display: swap;
-}
+@import '@fontsource/limelight/400.css';
+@import '@fontsource/bevan/400.css';
+@import '@fontsource/alegreya/400.css';
+@import '@fontsource/alegreya/400-italic.css';
+@import '@fontsource/alegreya/700.css';
+@import '@fontsource/special-elite/400.css';
+@import '@fontsource/courier-prime/400.css';
+@import '@fontsource/courier-prime/700.css';
 
 :root {
-  --bg: #050008;
-  --surface: #13061c;
-  --accent: #ff3cac;
-  --accent-2: #18f0ff;
-  --text: #e8fbff;
-  --muted: #c0b0cc;
-  --on-accent: #111111;
-  --focus: #ffe600; /* seleção de fliperama: amarelo, igual em todo console */
-  --shadow: #000000;
+  /* tokens da noemi-ui, versão escura (cinema antigo) */
+  --n-bg: #17110c;
+  --n-card: #241a13;
+  --n-balloon: #2e2219;
+  --n-text: #f1e4c6;
+  --n-text-soft: #b9a588;
+  --n-outline: #e9daba;
+  --n-red: #e0574a;
+  --n-mustard: #e8b34a;
+  --n-teal: #5fa8a1;
+  --n-on-mustard: #24170f;
+
+  /* nomes que o app inteiro já usa, apontando pros tokens */
+  --bg: var(--n-bg);
+  --surface: var(--n-card);
+  --balloon: var(--n-balloon);
+  --accent: var(--n-mustard);
+  --accent-2: var(--n-teal);
+  --danger: var(--n-red);
+  --text: var(--n-text);
+  --muted: var(--n-text-soft);
+  --outline: var(--n-outline);
+  --on-accent: var(--n-on-mustard);
+  --focus: var(--n-teal);
+  --shadow: var(--n-outline);
+
   --font-scale: 1;
-  --px: 4px;
-  --font-body: 'Atkinson Hyperlegible', system-ui, sans-serif;
-  --font-title: 'Press Start 2P', 'Pixelify Sans', monospace;
-  /* títulos principais: letreiro de fliperama; subtítulos e rótulos: pixel legível */
-  --font-display: 'Bungee', 'Pixelify Sans', sans-serif;
-  --font-sub: 'Pixelify Sans', 'Press Start 2P', sans-serif;
-  --font-hud: 'VT323', 'Press Start 2P', monospace;
-  /* sombras duras na cor do console escurecida (sem blur: impresso/16-bit) */
-  --press: color-mix(in srgb, var(--accent) 38%, #000);
-  --press-2: color-mix(in srgb, var(--accent-2) 32%, #000);
-  --glow: 5px 5px 0 var(--press);
-  --glow-2: 5px 5px 0 var(--press-2);
-  /* fósforo: brilho só no que está em destaque (foco) */
-  --glow-focus: 0 0 1px var(--focus), 0 0 8px var(--focus), 0 0 22px color-mix(in srgb, var(--focus) 45%, transparent);
+  --font-title: 'Limelight', serif;
+  --font-display: 'Limelight', serif;
+  --font-label: 'Bevan', serif;
+  --font-sub: 'Bevan', serif;
+  --font-body: 'Alegreya', serif;
+  --font-hud: 'Special Elite', monospace;
+  --font-mono: 'Courier Prime', monospace;
+
   --edge: 3px;
-  --tube: clamp(6px, 0.9vmin, 12px); /* espessura da moldura do tubo */
-  /* área segura: o conteúdo fica longe da curva e dos cantos escuros do tubo
-     (como a margem de segurança das TVs); o fundo continua até a borda */
-  --safe: clamp(16px, 2.6vmin, 36px);
-  --ease: steps(4, end);
-  --t: 160ms;
+  --radii-sm: 8px 10px 7px 9px / 9px 7px 10px 8px;
+  --radii: 16px 20px 14px 18px / 18px 14px 20px 16px;
+  --hard: 4px 4px 0 var(--outline);
+  --hard-sm: 3px 3px 0 var(--outline);
+  --hard-up: 6px 6px 0 var(--outline);
+  --hard-cartoon: 6px 7px 0 var(--outline);
+  /* compatibilidade com os componentes antigos */
+  --press: var(--outline);
+  --press-2: var(--outline);
+  --glow: var(--hard);
+  --glow-2: var(--hard);
+  --glow-focus: none;
+  --tube: 0px;
+  --safe: clamp(16px, 2.2vmin, 32px);
+  --ease: steps(2, end);
+  --t: 120ms;
   color-scheme: dark;
 }
 
 html {
-  font-size: calc(16px * var(--font-scale));
+  font-size: calc(17px * var(--font-scale));
   background: var(--bg);
 }
 
@@ -89,68 +86,62 @@ body {
   margin: 0;
   min-height: 100vh;
   font-family: var(--font-body);
+  line-height: 1.55;
   color: var(--text);
+  /* duas manchas de aquarela bem leves: mostarda em cima à esquerda,
+     verde-azulado embaixo à direita */
   background:
-    radial-gradient(ellipse at 50% -10%, color-mix(in srgb, var(--accent) 14%, transparent), transparent 55%),
+    radial-gradient(ellipse at 0% 0%, rgb(232 179 74 / 0.13), transparent 55%),
+    radial-gradient(ellipse at 100% 100%, rgb(95 168 161 / 0.12), transparent 55%),
     var(--bg);
-  transition: background-color 300ms;
   overflow: hidden;
   -webkit-font-smoothing: antialiased;
 }
 
-body.no-pixel {
-  --font-title: 'Atkinson Hyperlegible', system-ui, sans-serif;
-  --font-hud: 'Atkinson Hyperlegible', system-ui, sans-serif;
-}
-
+/* títulos de cartaz: Limelight em mostarda, contorno e sombra dura */
 h1,
-h2,
-h3,
-.pixel {
+.title {
   font-family: var(--font-title);
   font-weight: 400;
-  /* a Press Start 2P é larga: normaliza pro tamanho de uma fonte comum */
-  font-size-adjust: 0.42;
-  line-height: 1.35;
-  letter-spacing: 0.04em;
+  line-height: 1.05;
+  letter-spacing: 0.01em;
+  color: var(--accent);
+  -webkit-text-stroke: 1.5px var(--n-on-mustard);
+  paint-order: stroke fill;
+  text-shadow: 3px 3px 0 var(--outline);
   margin: 0;
-}
-/* mix: Bungee nos títulos (h1), Pixelify nos subtítulos e rótulos; a Press
-   Start 2P fica no logo, no placar e nos detalhes pequenos de fliperama */
-h1,
-h1.pixel {
-  font-family: var(--font-display);
-  font-size-adjust: none;
-  line-height: 1.1;
-  letter-spacing: 0.02em;
 }
 h2,
 h3,
-:is(h2, h3).pixel,
-.sub {
-  font-family: var(--font-sub);
-  font-weight: 700;
-  font-size-adjust: none;
-  letter-spacing: 0.03em;
+.sub,
+.pixel:not(h1) {
+  font-family: var(--font-label);
+  font-weight: 400;
+  line-height: 1.2;
+  letter-spacing: 0.02em;
+  margin: 0;
 }
-body.no-pixel :is(h1, h2, h3, .pixel, .sub) {
-  font-family: var(--font-body);
-  font-size-adjust: none;
-  font-weight: 700;
-}
-/* título = fósforo aceso: brilho quente + separação de cor do tubo */
-h1 {
-  text-shadow: 0 0 1px var(--accent), 0 0 8px color-mix(in srgb, var(--accent) 80%, transparent), 0 0 22px color-mix(in srgb, var(--accent) 40%, transparent), 3px 3px 0 #000;
-  filter: url(#crt-chroma);
-}
-.hud {
-  font-family: var(--font-hud);
+/* .pixel ficou de nome antigo: hoje é o rótulo em Bevan */
+.label {
+  font-family: var(--font-label);
+  font-size: 0.78rem;
+  text-transform: uppercase;
   letter-spacing: 0.06em;
+}
+.hud,
+.meta {
+  font-family: var(--font-hud);
+  letter-spacing: 0.04em;
+}
+.mono,
+code,
+kbd {
+  font-family: var(--font-mono);
 }
 
 p {
   margin: 0;
-  line-height: 1.5;
+  line-height: 1.55;
 }
 
 .muted {
@@ -169,69 +160,81 @@ p {
   border: 0;
 }
 
-/* Botões: pílula de borda grossa e sombra dura; sobe no hover, afunda ao apertar. */
+/* Botão sóbrio: retângulo de cantos irregulares, borda reta e sombra dura.
+   Sobe no hover/foco, afunda na sombra ao apertar. */
 .btn {
-  font: inherit;
-  font-weight: 700;
-  font-size: 1.05rem;
-  color: var(--accent-2);
-  background: color-mix(in srgb, var(--bg) 85%, transparent);
-  border: var(--edge) solid var(--accent-2);
-  border-radius: 999px;
-  padding: 0.75rem 1.4rem;
-  box-shadow: var(--glow-2);
+  font-family: var(--font-label);
+  font-weight: 400;
+  font-size: 0.85rem;
+  line-height: 1;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text);
+  background: var(--surface);
+  border: var(--edge) solid var(--outline);
+  border-radius: var(--radii-sm);
+  padding: 0.75rem 1.25rem;
+  box-shadow: var(--hard);
   cursor: pointer;
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  /* alvo grande pra todo mundo: é app de TV, de controle na mão */
-  min-height: 3.4rem;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  transition: transform var(--t) var(--ease), box-shadow var(--t) var(--ease), background var(--t) var(--ease);
+  /* alvo grande: é app de TV, de controle na mão */
+  min-height: 3.2rem;
+  transition:
+    transform var(--t) var(--ease),
+    box-shadow var(--t) var(--ease),
+    background var(--t) var(--ease);
 }
-.btn:hover {
-  background: color-mix(in srgb, var(--accent-2) 14%, var(--bg));
+.btn:hover,
+.btn[data-nav]:focus-visible {
   transform: translate(-2px, -2px);
-  box-shadow: 7px 7px 0 var(--press-2);
+  box-shadow: var(--hard-up);
 }
 .btn:active {
-  transform: translate(5px, 5px);
+  transform: translate(4px, 4px);
   box-shadow: none;
-}
-.btn.primary:hover {
-  filter: brightness(1.06);
-  box-shadow: 7px 7px 0 var(--press);
 }
 .btn.primary {
   background: var(--accent);
   color: var(--on-accent);
-  border-color: var(--accent);
-  box-shadow: var(--glow);
 }
 .btn.danger {
-  background: transparent;
-  color: #ff6b81;
-  border-color: #ff6b81;
-  box-shadow: 5px 5px 0 #4a1019;
+  background: var(--danger);
+  color: var(--bg);
+}
+.btn.flat {
+  box-shadow: none;
+}
+.btn.flat:hover {
+  transform: none;
+  background: color-mix(in srgb, var(--outline) 8%, var(--surface));
 }
 .btn.small {
-  padding: 0.5rem 1rem;
-  min-height: 2.75rem;
-  font-size: 0.95rem;
+  padding: 0.45rem 0.8rem;
+  min-height: 2.6rem;
+  font-size: 0.75rem;
+  box-shadow: var(--hard-sm);
 }
 .btn[aria-pressed='true'],
 .btn[aria-checked='true'] {
-  background: var(--accent-2);
-  color: #050008;
-}
-.btn:disabled {
-  opacity: 0.45;
+  transform: translate(4px, 4px);
   box-shadow: none;
-  cursor: default;
+  background: var(--accent-2);
+  color: var(--bg);
+}
+.btn:disabled,
+.btn[aria-disabled='true'] {
+  transform: none;
+  box-shadow: none;
+  background: var(--surface);
+  color: var(--muted);
+  border-color: var(--muted);
+  cursor: not-allowed;
 }
 
-/* Foco: o que mais importa num app de controle. Borda grossa + cursor ▶ piscando. */
+/* Foco: o que mais importa num app de controle. Anel verde-azulado de 3px e
+   o item sobe com a sombra maior (dá pra ver do sofá). */
 [data-nav] {
   outline: none;
   position: relative;
@@ -239,97 +242,145 @@ p {
 [data-nav]:focus-visible,
 [data-nav]:focus {
   outline: 3px solid var(--focus);
-  outline-offset: 4px;
-  box-shadow: var(--glow-focus);
+  outline-offset: 3px;
   z-index: 2;
 }
-.btn[data-nav]:focus {
-  border-color: var(--focus);
-}
+/* cursor de programa de cinema: ▶ ao lado do item em foco, parado */
 [data-nav].cursor:focus::before {
   content: '▶' / '';
   position: absolute;
-  left: -1.6rem;
+  inset-inline-start: -1.5rem;
   top: 50%;
   transform: translateY(-50%);
-  color: var(--focus);
-  font-family: var(--font-title);
-  text-shadow: 0 0 8px var(--focus);
-  animation: blink 0.8s steps(2, start) infinite;
-}
-@keyframes blink {
-  to {
-    visibility: hidden;
-  }
+  color: var(--accent);
+  font-family: var(--font-label);
 }
 
-input[type='text'] {
+input[type='text'],
+input[type='password'],
+input[type='search'],
+input[type='number'],
+textarea,
+select {
   font: inherit;
+  font-size: 1rem;
   color: var(--text);
-  background: #000;
-  border: var(--edge) solid var(--accent-2);
-  border-radius: 10px;
-  box-shadow: var(--glow-2);
-  padding: 0.55rem 0.8rem;
+  background: var(--balloon);
+  border: var(--edge) solid var(--outline);
+  border-radius: var(--radii-sm);
+  box-shadow: var(--hard-sm);
+  padding: 0.6rem 0.75rem;
   width: 100%;
   min-height: 2.75rem;
+  transition:
+    border-color var(--t) var(--ease),
+    box-shadow var(--t) var(--ease);
 }
-input[type='text']:focus {
+:is(input, textarea, select)::placeholder {
+  color: var(--muted);
+  font-style: italic;
+}
+:is(input[type='text'], input[type='password'], input[type='search'], input[type='number'], textarea, select):focus {
+  outline: none;
   border-color: var(--focus);
+  box-shadow: 4px 4px 0 var(--focus);
+}
+[aria-invalid='true'] {
+  border-color: var(--danger) !important;
+  box-shadow: 3px 3px 0 var(--danger) !important;
 }
 
-/* janela de RPG 16-bit: degradê da superfície, borda clara, anel escuro por
-   fora, brilho fino por dentro e sombra dura na cor do console */
+/* Cartão/painel sóbrio: fundo de cartão, borda reta, sombra dura. */
 .panel {
-  background: linear-gradient(color-mix(in srgb, var(--surface) 92%, var(--accent) 8%), var(--surface));
-  border: var(--edge) solid color-mix(in srgb, var(--accent) 70%, #fff);
-  border-radius: 8px;
-  box-shadow:
-    0 0 0 3px #000,
-    inset 0 0 0 2px color-mix(in srgb, #fff 10%, transparent),
-    8px 8px 0 3px var(--press);
+  background: var(--surface);
+  border: var(--edge) solid var(--outline);
+  border-radius: var(--radii-sm);
+  box-shadow: var(--hard);
   padding: 1.25rem;
 }
 
+/* Etiqueta (badge): datilografada, sem sombra. */
 .chip {
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
+  min-height: 1.4rem;
   font-family: var(--font-hud);
-  font-size: 1.15rem;
-  letter-spacing: 0.05em;
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
-  padding: 0 0.55rem;
-  border: var(--edge) solid color-mix(in srgb, var(--accent-2) 70%, transparent);
-  border-radius: 6px;
-  color: var(--accent-2);
+  padding: 0.25rem 0.5rem 0.1rem;
+  border: 2px solid var(--outline);
+  border-radius: 4px;
+  color: var(--text);
+  background: var(--surface);
+}
+.chip.ok {
+  background: var(--accent-2);
+  color: var(--bg);
+}
+.chip.warn {
+  background: var(--accent);
+  color: var(--on-accent);
+}
+.chip.error {
+  background: var(--danger);
+  color: var(--bg);
 }
 
-/* Linhas de TV: sutis, por cima de tudo, sem pegar clique. */
-body.scanlines::after {
+/* 🎬 Contorno à mão (componentes de desenho): a borda vai num ::before com
+   o filtro #sketch (components/Sketch.svelte), nunca no texto. */
+.sketched {
+  position: relative;
+  border-color: transparent !important;
+  border-radius: var(--radii);
+  box-shadow: var(--hard-cartoon);
+}
+.sketched::before {
   content: '';
-  position: fixed;
-  inset: 0;
+  position: absolute;
+  inset: calc(var(--edge) * -1);
+  border: var(--edge) solid var(--outline);
+  border-radius: inherit;
+  filter: url(#sketch);
   pointer-events: none;
-  z-index: 9999;
-  background: repeating-linear-gradient(to bottom, rgba(0, 0, 0, 0.32) 0 2px, transparent 2px 4px);
+}
+
+/* 🎬 Carimbo: inclinado, borda dupla, letras em Bevan. Um por tela. */
+.stamp {
+  display: inline-block;
+  font-family: var(--font-label);
+  font-size: 0.85rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--danger);
+  border: var(--edge) double var(--danger);
+  border-radius: var(--radii-sm);
+  padding: 0.3rem 0.7rem;
+  transform: rotate(-4deg);
 }
 
 body.high-contrast {
+  --bg: #000000;
+  --surface: #111111;
+  --balloon: #111111;
+  --accent: #ffd400;
+  --accent-2: #7fdcff;
+  --danger: #ff6b6b;
+  --text: #ffffff;
+  --muted: #e6e6e6;
+  --outline: #ffffff;
+  --focus: #ffd400;
+  --on-accent: #000000;
   background: var(--bg);
-  --glow: none;
-  --glow-2: none;
-  --glow-focus: none;
 }
-body.high-contrast h1 {
-  box-shadow: none;
+body.high-contrast h1,
+body.high-contrast .title {
+  -webkit-text-stroke: 0;
   text-shadow: none;
-  filter: none;
 }
-body.high-contrast .btn,
-body.high-contrast .panel,
-body.high-contrast input[type='text'] {
-  border-color: var(--text);
+body.high-contrast .sketched::before {
+  filter: none;
 }
 body.high-contrast [data-nav]:focus {
   outline-width: 6px;
@@ -355,39 +406,15 @@ html.reduce-motion {
   transition: none !important;
 }
 
-/* cores do console mudam em degraus ao trocar de aba (variáveis registradas
-   pra o navegador saber interpolar) */
-@property --bg {
-  syntax: '<color>';
-  inherits: true;
-  initial-value: #050008;
-}
-@property --accent {
-  syntax: '<color>';
-  inherits: true;
-  initial-value: #ff3cac;
-}
-@property --accent-2 {
-  syntax: '<color>';
-  inherits: true;
-  initial-value: #18f0ff;
-}
-html {
-  transition:
-    --bg 320ms steps(6),
-    --accent 320ms steps(6),
-    --accent-2 320ms steps(6);
-}
-
-/* estrela que explode em pixels (lib/motion.ts burst) */
+/* estrela que espirra tinta (lib/motion.ts burst) */
 .burst-pixel {
   position: fixed;
   z-index: 9500;
   width: 8px;
   height: 8px;
   margin: -4px 0 0 -4px;
+  border-radius: 50%;
   pointer-events: none;
-  box-shadow: 0 0 6px currentColor;
   animation: burst 0.6s steps(6) forwards;
 }
 @keyframes burst {
@@ -398,39 +425,43 @@ html {
 }
 
 ::-webkit-scrollbar {
-  width: 10px;
-  height: 10px;
+  width: 12px;
+  height: 12px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg);
 }
 ::-webkit-scrollbar-thumb {
-  background: color-mix(in srgb, var(--accent) 55%, transparent);
+  background: var(--muted);
+  border: 3px solid var(--bg);
+  border-radius: 6px;
 }
 
-/* barra de energia: enche em blocos, como a de vida de jogo de luta */
+/* barra de progresso sóbria: trilho de cartão, preenchimento verde-azulado
+   que anda em degraus */
 .energy {
   display: block;
   width: min(22rem, 100%);
-  height: 0.9rem;
-  padding: 2px;
-  border: var(--edge) solid var(--accent-2);
-  background: #000;
-  box-shadow: 4px 4px 0 var(--press-2);
+  height: 1rem;
+  border: var(--edge) solid var(--outline);
+  border-radius: var(--radii-sm);
+  background: var(--surface);
+  overflow: hidden;
 }
 .energy > span {
   display: block;
   height: 100%;
-  background: repeating-linear-gradient(90deg, var(--focus) 0 10px, transparent 10px 13px);
-  transition: width 120ms steps(1);
+  background: var(--accent-2);
+  transition: width 250ms steps(5);
 }
 
-/* glitch analógico (lib/glitch.ts): sinal de TV, sempre ligado a um evento */
+/* glitch analógico (lib/glitch.ts): só ligado a evento (erro, troca de
+   perfil, fim de jogo), nunca de ambiente */
 html[data-glitch] .layer {
   will-change: transform, filter;
 }
 html[data-glitch='static'] .layer {
   animation: sig-static 0.26s steps(4) both;
-}
-html[data-glitch='static'] .crt .grain {
-  opacity: 0.35;
 }
 html[data-glitch='jitter'] .layer {
   animation: sig-jitter 0.26s steps(4) both;
@@ -471,16 +502,16 @@ html[data-glitch='hold'] .layer {
 }
 @keyframes sig-degauss {
   0% {
-    filter: hue-rotate(90deg) saturate(1.6);
-    transform: skewX(4deg);
+    filter: hue-rotate(60deg) saturate(1.4);
+    transform: skewX(3deg);
   }
   30% {
-    filter: hue-rotate(-50deg) saturate(1.3);
-    transform: skewX(-2.5deg);
+    filter: hue-rotate(-35deg) saturate(1.2);
+    transform: skewX(-2deg);
   }
   60% {
-    filter: hue-rotate(20deg);
-    transform: skewX(1deg);
+    filter: hue-rotate(15deg);
+    transform: skewX(0.8deg);
   }
   100% {
     filter: none;

@@ -14,8 +14,8 @@ test('teclado: troca console, desce pra fileira e o destaque acompanha', async (
   await open(page, app)
   await goTab(page, 'snes')
   await expect(page.locator('nav.tabs [aria-current="page"]')).toHaveText(/^SNES/)
-  // paleta do SNES (neon); a cor desliza, então espera ela chegar
-  await expect.poll(() => page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue('--accent').trim())).toBe('rgb(184, 150, 255)')
+  // o console não pinta a tela: o tema é fixo (noemi-ui)
+  expect(await page.evaluate(() => document.documentElement.style.getPropertyValue('--accent'))).toBe('')
 
   await page.keyboard.press('ArrowDown')
   expect((await focused(page)).label).toContain('Mega Man X')

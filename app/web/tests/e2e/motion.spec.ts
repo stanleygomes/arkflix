@@ -29,9 +29,22 @@ test('animações: telas, abas, capa em foco, título, estrela e PLAYER 1 START'
     return l && c ? Math.abs(l.x - c.x) < 2 && Math.abs(l.width - c.width) < 2 : false
   }).toBe(true)
 
-  // configurações ligam como TV; durante a troca, a tela que sai fica inerte
+  // troca de tela curta (swap); durante a troca, a tela que sai fica inerte
+  const seen = page.evaluate(
+    () =>
+      new Promise<number>((resolve) => {
+        let max = 0
+        const t0 = performance.now()
+        const tick = () => {
+          max = Math.max(max, document.getAnimations().length)
+          if (performance.now() - t0 < 400) requestAnimationFrame(tick)
+          else resolve(max)
+        }
+        tick()
+      }),
+  )
   await page.keyboard.press('m')
-  expect(await running(page)).toBeGreaterThan(0)
+  expect(await seen).toBeGreaterThan(0)
   await expect(page.locator('.layer[inert]')).toHaveCount(0, { timeout: 2000 })
   await expect(page.locator('.layer')).toHaveCount(1)
   await expect(page.locator('main.you :focus')).toHaveCount(1) // foco caiu na tela nova
@@ -46,17 +59,20 @@ test('animações: telas, abas, capa em foco, título, estrela e PLAYER 1 START'
   await expect(page.getByRole('dialog', { name: /Jogando/ })).toBeHidden({ timeout: 8000 })
 })
 
-test('trocar de perfil passa pelo mosaico em blocos', async ({ page, app }) => {
+test('trocar de perfil abre a tela nova numa íris', async ({ page, app }) => {
   await open(page, app)
   await switchProfile(page)
   await page.getByRole('button', { name: /^Jogador 1/ }).click()
-  await expect(page.locator('.wipe')).toHaveCount(1)
-  await expect(page.locator('.wipe')).toHaveCount(0, { timeout: 5000 })
+  await expect(page.locator('.iris')).toHaveCount(1)
+  await expect(page.locator('.iris')).toHaveCount(0, { timeout: 5000 })
+  // depois, nada fica animando (só o que for infinito por engano aparece aqui)
+  const left = await page.evaluate(() => document.getAnimations().filter((a) => a.playState === 'running').map((a) => (a as CSSAnimation).animationName ?? (a.effect as KeyframeEffect)?.target?.className))
+  expect(left).toEqual([])
 })
 
 test.describe('com reduzir animações', () => {
   test.use({ reducedMotion: 'reduce' })
-  test('nada se mexe: sem estrela, sem mosaico, troca de tela seca', async ({ page, app }) => {
+  test('nada se mexe: sem estrela, sem íris, troca de tela seca', async ({ page, app }) => {
     await open(page, app)
     await page.locator('.shelf [data-game][aria-label^="Super Mario World"]').first().focus()
     await page.keyboard.press('f')

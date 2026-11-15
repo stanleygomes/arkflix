@@ -62,7 +62,7 @@
 
   <h3>Créditos</h3>
   <p class="muted">
-    Fontes Pixelify Sans e Atkinson Hyperlegible (SIL Open Font License). Emuladores: RetroArch, PPSSPP e PCSX2, cada um com a
+    Fontes Limelight, Bevan, Alegreya e Courier Prime (SIL Open Font License) e Special Elite (Apache 2.0). Emuladores: RetroArch, PPSSPP e PCSX2, cada um com a
     sua licença (veja o README). Sons e música sintetizados pelo próprio app.
   </p>
 </div>

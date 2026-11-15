@@ -28,9 +28,9 @@ describe('contraste', () => {
     expect(contrast(highContrastPalette.text, highContrastPalette.bg)).toBeGreaterThanOrEqual(7)
   })
   it('escolhe texto legível sobre o destaque', () => {
-    expect(onColor('#ffd400')).toBe('#111111')
-    expect(onColor('#1d1d6b')).toBe('#e8fbff')
-    for (const bg of ['#ff9b54', '#a99bff', '#5ec4f2', '#ff5cc6']) expect(contrast(onColor(bg), bg)).toBeGreaterThanOrEqual(4.5)
+    expect(onColor('#e8b34a')).toBe('#24170f') // mostarda: sempre tinta escura
+    expect(onColor('#17110c')).toBe('#f1e4c6')
+    for (const bg of ['#e8b34a', '#5fa8a1', '#e0574a', '#ffd400']) expect(contrast(onColor(bg), bg)).toBeGreaterThanOrEqual(4.5)
   })
 })
 

@@ -7,11 +7,11 @@ test('acessibilidade: fonte, alto contraste e animações aplicam na hora e pers
   await axe(page, 'configurações: acessibilidade')
 
   await page.getByRole('button', { name: '150%' }).click()
-  await expect.poll(() => page.evaluate(() => getComputedStyle(document.documentElement).fontSize)).toBe('24px')
+  await expect.poll(() => page.evaluate(() => getComputedStyle(document.documentElement).fontSize)).toBe('25.5px') // 17px × 1,5
 
   await page.getByRole('switch', { name: 'Alto contraste' }).click()
   await expect(page.locator('body')).toHaveClass(/high-contrast/)
-  await expect.poll(() => page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue('--bg').trim())).toBe('rgb(0, 0, 0)')
+  await expect.poll(() => page.evaluate(() => getComputedStyle(document.body).backgroundColor)).toBe('rgb(0, 0, 0)')
   await axe(page, 'alto contraste')
 
   await page.getByRole('switch', { name: 'Reduzir animações' }).click()
@@ -22,17 +22,17 @@ test('acessibilidade: fonte, alto contraste e animações aplicam na hora e pers
   await expect.poll(() => JSON.parse(app.read(`${app.data}/settings.json`)).a11y.highContrast).toBe(true)
   await page.reload()
   await expect(page.locator('body')).toHaveClass(/high-contrast/)
-  await expect.poll(() => page.evaluate(() => getComputedStyle(document.documentElement).fontSize)).toBe('24px')
+  await expect.poll(() => page.evaluate(() => getComputedStyle(document.documentElement).fontSize)).toBe('25.5px') // 17px × 1,5
 })
 
-test('títulos sem fonte pixel trocam a fonte de verdade', async ({ page, app }) => {
+test('tipografia da noemi-ui: título em Limelight, texto em Alegreya', async ({ page, app }) => {
   await open(page, app)
   await settings(page)
-  await pickItem(page, 'Acessibilidade e som')
-  await page.getByRole('switch', { name: 'Títulos em fonte pixel' }).click()
-  await expect(page.locator('body')).toHaveClass(/no-pixel/)
-  const font = await page.locator('h1').first().evaluate((el) => getComputedStyle(el).fontFamily)
-  expect(font).toContain('Atkinson')
+  const h1 = await page.locator('h1').first().evaluate((el) => getComputedStyle(el).fontFamily)
+  expect(h1).toContain('Limelight')
+  const body = await page.locator('body').evaluate((el) => getComputedStyle(el).fontFamily)
+  expect(body).toContain('Alegreya')
+  await expect.poll(() => page.evaluate(() => document.fonts.check('16px Limelight'))).toBe(true)
 })
 
 test('biblioteca: adicionar pasta e salvar procura os jogos de novo', async ({ page, app }) => {

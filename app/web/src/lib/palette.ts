@@ -1,15 +1,16 @@
-// Cores: paleta do console em foco vira variáveis CSS, e o contraste (WCAG)
-// é calculado aqui pra testes e pro modo de alto contraste.
+// Cores: o tema é fixo (noemi-ui, cinema antigo escuro, em app.css); o
+// console não pinta mais a tela. O contraste (WCAG) é calculado aqui pros
+// testes. O alto contraste é a classe high-contrast no <body>.
 import type { Palette } from './types'
 
-/** Paleta da tela inicial (nenhum console em foco). */
+/** Tema do app (os tokens de app.css). */
 export const homePalette: Palette = {
-  bg: '#050008',
-  surface: '#13061c',
-  accent: '#ff3cac',
-  accent2: '#18f0ff',
-  text: '#e8fbff',
-  muted: '#c0b0cc',
+  bg: '#17110c',
+  surface: '#241a13',
+  accent: '#e8b34a',
+  accent2: '#5fa8a1',
+  text: '#f1e4c6',
+  muted: '#b9a588',
 }
 
 /** Alto contraste: preto, branco e amarelo, igual em todo console. */
@@ -45,17 +46,15 @@ export function contrast(a: string, b: string): number {
   return (hi + 0.05) / (lo + 0.05)
 }
 
-/** Cor de texto legível sobre o fundo dado (preto ou o creme da paleta). */
-export function onColor(bg: string, light = '#e8fbff'): string {
-  return contrast(bg, '#111111') >= contrast(bg, light) ? '#111111' : light
+/** Cor de texto legível sobre o fundo dado (tinta escura ou o creme). */
+export function onColor(bg: string, light = '#f1e4c6'): string {
+  return contrast(bg, '#24170f') >= contrast(bg, light) ? '#24170f' : light
 }
 
-export function applyPalette(p: Palette, el: HTMLElement = document.documentElement): void {
-  el.style.setProperty('--bg', p.bg)
-  el.style.setProperty('--surface', p.surface)
-  el.style.setProperty('--accent', p.accent)
-  el.style.setProperty('--accent-2', p.accent2)
-  el.style.setProperty('--text', p.text)
-  el.style.setProperty('--muted', p.muted)
-  el.style.setProperty('--on-accent', onColor(p.accent))
+const PROPS = ['--bg', '--surface', '--accent', '--accent-2', '--text', '--muted', '--on-accent']
+
+/** Antes pintava a tela com a cor do console; hoje só limpa o que sobrou
+ * (o tema vem do CSS). Fica pra as telas não precisarem saber disso. */
+export function applyPalette(_p?: Palette, el: HTMLElement = document.documentElement): void {
+  for (const prop of PROPS) el.style.removeProperty(prop)
 }

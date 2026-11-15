@@ -27,8 +27,6 @@
   const switches: { key: keyof Accessibility; label: string; help: string }[] = [
     { key: 'highContrast', label: 'Alto contraste', help: 'Preto, branco e amarelo em toda a interface; ignora a cor dos consoles.' },
     { key: 'reduceMotion', label: 'Reduzir animações', help: 'Sem transições, cursor piscando ou rolagem suave.' },
-    { key: 'scanlines', label: 'Linhas de TV (CRT)', help: 'Efeito sutil de tela antiga por cima da interface.' },
-    { key: 'pixelTitles', label: 'Títulos em fonte pixel', help: 'Desligado, todos os textos usam a fonte de leitura fácil.' },
     { key: 'sounds', label: 'Sons de navegação', help: 'Bipes 16-bit ao mover, confirmar e voltar.' },
     { key: 'music', label: 'Música de fundo', help: 'Trilha chiptune baixa nos menus; para durante o jogo.' },
     { key: 'videos', label: 'Vídeo dos jogos', help: 'No Início, o vídeo do jogo toca no fundo depois de 2 s. Nunca com "Reduzir animações".' },

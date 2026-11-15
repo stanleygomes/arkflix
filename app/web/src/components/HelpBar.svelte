@@ -27,15 +27,11 @@
   }
   .coin {
     margin-right: auto;
-    color: var(--focus);
+    color: var(--accent-2);
+    font-family: var(--font-hud);
     font-size: 0.85rem;
-    text-shadow: 0 0 10px var(--focus);
-    animation: coin 1.1s steps(2, start) infinite;
-  }
-  @keyframes coin {
-    to {
-      visibility: hidden;
-    }
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
   }
   .hint {
     display: inline-flex;

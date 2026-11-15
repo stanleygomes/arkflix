@@ -78,14 +78,14 @@ test('no navegador não há menu de energia', async ({ page, app }) => {
 
 test.describe('com animação', () => {
   test.use({ reducedMotion: 'no-preference' })
-  test('ligar o app desktop mostra a tela de boot, e um botão pula', async ({ page, app }) => {
+  test('ligar o app desktop liga a TV por um instante, e um botão pula', async ({ page, app }) => {
     await asDesktop(page)
     await page.goto(app.url)
-    await expect(page.locator('.boot')).toBeVisible()
+    await expect(page.locator('.tube.on')).toBeVisible()
     await page.keyboard.press('Enter')
-    await expect(page.locator('.boot')).toHaveCount(0)
+    await expect(page.locator('.tube')).toHaveCount(0)
     await page.goto(app.url)
-    await expect(page.locator('.boot')).toBeVisible()
-    await expect(page.locator('.boot')).toHaveCount(0, { timeout: 4000 }) // some sozinha
+    await expect(page.locator('.tube.on')).toBeVisible()
+    await expect(page.locator('.tube')).toHaveCount(0, { timeout: 4000 }) // some sozinha
   })
 })

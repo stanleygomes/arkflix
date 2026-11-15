@@ -1,227 +1,166 @@
 <script lang="ts">
-  // Tubo de TV por cima do app inteiro: moldura arredondada, cantos escuros,
-  // bojo do vidro, reflexo, linhas e grão. Só decoração: sem clique, fora da
-  // árvore de acessibilidade. As linhas somem no centro (onde fica o texto) e
-  // engrossam na borda. Alto contraste desliga tudo; "reduzir animações"
-  // congela o grão e tira a cintilação.
-  // paused: protetor de tela ligado, o grão sai (nada animando por trás)
-  let { paused = false }: { paused?: boolean } = $props()
+  // Tubo de TV num momento curto: a tela toda vira o tubo (preto quente,
+  // cantos escuros, bojo, reflexo, linhas), com um cartão de teste da época.
+  // "on": a linha do meio abre com um clarão; "off": a imagem fecha numa
+  // linha e num ponto. Some sozinho em ~1,6 s; qualquer botão pula. Nada
+  // fica animando depois. Fora da árvore de acessibilidade.
+  import { tube } from '../lib/tube.svelte'
 
-  let canvas = $state<HTMLCanvasElement | null>(null)
+  const MS = 1600
+  let shown = $state(0)
 
   $effect(() => {
-    if (!canvas) return
-    const ctx = canvas.getContext('2d')
-    if (!ctx) return
-    const { width: w, height: h } = canvas
-    const img = ctx.createImageData(w, h)
-    const draw = () => {
-      const d = img.data
-      for (let i = 0; i < d.length; i += 4) {
-        const v = (Math.random() * 255) | 0
-        d[i] = d[i + 1] = d[i + 2] = v
-        d[i + 3] = 255
-      }
-      ctx.putImageData(img, 0, 0)
+    const seq = tube.seq
+    if (!seq) return
+    shown = seq
+    const t = setTimeout(() => {
+      if (shown === seq) shown = 0
+    }, MS)
+    const skip = () => (shown = 0)
+    window.addEventListener('keydown', skip, { once: true, capture: true })
+    window.addEventListener('pointerdown', skip, { once: true, capture: true })
+    return () => {
+      clearTimeout(t)
+      window.removeEventListener('keydown', skip, { capture: true })
+      window.removeEventListener('pointerdown', skip, { capture: true })
     }
-    draw()
-    const still = () =>
-      document.body.classList.contains('reduce-motion') || matchMedia('(prefers-reduced-motion: reduce)').matches
-    // 12 quadros por segundo: grão de sinal, não de vídeo moderno
-    const id = window.setInterval(() => {
-      if (!still() && !document.hidden) draw()
-    }, 1000 / 12)
-    return () => clearInterval(id)
   })
 </script>
 
-<div class="crt" aria-hidden="true">
-  {#if !paused}<canvas class="grain" bind:this={canvas} width="480" height="270"></canvas>{/if}
-  <div class="lines"></div>
-  <div class="tracking"></div>
-  <div class="hum"></div>
-  <div class="roll"></div>
-  <div class="bulge"></div>
-  <div class="glass"></div>
-  <div class="flicker"></div>
-  <div class="bezel"></div>
-</div>
-<!-- separação de cor do tubo: vermelho pra direita, azul pra esquerda (usado
-     só nos títulos grandes, nunca no texto corrido) -->
-<svg class="defs" aria-hidden="true" width="0" height="0">
-  <filter id="crt-chroma" x="-5%" y="-5%" width="110%" height="110%" color-interpolation-filters="sRGB">
-    <feColorMatrix in="SourceGraphic" type="matrix" values="1 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 1 0" result="r" />
-    <feOffset in="r" dx="0.8" result="r2" />
-    <feColorMatrix in="SourceGraphic" type="matrix" values="0 0 0 0 0  0 1 0 0 0  0 0 0 0 0  0 0 0 1 0" result="g" />
-    <feColorMatrix in="SourceGraphic" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 1 0 0  0 0 0 1 0" result="b" />
-    <feOffset in="b" dx="-0.8" result="b2" />
-    <feBlend in="r2" in2="g" mode="screen" result="rg" />
-    <feBlend in="rg" in2="b2" mode="screen" />
-  </filter>
-</svg>
+{#if shown}
+  {#key shown}
+    <div class="tube {tube.kind}" aria-hidden="true">
+      <div class="picture">
+        <div class="card">
+          <span class="ring"></span>
+          <p class="name">ARKFLIX</p>
+          {#if tube.caption}<p class="caption">{tube.caption}</p>{/if}
+        </div>
+      </div>
+      <div class="lines"></div>
+      <div class="bulge"></div>
+      <div class="glass"></div>
+    </div>
+  {/key}
+{/if}
 
 <style>
-  .crt {
+  .tube {
     position: fixed;
     inset: 0;
-    z-index: 30000; /* por cima de tudo, até do boot (não pega clique) */
+    z-index: 9800;
     pointer-events: none;
-  }
-  .crt > * {
-    position: absolute;
-    inset: 0;
-  }
-  .defs {
-    position: absolute;
-    width: 0;
-    height: 0;
-  }
-  .grain {
-    width: 100%;
-    height: 100%;
-    image-rendering: pixelated;
-    opacity: 0.035; /* mistura normal: blend em tela cheia custa caro na TV */
-  }
-  /* linhas de varredura: quase nada no meio, mais fortes na borda do tubo */
-  .lines {
-    background: repeating-linear-gradient(to bottom, transparent 0 2px, rgb(0 0 0 / 0.45) 3px 4px);
-    mask-image: radial-gradient(ellipse 75% 70% at 50% 50%, rgb(0 0 0 / 0.22) 45%, #000 100%);
-  }
-  /* faixa de tracking do VHS: passa no rodapé a cada ~17 s, sem cobrir texto */
-  .tracking {
-    top: auto;
-    height: 3.5vh;
-    bottom: 1.5vh;
-    opacity: 0;
-    background:
-      repeating-linear-gradient(90deg, rgb(255 255 255 / 0.18) 0 3px, transparent 3px 7px, rgb(255 255 255 / 0.08) 7px 9px, transparent 9px 16px),
-      linear-gradient(transparent, rgb(255 255 255 / 0.06), transparent);
-    animation: tracking 17s steps(1) infinite;
-  }
-  @keyframes tracking {
-    0%,
-    92% {
-      opacity: 0;
-      transform: translateX(0);
-    }
-    93% {
-      opacity: 1;
-      transform: translateX(-6px);
-    }
-    95% {
-      opacity: 0.7;
-      transform: translateX(4px) translateY(-0.6vh);
-    }
-    97% {
-      opacity: 1;
-      transform: translateX(-2px) translateY(-1.2vh);
-    }
-    99%,
-    100% {
-      opacity: 0;
-    }
-  }
-  /* barra de zumbido: faixa clara larga descendo devagar (interferência de
-     rede elétrica dos CRTs), quase invisível sobre o texto */
-  .hum {
-    bottom: auto;
-    height: 18vh;
-    background: linear-gradient(transparent, rgb(255 255 255 / 0.035) 45%, rgb(255 255 255 / 0.05) 50%, rgb(255 255 255 / 0.035) 55%, transparent);
-    animation: hum 11s steps(66) infinite;
-  }
-  @keyframes hum {
-    from {
-      transform: translateY(-20vh);
-    }
-    to {
-      transform: translateY(105vh);
-    }
-  }
-  /* linha clara que rola rápido (glitch "bar", disparado pelo lib/glitch.ts) */
-  .roll {
-    bottom: auto;
-    height: 1.2vh;
-    opacity: 0;
-    background: linear-gradient(transparent, rgb(255 255 255 / 0.22), transparent);
-  }
-  :global(html[data-glitch='bar']) .roll {
-    animation: roll 0.9s steps(12) both;
-  }
-  @keyframes roll {
-    from {
-      opacity: 1;
-      transform: translateY(-2vh);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(102vh);
-    }
-  }
-  /* chuvisco: o grão sobe e a imagem dá uma queda de brilho */
-  :global(html[data-glitch='snow']) .grain {
-    opacity: 0.22;
-  }
-  :global(html[data-glitch='snow']) .flicker {
-    animation: none;
-    opacity: 0.12;
-  }
-
-  /* bojo: centro levemente aceso, borda escura, quatro cantos fundos */
-  .bulge {
-    background:
-      radial-gradient(circle at 0 0, rgb(0 0 0 / 0.6), transparent 16%),
-      radial-gradient(circle at 100% 0, rgb(0 0 0 / 0.6), transparent 16%),
-      radial-gradient(circle at 0 100%, rgb(0 0 0 / 0.6), transparent 16%),
-      radial-gradient(circle at 100% 100%, rgb(0 0 0 / 0.6), transparent 16%),
-      radial-gradient(ellipse 80% 75% at 50% 45%, rgb(255 255 255 / 0.03), transparent 65%, rgb(0 0 0 / 0.4) 100%);
-  }
-  /* reflexo no vidro, canto superior esquerdo */
-  .glass {
-    background: radial-gradient(ellipse 45% 30% at 22% 12%, rgb(255 255 255 / 0.06), transparent 70%);
-  }
-  /* cintilação rara e irregular: duas quedas curtas a cada ~7 s */
-  .flicker {
     background: #000;
-    opacity: 0;
-    animation: flicker 7.3s steps(1) infinite;
+    animation: fade 1.6s steps(1) forwards;
   }
-  @keyframes flicker {
-    0%,
-    61%,
-    63%,
-    88%,
-    90%,
+  @keyframes fade {
+    92% {
+      opacity: 1;
+    }
     100% {
       opacity: 0;
     }
-    62% {
-      opacity: 0.1;
+  }
+  .picture {
+    position: absolute;
+    inset: 1.5vmin;
+    border-radius: 3vmin;
+    overflow: hidden;
+    display: grid;
+    place-items: center;
+    background: radial-gradient(ellipse at center, #2a1a10, #0c0608 70%, #000);
+  }
+  .on .picture {
+    animation: power-on 0.6s steps(5) both;
+  }
+  .off .picture {
+    animation: power-off 0.7s steps(6) 0.5s both;
+  }
+  @keyframes power-on {
+    0% {
+      transform: scale(1, 0.006);
+      filter: brightness(4);
     }
-    89% {
-      opacity: 0.14;
+    40% {
+      transform: scale(1, 0.006);
+      filter: brightness(3);
+    }
+    100% {
+      transform: none;
+      filter: none;
     }
   }
-  /* moldura: o tubo tem cantos arredondados, o resto é o gabinete */
-  .bezel {
-    inset: var(--tube);
-    border-radius: calc(var(--tube) * 2.4);
-    box-shadow:
-      0 0 0 100vmax #050407,
-      inset 0 0 0 2px rgb(255 255 255 / 0.05),
-      inset 0 0 18px 6px rgb(0 0 0 / 0.75);
-  }
-  :global(body.high-contrast) .crt {
-    display: none;
-  }
-  :global(body.reduce-motion) :is(.flicker, .tracking, .hum, .roll) {
-    display: none;
-  }
-  @media (prefers-reduced-motion: reduce) {
-    .flicker,
-    .tracking,
-    .hum,
-    .roll {
-      display: none;
+  @keyframes power-off {
+    0% {
+      transform: none;
+      filter: none;
     }
+    60% {
+      transform: scale(1, 0.006);
+      filter: brightness(3);
+    }
+    100% {
+      transform: scale(0.01, 0.006);
+      filter: brightness(5);
+      opacity: 0;
+    }
+  }
+  /* cartão de teste: anel com mira e o nome, fósforo só no destaque */
+  .card {
+    display: grid;
+    place-items: center;
+    gap: 1.2vmin;
+    color: #f1e4c6;
+  }
+  .ring {
+    width: 26vmin;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    border: 0.8vmin solid #f1e4c6;
+    background:
+      linear-gradient(#f1e4c6, #f1e4c6) center / 0.5vmin 100% no-repeat,
+      linear-gradient(#f1e4c6, #f1e4c6) center / 100% 0.5vmin no-repeat;
+    opacity: 0.6;
+  }
+  .name {
+    font-family: 'Limelight', serif;
+    font-size: 9vmin;
+    line-height: 1;
+    color: #e8b34a;
+    text-shadow:
+      0 0 1px #ffd98a,
+      0 0 8px rgb(232 179 74 / 0.8),
+      0 0 22px rgb(232 179 74 / 0.35);
+  }
+  .caption {
+    font-family: 'Special Elite', monospace;
+    font-size: 2.6vmin;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+  }
+  .lines {
+    position: absolute;
+    inset: 1.5vmin;
+    border-radius: 3vmin;
+    background: repeating-linear-gradient(transparent 0 2px, rgb(0 0 0 / 0.45) 3px 4px);
+    mix-blend-mode: multiply;
+    mask-image: radial-gradient(ellipse at center, transparent 30%, #000 85%);
+  }
+  .bulge {
+    position: absolute;
+    inset: 1.5vmin;
+    border-radius: 3vmin;
+    background:
+      radial-gradient(circle at 0 0, rgb(0 0 0 / 0.85), transparent 55%),
+      radial-gradient(circle at 100% 0, rgb(0 0 0 / 0.85), transparent 55%),
+      radial-gradient(circle at 0 100%, rgb(0 0 0 / 0.85), transparent 55%),
+      radial-gradient(circle at 100% 100%, rgb(0 0 0 / 0.85), transparent 55%),
+      radial-gradient(ellipse at center, rgb(255 240 210 / 0.06), transparent 60%);
+  }
+  .glass {
+    position: absolute;
+    inset: 1.5vmin;
+    border-radius: 3vmin;
+    background: linear-gradient(135deg, rgb(255 255 255 / 0.09), transparent 30%);
   }
 </style>
