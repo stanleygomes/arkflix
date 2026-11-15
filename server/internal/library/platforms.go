@@ -44,6 +44,16 @@ var platformAliases = map[string]string{
 	"odyssey2": "odyssey-2", "wiiware": "wii",
 }
 
+// PlatformSlug normaliza o nome da pasta do console pro slug do RomM
+// ("megadrive" → "genesis"); desconhecido volta minúsculo.
+func PlatformSlug(folder string) string {
+	s := strings.ToLower(folder)
+	if a, ok := platformAliases[s]; ok {
+		return a
+	}
+	return s
+}
+
 // platformName dá o nome do console pelo nome da pasta; desconhecido vira
 // o próprio nome da pasta.
 func platformName(slug string) string {

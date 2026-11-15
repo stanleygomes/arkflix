@@ -87,12 +87,16 @@ func (s *scanner) episodes(dir string, files []mediaFile) []episode {
 			ep.season, ep.seasonP = dirSeason, parent
 		}
 		if ep.title == "" {
-			ep.title = "Episódio " + strconv.Itoa(num)
+			ep.title = EpisodeName(num)
 		}
 		out = append(out, ep)
 	}
 	return out
 }
+
+// EpisodeName é o nome de episódio sem título no arquivo ("Episódio 3"); o
+// pacote metadata troca pelo nome do TMDB.
+func EpisodeName(n int) string { return "Episódio " + strconv.Itoa(n) }
 
 // seasons grava as temporadas que têm episódio. A pasta real ganha da
 // virtual (episódio solto na pasta da série).

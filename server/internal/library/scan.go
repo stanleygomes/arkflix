@@ -101,10 +101,11 @@ func (s *scanner) put(it *store.Item) error {
 	if it.ID == "" {
 		it.ID = store.ID(it.Kind, it.Path)
 	}
+	s.seen[it.Path] = true
+	keepMeta(s.old[it.Path], it)
 	if it.SortName == "" {
 		it.SortName = store.SortName(it.Name)
 	}
-	s.seen[it.Path] = true
 	if old := s.old[it.Path]; old != nil && same(old, it) {
 		it.RID = old.RID
 		return nil
