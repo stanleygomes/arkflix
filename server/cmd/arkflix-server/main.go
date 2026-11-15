@@ -64,6 +64,7 @@ func run(args []string) error {
 	}
 	d := &deps.Deps{Config: cfg, Store: st, Auth: au, Library: library.New(cfg, st), Media: media.New(cfg), Meta: metadata.New(cfg, st), Version: version}
 	// depois de cada scan, completa pela internet o que faltar
+	d.Meta.Version = version
 	d.Library.OnScanned = func() { go d.Meta.Run(context.Background()) }
 
 	rest := fs.Args()
