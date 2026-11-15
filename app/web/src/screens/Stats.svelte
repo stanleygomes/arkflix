@@ -4,7 +4,6 @@
   import TopBar from '../components/TopBar.svelte'
   import { api } from '../lib/api'
   import { playTime } from '../lib/format'
-  import { applyPalette, highContrastPalette, homePalette } from '../lib/palette'
   import { app, system, toast, currentProfile } from '../lib/state.svelte'
   import type { Stats } from '../lib/types'
 
@@ -22,16 +21,14 @@
       .then((s) => (data = s))
       .catch((err) => toast((err as Error).message, 'error'))
   })
-  $effect(() => {
-    applyPalette(app.settings?.a11y.highContrast ? highContrastPalette : homePalette)
-  })
 
   const weekdays = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb']
-  const hiScore = $derived.by(() => {
-    const total = app.games.reduce((sum, g) => sum + (g.playTime || 0), 0)
-    return `${String(Math.floor(total / 3600)).padStart(3, '0')}:${String(Math.floor((total % 3600) / 60)).padStart(2, '0')}`
-  })
+  // tempo total na vida (todos os jogos), fora do período escolhido
+  const lifetime = $derived(app.games.reduce((sum, g) => sum + (g.playTime || 0), 0))
+  const owned = $derived(app.games.filter((g) => !g.remote).length)
   const dur = (s: number) => (s > 0 ? playTime(s) : '0 min')
+  // número gigante: algarismos em texto, unidades (h, min) em mostarda
+  const parts = (t: string) => t.split(/(\d+)/).filter(Boolean).map((p) => ({ p, unit: !/^\d/.test(p) }))
   const dayLabel = (d: string) => d.slice(8, 10) + '/' + d.slice(5, 7)
   // embedded: aberta como painel da tela Você (lista sempre visível)
   let { embedded = false }: { embedded?: boolean } = $props()
@@ -40,14 +37,13 @@
 <div class="page" class:embedded>
   {#if !embedded}<TopBar actions={false} />{/if}
   <main class="body">
-    <!-- placar de fliperama: o "recorde" é o tempo total jogado (HHH:MM) -->
-    <div class="hud" aria-label="Placar">
-      <p><span>1UP</span> {(currentProfile()?.name ?? 'Jogador').toUpperCase()}</p>
-      <p><span>HI-SCORE</span> {hiScore}</p>
-      <p><span>JOGOS</span> {String(app.games.filter((g) => !g.remote).length).padStart(3, '0')}</p>
-    </div>
+    <p class="summary meta">
+      <span>{currentProfile()?.name ?? 'Jogador'}</span>
+      <span>{owned} jogo{owned === 1 ? '' : 's'} no PC</span>
+      <span>{dur(lifetime)} na vida toda</span>
+    </p>
     <header class="head">
-      {#if !embedded}<h1 class="pixel">Estatísticas</h1>{/if}
+      {#if !embedded}<h1>Estatísticas</h1>{/if}
       <div class="segmented" role="group" aria-label="Período">
         {#each periods as p, i (p.id)}
           <button class="btn small" data-nav data-nav-default={i === 0 ? '' : undefined} aria-pressed={period === p.id} onclick={() => (period = p.id)}>
@@ -58,16 +54,16 @@
     </header>
     {#if data}
       <dl class="tiles">
-        <div class="tile giant"><dt>Tempo jogando</dt><dd>{dur(data.totalSeconds)}</dd></div>
-        <div class="tile"><dt>Partidas</dt><dd class="pixel">{data.plays}</dd></div>
-        <div class="tile"><dt>Jogos jogados</dt><dd class="pixel">{data.gamesPlayed} <small>de {data.libraryGames}</small></dd></div>
+        <div class="giant"><dt>Tempo jogando</dt><dd>{#each parts(dur(data.totalSeconds)) as t, i (i)}<span class:unit={t.unit}>{t.p}</span>{/each}</dd></div>
+        <div class="tile"><dt>Partidas</dt><dd>{data.plays}</dd></div>
+        <div class="tile"><dt>Jogos jogados</dt><dd>{data.gamesPlayed} <small>de {data.libraryGames}</small></dd></div>
         <div class="tile">
           <dt>Dia com mais jogo</dt>
-          <dd class="pixel">{data.bestDay.seconds ? `${dayLabel(data.bestDay.date)} · ${dur(data.bestDay.seconds)}` : '—'}</dd>
+          <dd>{data.bestDay.seconds ? `${dayLabel(data.bestDay.date)} · ${dur(data.bestDay.seconds)}` : '—'}</dd>
         </div>
       </dl>
       {#if data.sessions === 0}
-        <p class="muted empty">Nenhuma partida neste período. Jogue alguma coisa e volte aqui.</p>
+        <p class="empty">Nenhuma partida neste período. Jogue alguma coisa e volte aqui.</p>
       {:else}
         <div class="grid">
           <BarChart
@@ -119,22 +115,6 @@
     overflow: visible;
   }
 
-  .hud {
-    display: flex;
-    justify-content: space-between;
-    gap: 2rem;
-    font-family: var(--font-hud);
-    font-size: 1.3rem;
-    letter-spacing: 0.06em;
-    color: #fff;
-  }
-  .hud p {
-    line-height: 1;
-  }
-  .hud span {
-    margin-right: 0.6em;
-    color: var(--accent-2);
-  }
   .page {
     height: 100%;
     display: flex;
@@ -149,6 +129,16 @@
     flex-direction: column;
     gap: 1.5rem;
   }
+  .summary {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.3rem 0;
+    color: var(--muted);
+  }
+  .summary span + span::before {
+    content: '·' / '';
+    margin-inline: 0.7rem;
+  }
   .head {
     display: flex;
     align-items: center;
@@ -156,54 +146,75 @@
     flex-wrap: wrap;
   }
   h1 {
-    font-size: 2.2rem;
+    font-size: clamp(2.4rem, 4vw, 3.2rem);
   }
   .segmented {
     display: flex;
-    gap: 0.5rem;
+    gap: 0.6rem;
   }
   .tiles {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
-    gap: 1rem;
+    gap: 1.25rem;
     margin: 0;
   }
-  .tile {
-    background: #000;
-    border: 3px solid color-mix(in srgb, var(--accent-2) 70%, transparent);
-    border-radius: 10px;
-    box-shadow: var(--glow-2);
-    padding: 0.9rem 1rem;
-  }
-  /* o número gigante da tela (um só): tempo total jogado */
-  .tile.giant {
+  /* o número gigante da tela (um só): tempo jogando no período. Sem
+     moldura, é layout; um fio reto embaixo separa dos cartões */
+  .giant {
     grid-column: 1 / -1;
+    padding-bottom: 1.1rem;
+    border-bottom: var(--edge) solid var(--outline);
   }
-  .tile.giant dd {
-    font-family: var(--font-display);
+  .giant dd {
+    font-family: var(--font-label);
     font-size: clamp(44px, 8vw, 92px);
     line-height: 1;
-    color: var(--accent-2);
-    text-shadow: 6px 6px 0 var(--press-2);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0;
+    color: var(--text);
+    margin-top: 0.4rem;
+  }
+  .giant .unit {
+    color: var(--accent);
+    font-size: 0.55em;
+  }
+  .tile {
+    background: var(--surface);
+    border: var(--edge) solid var(--outline);
+    border-radius: var(--radii-sm);
+    box-shadow: var(--hard);
+    padding: 1rem 1.25rem;
   }
   dt {
+    font-family: var(--font-hud);
+    font-size: 0.8rem;
+    letter-spacing: 0.04em;
     color: var(--muted);
-    font-size: 0.9rem;
   }
   dd {
-    margin: 0.3rem 0 0;
-    font-size: 1.6rem;
+    margin: 0.35rem 0 0;
+    font-family: var(--font-label);
+    font-size: 1.5rem;
+    line-height: 1.15;
+    font-variant-numeric: tabular-nums;
   }
   dd small {
-    font-size: 0.9rem;
+    font-family: var(--font-body);
+    font-size: 1rem;
     color: var(--muted);
   }
   .grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(34rem, 1fr));
-    gap: 2.2rem 3.5rem;
+    grid-template-columns: repeat(auto-fit, minmax(30rem, 1fr));
+    gap: 1.75rem;
   }
+  /* vazio: caixa tracejada, texto do porquê */
   .empty {
-    font-size: 1.1rem;
+    padding: 2rem 1.25rem;
+    max-width: 30rem;
+    color: var(--muted);
+    font-size: 1.05rem;
+    border: var(--edge) dashed var(--muted);
+    border-radius: var(--radii-sm);
   }
 </style>

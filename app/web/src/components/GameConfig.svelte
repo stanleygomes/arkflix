@@ -80,27 +80,27 @@
     {:else if !info.supported}
       <p class="muted">Este jogo não abre no RetroArch: configure pelo emulador dele.</p>
     {:else}
-      <p class="muted">Só pra este jogo, neste perfil. Vale na próxima vez que ele abrir.</p>
+      <p class="lead muted">Só pra este jogo, neste perfil. Vale na próxima vez que ele abrir.</p>
       {#each groups as gr, gi (gr.key)}
-        <div class="group">
-          <h3 id={`cfg-${gr.key}`}>{gr.label}</h3>
+        <fieldset class="group">
+          <legend id={`cfg-${gr.key}`}>{gr.label}</legend>
           <div class="opts" role="radiogroup" aria-labelledby={`cfg-${gr.key}`} data-nav-group={`cfg-${gr.key}`}>
             {#each gr.opts as o, oi (o.value)}
               {@const on = (info.settings[gr.key] ?? '') === o.value}
               <button
-                class="opt"
+                class="choice"
                 role="radio"
                 aria-checked={on}
                 data-nav
                 data-nav-default={gi === 0 && oi === 0 ? '' : undefined}
                 onclick={() => pick(gr.key, o.value)}
               >
-                <span class="dot" aria-hidden="true"></span>{o.label}
+                <span class="mark radio" aria-hidden="true"></span>{o.label}
               </button>
             {/each}
           </div>
           {#if gr.hint}<p class="muted hint">{gr.hint}</p>{/if}
-        </div>
+        </fieldset>
       {/each}
     {/if}
     <div class="actions">
@@ -113,7 +113,7 @@
   .backdrop {
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, 0.65);
+    background: color-mix(in srgb, var(--bg) 78%, transparent);
     display: grid;
     place-items: center;
     z-index: 80;
@@ -121,54 +121,89 @@
   .dialog {
     display: flex;
     flex-direction: column;
-    gap: 0.9rem;
-    min-width: 26rem;
-    max-width: 44rem;
+    gap: 1rem;
+    width: min(44rem, 100% - 2rem);
     max-height: 90vh;
     overflow-y: auto;
+    box-shadow: 8px 8px 0 var(--outline);
   }
   h2 {
-    font-size: 1.4rem;
+    font-size: 1.25rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
   }
-  h3 {
-    font-size: 1.05rem;
-    margin: 0 0 0.4rem;
+  fieldset {
+    border: none;
+    margin: 0;
+    padding: 0.9rem 0 0;
+    border-top: var(--edge) solid color-mix(in srgb, var(--outline) 35%, transparent);
+  }
+  legend {
+    font-family: var(--font-label);
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    padding: 0 0.5rem 0 0;
   }
   .opts {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.5rem;
+    gap: 0.25rem 0.5rem;
+    margin-top: 0.4rem;
   }
-  .opt {
-    font: inherit;
-    color: var(--text);
-    background: color-mix(in srgb, var(--bg) 60%, var(--surface));
-    border: 3px solid transparent;
-    padding: 0.45rem 0.8rem;
+  .choice {
     display: flex;
-    gap: 0.5rem;
     align-items: center;
+    gap: 0.75rem;
+    min-height: 3rem;
+    padding: 0.4rem 0.8rem;
+    font: inherit;
+    font-size: 1.05rem;
+    line-height: 1.3;
+    text-align: start;
+    color: var(--text);
+    background: none;
+    border: 0;
+    border-radius: 4px;
     cursor: pointer;
   }
-  .dot {
-    width: 0.8rem;
-    height: 0.8rem;
-    border: 2px solid var(--text);
-    border-radius: 50%;
-    flex: none;
+  .choice:hover {
+    background: color-mix(in srgb, var(--accent) 14%, transparent);
   }
-  .opt[aria-checked='true'] .dot {
-    background: var(--accent);
+  .mark {
+    flex: none;
+    position: relative;
+    width: 22px;
+    height: 22px;
+    background: var(--balloon);
+    border: var(--edge) solid var(--outline);
+    box-shadow: 2px 2px 0 var(--outline);
+  }
+  .mark.radio {
+    border-radius: 50%;
+  }
+  .mark.radio::after {
+    content: '';
+    position: absolute;
+    inset: 3px;
+    border-radius: 50%;
+  }
+  [aria-checked='true'] > .mark.radio::after {
+    background: var(--outline);
   }
   .hint {
-    margin: 0.3rem 0 0;
-    font-size: 0.9rem;
+    margin: 0.4rem 0 0;
+    font-size: 0.95rem;
   }
   .error {
-    color: #ff8a8a;
+    color: var(--danger);
   }
   .actions {
     display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
     justify-content: flex-end;
+    padding-top: 1rem;
+    border-top: var(--edge) solid var(--outline);
   }
 </style>

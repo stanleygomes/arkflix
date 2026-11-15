@@ -49,14 +49,14 @@
       <div class="options" role="radiogroup" aria-label="Ordenar por">
         {#each SORTS as s (s.key)}
           <button
-            class="option"
+            class="choice"
             role="radio"
             aria-checked={sort === s.key}
             data-nav
             data-nav-default={sort === s.key ? '' : undefined}
             onclick={() => onsort(s.key)}
           >
-            <span class="dot" aria-hidden="true"></span>{s.label}
+            <span class="mark radio" aria-hidden="true"></span>{s.label}
           </button>
         {/each}
       </div>
@@ -66,15 +66,15 @@
         <legend>{group.label}</legend>
         <div class="checks">
           {#each group.options as opt (opt.id)}
-            <button class="check" role="checkbox" aria-checked={filters.includes(opt.id)} data-nav onclick={() => onfilter?.(opt.id)}>
-              <span class="box" aria-hidden="true"></span>{opt.label}
+            <button class="choice" role="checkbox" aria-checked={filters.includes(opt.id)} data-nav onclick={() => onfilter?.(opt.id)}>
+              <span class="mark box" aria-hidden="true"></span>{opt.label}
             </button>
           {/each}
         </div>
       </fieldset>
     {/each}
     {#if extra.length}
-      <div class="actions extra">
+      <div class="extra">
         {#each extra as x (x.label)}
           <button class="btn" class:danger={x.danger} data-nav onclick={x.onclick}>{x.label}</button>
         {/each}
@@ -93,7 +93,7 @@
   .backdrop {
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, 0.65);
+    background: color-mix(in srgb, var(--bg) 78%, transparent);
     display: grid;
     place-items: center;
     z-index: 80;
@@ -101,78 +101,112 @@
   .menu {
     display: flex;
     flex-direction: column;
-    gap: 1rem;
-    min-width: 24rem;
+    gap: 0.6rem;
+    width: min(40rem, 100% - 2rem);
     max-height: 90vh;
     overflow-y: auto;
+    box-shadow: 8px 8px 0 var(--outline);
+  }
+  h2 {
+    font-size: 1.25rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
   }
   fieldset {
     border: none;
     margin: 0;
-    padding: 0;
+    padding: 0.6rem 0 0;
+    border-top: var(--edge) solid color-mix(in srgb, var(--outline) 35%, transparent);
   }
   legend {
-    font-weight: 700;
-    margin-bottom: 0.6rem;
+    font-family: var(--font-label);
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    padding: 0 0.5rem 0 0;
   }
   .options {
     display: grid;
-    gap: 0.3rem;
-  }
-  .option {
-    font: inherit;
-    color: var(--text);
-    background: transparent;
-    border: 3px solid transparent;
-    text-align: left;
-    padding: 0.45rem 0.6rem;
-    display: flex;
-    gap: 0.7rem;
-    align-items: center;
-    cursor: pointer;
+    grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+    gap: 0.15rem 0.5rem;
+    margin-top: 0.4rem;
   }
   .checks {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.4rem;
+    gap: 0.15rem 0.5rem;
+    margin-top: 0.4rem;
   }
-  .check {
-    font: inherit;
-    color: var(--text);
-    background: color-mix(in srgb, var(--bg) 60%, var(--surface));
-    border: 3px solid transparent;
-    padding: 0.35rem 0.6rem;
+  .choice {
     display: flex;
-    gap: 0.5rem;
     align-items: center;
+    gap: 0.75rem;
+    min-height: 2.75rem;
+    padding: 0.4rem 0.8rem;
+    font: inherit;
+    font-size: 1.05rem;
+    line-height: 1.3;
+    text-align: start;
+    color: var(--text);
+    background: none;
+    border: 0;
+    border-radius: 4px;
     cursor: pointer;
   }
-  .box {
-    width: 0.9rem;
-    height: 0.9rem;
-    border: 2px solid var(--text);
+  .choice:hover {
+    background: color-mix(in srgb, var(--accent) 14%, transparent);
   }
-  .check[aria-checked='true'] .box {
+  .mark {
+    flex: none;
+    position: relative;
+    width: 22px;
+    height: 22px;
+    background: var(--balloon);
+    border: var(--edge) solid var(--outline);
+    box-shadow: 2px 2px 0 var(--outline);
+  }
+  .mark.radio {
+    border-radius: 50%;
+  }
+  .mark.radio::after {
+    content: '';
+    position: absolute;
+    inset: 3px;
+    border-radius: 50%;
+  }
+  [aria-checked='true'] > .mark.radio::after {
+    background: var(--outline);
+  }
+  .mark.box {
+    border-radius: 4px;
+  }
+  [aria-checked='true'] > .mark.box {
     background: var(--accent);
+  }
+  [aria-checked='true'] > .mark.box::after {
+    content: '';
+    position: absolute;
+    left: 4px;
+    top: 0;
+    width: 6px;
+    height: 11px;
+    border: solid var(--on-accent);
+    border-width: 0 3px 3px 0;
+    transform: rotate(45deg);
+  }
+  .extra {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    padding-top: 1rem;
+    border-top: var(--edge) solid color-mix(in srgb, var(--outline) 35%, transparent);
   }
   .actions {
     display: flex;
-    gap: 0.8rem;
+    flex-wrap: wrap;
+    gap: 0.75rem;
     justify-content: flex-end;
-  }
-  .actions.extra {
-    justify-content: flex-start;
-    border-top: 2px dashed color-mix(in srgb, var(--text) 25%, transparent);
-    padding-top: 0.8rem;
-  }
-  .dot {
-    width: 0.9rem;
-    height: 0.9rem;
-    border: 2px solid var(--text);
-    flex: none;
-  }
-  .option[aria-checked='true'] .dot {
-    background: var(--accent);
-    box-shadow: inset 0 0 0 2px var(--surface);
+    padding-top: 1rem;
+    border-top: var(--edge) solid var(--outline);
   }
 </style>
