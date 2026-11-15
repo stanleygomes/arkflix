@@ -1,7 +1,8 @@
 <script lang="ts">
   // Filmes e séries (Jellyfin da conta do perfil). Mesmo jeito do Início dos
   // jogos: destaque grande em cima (muda com o foco) e fileiras embaixo. Abas
-  // no topo: Início, Filmes, Séries e Minha lista (estas em grade, com ordem).
+  // no topo: Início, Filmes, Séries e Minha lista (estas em grade, com ordem)
+  // e, com um arkflix-server, Listas (as do usuário de lá, em fileiras).
   import { tick } from 'svelte'
   import HelpBar from '../components/HelpBar.svelte'
   import Icon from '../components/Icon.svelte'
@@ -15,15 +16,19 @@
   import { shade } from '../lib/motion'
   import { app, go, isKids, toast } from '../lib/state.svelte'
   import type { WatchHome, WatchItem } from '../lib/types'
+  import { loadArkLists } from '../lib/ark'
   import { cardLabel, displayName, episodeTag, opensPlayer, playLabel, remaining, runtime } from '../lib/watch'
 
-  type Tab = 'home' | 'movies' | 'series' | 'favorites'
-  const TABS: { id: Tab; label: string }[] = [
+  type Tab = 'home' | 'movies' | 'series' | 'favorites' | 'lists'
+  const TABS = $derived<{ id: Tab; label: string }[]>([
     { id: 'home', label: 'Início' },
     { id: 'movies', label: 'Filmes' },
     { id: 'series', label: 'Séries' },
     { id: 'favorites', label: 'Minha lista' },
-  ]
+    ...(app.ark?.lists && app.ark.videos ? [{ id: 'lists' as const, label: 'Listas' }] : []),
+  ])
+  // fileiras: Início e Listas; o resto é grade
+  const shelved = $derived(app.watchTab === 'home' || app.watchTab === 'lists')
   const SORTS = [
     { id: 'added', label: 'Recentes' },
     { id: 'name', label: 'A-Z' },
@@ -39,6 +44,7 @@
   let sort = $state('added')
   let loading = $state(false)
   let failed = $state('')
+  let listsLoaded = $state(false)
 
   async function load(tab: Tab, order: string) {
     if (!connected) return
@@ -47,6 +53,9 @@
     try {
       if (tab === 'home') {
         home = await api.watchHome()
+      } else if (tab === 'lists') {
+        await loadArkLists()
+        listsLoaded = true
       } else {
         const page = await api.watchList(tab, order, '', 0, PAGE)
         list = page.items
@@ -76,8 +85,11 @@
     }
   }
 
-  type Row = { id: string; title: string; items: WatchItem[]; wide?: boolean }
+  type Row = { id: string; title: string; items: WatchItem[]; wide?: boolean; list?: string }
   const rows = $derived.by((): Row[] => {
+    if (app.watchTab === 'lists') {
+      return app.arkLists.filter((l) => l.videos.length > 0).map((l) => ({ id: `ark-${l.id}`, title: l.name, items: l.videos, list: l.id }))
+    }
     if (!home) return []
     return [
       { id: 'resume', title: 'Continuar assistindo', items: home.resume, wide: true },
@@ -88,10 +100,14 @@
     ].filter((r) => r.items.length > 0)
   })
 
-  const pool = $derived(app.watchTab === 'home' ? rows.flatMap((r) => r.items) : list)
+  const pool = $derived(shelved ? rows.flatMap((r) => r.items) : list)
   const selected = $derived(pool.find((it) => it.id === app.watchSelected) ?? pool[0])
   const hero = $derived(selected?.backdrop || selected?.poster || '')
-  const empty = $derived(!loading && !failed && (app.watchTab === 'home' ? home !== null && rows.length === 0 : list.length === 0))
+  const empty = $derived(
+    !loading &&
+      !failed &&
+      (app.watchTab === 'home' ? home !== null && rows.length === 0 : app.watchTab === 'lists' ? listsLoaded && rows.length === 0 : list.length === 0),
+  )
 
   // cartão largo mostra nome e uma linha embaixo: o nome acessível começa
   // pelo mesmo texto visível e acrescenta o resto (progresso, lista)
@@ -234,9 +250,13 @@
     {:else if empty}
       <section class="empty">
         <Icon name={app.watchTab === 'favorites' ? 'star' : 'film'} size="3rem" />
-        <h1 id="watch-title">{app.watchTab === 'favorites' ? 'Lista vazia' : 'Nada por aqui'}</h1>
+        <h1 id="watch-title">{app.watchTab === 'favorites' ? 'Lista vazia' : app.watchTab === 'lists' ? 'Nenhuma lista com filmes' : 'Nada por aqui'}</h1>
         <p class="muted">
-          {app.watchTab === 'favorites' ? 'Aperte o botão de favorito num filme ou série pra guardar aqui.' : 'O servidor não tem nada desse tipo pra esta conta.'}
+          {app.watchTab === 'favorites'
+            ? 'Aperte o botão de favorito num filme ou série pra guardar aqui.'
+            : app.watchTab === 'lists'
+              ? 'Na página de um filme ou série, use “Adicionar à lista”. As listas ficam no servidor, em todo aparelho da sua conta.'
+              : 'O servidor não tem nada desse tipo pra esta conta.'}
         </p>
         <div class="actions">
           <button class="btn primary" data-nav data-nav-default onclick={() => selectTab('home')}><Icon name="home" /> Voltar ao início</button>
@@ -287,7 +307,7 @@
         {/if}
       </section>
 
-      {#if app.watchTab === 'home'}
+      {#if shelved}
         <div class="shelves">
           {#each rows as row (row.id)}
             <section class="shelf" aria-label={row.title}>
@@ -315,6 +335,13 @@
                     </button>
                   </li>
                 {/each}
+                {#if row.list}
+                  <li>
+                    <button class="card more" data-nav data-nav-inline="center" aria-label={`Abrir lista ${row.title}`} onclick={() => go({ name: 'arklist', id: row.list! })}>
+                      <Icon name="plus" size="1.6em" /> Abrir lista
+                    </button>
+                  </li>
+                {/if}
               </ul>
             </section>
           {/each}

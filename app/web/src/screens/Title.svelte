@@ -9,7 +9,9 @@
   import { pushHandler } from '../lib/input'
   import { current } from '../lib/nav'
   import { play } from '../lib/sound'
-  import { go, toast } from '../lib/state.svelte'
+  import { app, back, confirm, go, toast } from '../lib/state.svelte'
+  import ArkListPicker from '../components/ArkListPicker.svelte'
+  import { arkEditable, arkWritable } from '../lib/ark'
   import type { WatchDetails, WatchItem } from '../lib/types'
   import { episodeTag, playLabel, remaining, runtime } from '../lib/watch'
 
@@ -50,6 +52,29 @@
 
   const item = $derived(data?.item)
 
+  // arkflix-server: listas do usuário de lá e "esconder" (admin, gravável)
+  let picking = $state(false)
+  let listsBtn = $state<HTMLButtonElement>()
+  const canList = $derived(!!app.ark?.videos && arkEditable())
+  const canHide = $derived(!!app.ark?.videos && arkWritable())
+
+  async function hide() {
+    if (!item) return
+    const ok = await confirm(
+      `Esconder "${item.name}" do servidor? ${item.type === 'Series' ? 'A série inteira vai' : 'O arquivo vai'} pra pasta de escondidos e some pra todo mundo. Pra desfazer, só movendo de volta no servidor.`,
+      'Esconder do servidor',
+      true,
+    )
+    if (!ok) return
+    try {
+      await api.arkHide('watch', item.id)
+      toast(`"${item.name}" escondido do servidor`, 'ok', 3000)
+      back()
+    } catch (err) {
+      toast((err as Error).message, 'error')
+    }
+  }
+
   function playMain(fromStart = false) {
     if (!item) return
     const target = item.type === 'Series' ? data?.next : item
@@ -82,6 +107,7 @@
 
   $effect(() =>
     pushHandler((a) => {
+      if (picking) return false
       if (a === 'fav') {
         toggleFav()
         return true
@@ -157,6 +183,12 @@
             {#if item.type === 'Movie'}
               <button class="btn" data-nav aria-pressed={item.played} onclick={() => togglePlayed(item)}><Icon name="check" /> Assistido</button>
             {/if}
+            {#if canList}
+              <button class="btn" data-nav aria-haspopup="dialog" bind:this={listsBtn} onclick={() => (picking = true)}><Icon name="plus" /> Adicionar à lista</button>
+            {/if}
+            {#if canHide}
+              <button class="btn" data-nav onclick={hide}><Icon name="close" /> Esconder do servidor</button>
+            {/if}
           </div>
         </div>
       </section>
@@ -195,6 +227,17 @@
       {/if}
     {/if}
   </main>
+  {#if picking && item}
+    <ArkListPicker
+      kind="watch"
+      id={item.id}
+      name={item.name}
+      onclose={() => {
+        picking = false
+        listsBtn?.focus()
+      }}
+    />
+  {/if}
   <HelpBar
     hints={item?.type === 'Series'
       ? [

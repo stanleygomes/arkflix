@@ -14,14 +14,16 @@
   import Icon from './Icon.svelte'
   import { toggleFavorite } from '../lib/actions'
   import { downloadGame } from '../lib/downloads.svelte'
+  import { arkEditable, arkWritable } from '../lib/ark'
 
   let {
     gameId,
     onclose,
     onlists,
     onconfig,
+    onserverlists,
     quick = false,
-  }: { gameId: string; onclose: () => void; onlists: () => void; onconfig: () => void; quick?: boolean } = $props()
+  }: { gameId: string; onclose: () => void; onlists: () => void; onconfig: () => void; onserverlists?: () => void; quick?: boolean } = $props()
 
   async function launch(state = '') {
     if (!g) return
@@ -42,6 +44,30 @@
   const g = $derived(game(gameId))
   const canResume = $derived(!!g && !g.remote && g.lastPlayed > 0 && system(g.system)?.emulator === 'retroarch')
   const configurable = $derived(!!g && !g.remote && system(g.system)?.emulator === 'retroarch')
+  // jogo do RomM do arkflix-server: listas de lá e esconder (admin, gravável)
+  const onArk = $derived(!!g?.onServer && !!app.ark?.games)
+  const canServerList = $derived(onArk && !!onserverlists && arkEditable())
+  const canHide = $derived(onArk && arkWritable())
+
+  async function hideOnServer() {
+    if (!g) return
+    const ok = await confirm(
+      `Esconder "${g.name}" do servidor? O jogo vai pra pasta de escondidos e some do Catálogo pra todo mundo. A cópia deste PC fica. Pra desfazer, só movendo de volta no servidor.`,
+      'Esconder do servidor',
+      true,
+    )
+    if (!ok) return
+    try {
+      await api.arkHide('game', gameId)
+      toast(`"${g.name}" escondido do servidor`, 'ok', 3000)
+      play('accept')
+      onclose()
+      if (g.remote) back()
+    } catch (err) {
+      toast((err as Error).message, 'error')
+    }
+  }
+
   const inLists = $derived(app.lists.filter((l) => l.games.includes(gameId)).length)
 
   $effect(() => {
@@ -127,6 +153,9 @@
       <button class="item" data-nav data-nav-default={quick ? undefined : ''} aria-haspopup="dialog" onclick={onlists}>
         <Icon name="plus" /> Listas{inLists ? ` (${inLists})` : ''}
       </button>
+      {#if canServerList}
+        <button class="item" data-nav aria-haspopup="dialog" onclick={onserverlists}><Icon name="cloud" /> Listas do servidor</button>
+      {/if}
       {#if !isKids()}
         <button class="item" data-nav onclick={edit}><Icon name="pencil" /> Editar informações</button>
         {#if configurable}
@@ -135,6 +164,9 @@
         <button class="item" data-nav onclick={toggleHidden}>
           <Icon name={g?.hidden ? 'check' : 'close'} /> {g?.hidden ? 'Mostrar na biblioteca' : 'Ocultar da biblioteca'}
         </button>
+        {#if canHide}
+          <button class="item" data-nav onclick={hideOnServer}><Icon name="close" /> Esconder do servidor</button>
+        {/if}
         {#if g?.local && !g.remote}
           <hr aria-hidden="true" />
           <button class="item danger" data-nav onclick={remove}><Icon name="trash" /> Apagar do PC</button>

@@ -55,6 +55,8 @@ export interface Game {
   edited?: boolean
   kidsOk?: boolean
   remote?: boolean
+  /** está no servidor RomM (baixado ou não) */
+  onServer?: boolean
 }
 
 /** O que apagar o jogo libera (GameSize). */
@@ -606,3 +608,74 @@ export interface WatchStream {
   item: WatchItem
   next: WatchItem | null
 }
+
+/** O arkflix-server do perfil (detectado pelo /info do Jellyfin ou do RomM). */
+export interface ArkInfo {
+  found: boolean
+  name: string
+  version: string
+  base: string
+  writable: boolean
+  features: string[]
+  source: 'jellyfin' | 'romm' | ''
+  user: string
+  /** a conta é admin e o perfil é adulto: o painel aparece */
+  admin: boolean
+  lists: boolean
+  /** dá pra pôr filmes e séries (conta do Jellyfin no servidor) */
+  videos: boolean
+  /** dá pra pôr jogos (o RomM do app é este servidor) */
+  games: boolean
+  error?: string
+}
+
+export interface ArkLibrary {
+  id: string
+  name: string
+  path: string
+  count: number
+  episodes?: number
+  albums?: number
+  artists?: number
+  platforms?: number
+  online: boolean
+}
+
+export interface ArkStatus {
+  version: string
+  writable: boolean
+  startedAt: string
+  libraries: ArkLibrary[]
+  scan: { running: boolean; startedAt: string; finishedAt: string; count: number; error: string }
+  metadata: { enabled: boolean; tmdb: boolean; running: boolean; pending: number; error: string }
+  sessions: { user: string; client: string; device: string; lastSeen: string }[]
+}
+
+export interface ArkUser {
+  id: string
+  rid: number
+  name: string
+  admin: boolean
+  createdAt: string
+  lastLogin: string
+}
+
+export interface ArkPlatform {
+  slug: string
+  name: string
+}
+
+/** Lista do servidor: filmes/séries como WatchItem, jogos como ids da biblioteca. */
+export interface ArkList {
+  id: string
+  name: string
+  count: number
+  kinds: string[]
+  updatedAt: string
+  videos: WatchItem[]
+  games: string[]
+  has: boolean
+}
+
+export type ArkKind = 'watch' | 'game'
+export type ArkUploadKind = 'movie' | 'episode' | 'rom' | 'bios' | 'music' | 'subtitle'

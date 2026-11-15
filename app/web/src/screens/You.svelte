@@ -18,6 +18,10 @@
   import ServerPanel from './settings/ServerPanel.svelte'
   import StoragePanel from './settings/StoragePanel.svelte'
   import UpdatesPanel from './settings/UpdatesPanel.svelte'
+  import ArkStatusPanel from './settings/ArkStatusPanel.svelte'
+  import ArkUsersPanel from './settings/ArkUsersPanel.svelte'
+  import ArkUploadPanel from './settings/ArkUploadPanel.svelte'
+  import { refreshArk } from '../lib/ark'
   import Activity from './Activity.svelte'
   import ImportScreen from './Import.svelte'
   import ProfileEditor from './ProfileEditor.svelte'
@@ -49,6 +53,7 @@
   $effect(() => {
     api.stats('all').then((s) => (summary = summarize(s))).catch(() => {})
     if (isKids()) return
+    refreshArk()
     api.remoteStatus().then((r) => (remote = r)).catch(() => {})
     api.storage().then((s) => (storage = s)).catch(() => {})
     api.emulatorStatus().then((e) => (emus = e)).catch(() => {})
@@ -133,6 +138,21 @@
           { id: 'emulators', label: 'Emuladores e BIOS', panel: EmulatorsPanel },
         ],
       },
+      ...(app.ark?.admin
+        ? [
+            {
+              id: 'arkserver',
+              label: 'Servidor arkflix',
+              icon: 'cloud' as IconName,
+              value: `${app.ark.name} · ${app.ark.writable ? 'gravável' : 'só leitura'}`,
+              subs: [
+                { id: 'arkstatus', label: 'Estado', panel: ArkStatusPanel },
+                { id: 'arkusers', label: 'Usuários', panel: ArkUsersPanel },
+                ...(app.ark.writable ? [{ id: 'arkupload', label: 'Enviar arquivos', panel: ArkUploadPanel }] : []),
+              ],
+            },
+          ]
+        : []),
       {
         id: 'system',
         label: 'Sistema',

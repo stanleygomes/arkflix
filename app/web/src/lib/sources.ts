@@ -41,6 +41,7 @@ export function sourceTitle(source: string): string {
   if (source === HIDDEN) return 'Jogos ocultos'
   if (kind === 'collection') return collection(id)?.label ?? id
   if (kind === 'list') return app.lists.find((l) => l.id === id)?.name ?? 'Lista'
+  if (kind === 'arklist') return app.arkLists.find((l) => l.id === id)?.name ?? 'Lista do servidor'
   return id
 }
 
@@ -52,6 +53,11 @@ export function sourceGames(source: string): Game[] {
   if (kind === 'collection') {
     const c = collection(id)
     return c ? shown().filter((g) => c.pick(g) && (c.id === 'server' || !g.remote)) : []
+  }
+  if (kind === 'arklist') {
+    // lista do servidor: na ordem de lá (o Go já tirou o que o perfil não vê)
+    const byId = new Map(shown().map((g) => [g.id, g]))
+    return (app.arkLists.find((l) => l.id === id)?.games ?? []).flatMap((g) => byId.get(g) ?? [])
   }
   if (kind === 'list') {
     const l = app.lists.find((x) => x.id === id)

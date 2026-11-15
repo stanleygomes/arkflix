@@ -21,6 +21,7 @@
   import { app, go, isKids, shown, system, toast } from '../lib/state.svelte'
   import type { Game, GameCheevos, SaveState } from '../lib/types'
   import { ago, playTime } from '../lib/format'
+  import { loadArkLists } from '../lib/ark'
 
   // ocultos ficam fora do Início (a página do jogo ainda abre). Duas visões,
   // como o Games/Media do PS5: Biblioteca (o que está neste PC) e Catálogo (o que está
@@ -45,7 +46,12 @@
       .map((s) => ({ slug: s.slug, short: s.short, name: s.name, kind: 'system' as const })),
   ])
 
-  type Row = { id: string; title: string; games: Game[]; source?: string; smart?: boolean }
+  type Row = { id: string; title: string; games: Game[]; source?: string; smart?: boolean; server?: boolean }
+
+  // listas do servidor arkflix com jogos viram fileiras do Início
+  $effect(() => {
+    if (app.ark?.games) loadArkLists().catch(() => {})
+  })
   const rows = $derived.by((): Row[] => {
     if (app.homeTab.startsWith('collection:') || app.homeTab.startsWith('list:')) {
       const games = sortGames(sourceGames(app.homeTab), sortOf(app.homeTab))
@@ -76,6 +82,13 @@
     for (const l of app.lists) {
       const games = sourceGames(`list:${l.id}`)
       if (games.length) out.push({ id: `list-${l.id}`, title: l.name, games, source: `list:${l.id}`, smart: !!l.rule })
+    }
+    if (app.ark?.games) {
+      const here = new Set(visible.map((g) => g.id))
+      for (const l of app.arkLists) {
+        const games = sourceGames(`arklist:${l.id}`).filter((g) => here.has(g.id))
+        if (games.length) out.push({ id: `ark-${l.id}`, title: l.name, games, source: `arklist:${l.id}`, server: true })
+      }
     }
     // a biblioteca toda, sempre por último (ou sozinha, no começo)
     const all = sortGames(visible, sortOf('collection:all'))
@@ -362,7 +375,7 @@
         {#each rows as row (row.id)}
           <section class="shelf" aria-label={row.title}>
             <h2 class="row-title">
-              {row.title}{#if row.smart}<span class="smart" title="Lista automática"><Icon name="auto" size="0.8em" /><span class="sr-only">(lista automática)</span></span>{/if}
+              {row.title}{#if row.smart}<span class="smart" title="Lista automática"><Icon name="auto" size="0.8em" /><span class="sr-only">(lista automática)</span></span>{/if}{#if row.server}<span class="smart" title="Lista do servidor"><Icon name="cloud" size="0.8em" /><span class="sr-only">(lista do servidor)</span></span>{/if}
             </h2>
             <ul class="row" data-nav-group={`row-${row.id}`}>
               {#each row.games as g (g.id)}

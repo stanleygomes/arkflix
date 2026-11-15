@@ -4,6 +4,7 @@
   // a lista e sair. A senha vai direto pro login; o app guarda só um token.
   import Icon from '../../components/Icon.svelte'
   import { api } from '../../lib/api'
+  import { refreshArk } from '../../lib/ark'
   import { ago } from '../../lib/format'
   import { play } from '../../lib/sound'
   import { app, confirm, prompt, toast } from '../../lib/state.svelte'
@@ -60,6 +61,7 @@
     }, { max: 200, secret: true })
     busy = false
     if (info?.connected) {
+      refreshArk()
       play('accept')
       toast(`Conectado a ${info.base}`, 'ok')
     }
@@ -75,6 +77,7 @@
     try {
       await api.disconnectRemote()
       info = await api.remoteStatus()
+      refreshArk()
       toast('Servidor desconectado', 'ok')
     } catch (err) {
       toast((err as Error).message, 'error')

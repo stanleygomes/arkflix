@@ -1,7 +1,7 @@
 // Estado global da interface (Svelte 5 runes).
 import { play } from './sound'
 import { glitch } from './glitch'
-import type { Boot, Family, WatchInfo, Game, GameEvent, GameList, Mapping, Pad, ProfileState, Settings, System, RetroPadButton, UpdateInfo } from './types'
+import type { ArkInfo, ArkList, Boot, Family, WatchInfo, Game, GameEvent, GameList, Mapping, Pad, ProfileState, Settings, System, RetroPadButton, UpdateInfo } from './types'
 
 export type Screen =
   | { name: 'home' }
@@ -20,6 +20,7 @@ export type Screen =
   | { name: 'watch' }
   | { name: 'title'; id: string }
   | { name: 'player'; id: string; start?: number }
+  | { name: 'arklist'; id: string }
 
 export type SettingsTab = 'library' | 'server' | 'storage' | 'emulators' | 'bluetooth' | 'updates' | 'cheevos' | 'controls' | 'a11y' | 'about'
 
@@ -100,9 +101,12 @@ export const app = $state({
   error: '',
   // filmes e séries: conta do perfil, aba e destaque da tela, player aberto
   watch: null as WatchInfo | null,
-  watchTab: 'home' as 'home' | 'movies' | 'series' | 'favorites',
+  watchTab: 'home' as 'home' | 'movies' | 'series' | 'favorites' | 'lists',
   watchSelected: '',
   watching: false,
+  // arkflix-server do perfil (null = não tem) e as listas do usuário de lá
+  ark: null as ArkInfo | null,
+  arkLists: [] as ArkList[],
 })
 
 export function screen(): Screen {

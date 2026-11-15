@@ -129,6 +129,14 @@ func (w *window) PickFiles() ([]string, error) {
 	})
 }
 
+func (w *window) PickAnyFiles(title string) ([]string, error) {
+	ctx := w.get()
+	if ctx == nil {
+		return nil, nil
+	}
+	return runtime.OpenMultipleFilesDialog(ctx, runtime.OpenDialogOptions{Title: title})
+}
+
 func runDesktop(store *settings.Store, pads *gamepad.Manager, ui fs.FS, smoke, windowed bool, emu launcher.Spec, blue bt.Backend) int {
 	// tela cheia por padrão (é um app de TV); F11 alterna, --windowed abre em janela
 	start := options.Fullscreen

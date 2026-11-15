@@ -5,6 +5,7 @@
   import GameConfig from '../components/GameConfig.svelte'
   import GameOptions from '../components/GameOptions.svelte'
   import ListPicker from '../components/ListPicker.svelte'
+  import ArkListPicker from '../components/ArkListPicker.svelte'
   import MediaViewer from '../components/MediaViewer.svelte'
   import HelpBar from '../components/HelpBar.svelte'
   import Icon from '../components/Icon.svelte'
@@ -28,6 +29,7 @@
   let loadError = $state('')
   let stamp = $state(Date.now())
   let picking = $state(false)
+  let serverPicking = $state(false)
   let menu = $state(false)
   let configuring = $state(false)
   let optionsBtn = $state<HTMLButtonElement>()
@@ -147,7 +149,7 @@
 
   $effect(() =>
     pushHandler((a) => {
-      if (menu || picking || configuring || viewing !== null) return false
+      if (menu || picking || serverPicking || configuring || viewing !== null) return false
       if (a === 'fav') {
         const stateId = current()?.dataset.state
         const st = isKids() ? undefined : listing?.states.find((s) => s.id === stateId)
@@ -327,6 +329,21 @@
       onconfig={() => {
         menu = false
         configuring = true
+      }}
+      onserverlists={() => {
+        menu = false
+        serverPicking = true
+      }}
+    />
+  {/if}
+  {#if serverPicking && g}
+    <ArkListPicker
+      kind="game"
+      {id}
+      name={g.name}
+      onclose={() => {
+        serverPicking = false
+        tick().then(() => optionsBtn?.focus())
       }}
     />
   {/if}

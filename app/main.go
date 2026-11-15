@@ -179,6 +179,9 @@ func main() {
 			mux.Handle("/fake-romm/", http.StripPrefix("/fake-romm", fixture.NewFakeRomM()))
 			// Jellyfin falso: stanley / senha123, filmes e uma série
 			mux.Handle("/fake-jellyfin/", http.StripPrefix("/fake-jellyfin", fixture.NewFakeJellyfin()))
+			// arkflix-server falso: Jellyfin, RomM e a API própria (/arkflix/api)
+			// no mesmo endereço; stanley (admin) / senha123
+			mux.Handle("/fake-arkflix/", http.StripPrefix("/fake-arkflix", fixture.NewFakeArkServer()))
 			// RetroAchievements falso: stanley / senha123, Super Mario World
 			ra := fixture.NewFakeRA()
 			ra.Prefix = "/fake-ra"
