@@ -38,6 +38,38 @@ test.describe('primeira vez', () => {
     expect(app.read(`${app.data}/romm.json`)).not.toContain('senha123')
   })
 
+  test('tela de boas-vindas: escolhe o Jellyfin e já entra em filmes e séries', async ({ page, app }) => {
+    await page.goto(app.url)
+    const kinds = page.getByRole('radiogroup', { name: 'Entrar em' })
+    await expect(kinds.getByRole('radio', { name: /^Jogos/ })).toHaveAttribute('aria-checked', 'true')
+    await kinds.getByRole('radio', { name: /^Filmes e séries/ }).click()
+    await expect(kinds.getByRole('radio', { name: /^Filmes e séries/ })).toHaveAttribute('aria-checked', 'true')
+    const form = page.getByRole('form', { name: 'Entrar no Jellyfin' })
+    await expect(form.getByRole('button', { name: /^Servidor/ })).toContainText('jellyfin')
+    await axe(page, 'boas-vindas com Jellyfin')
+
+    const fill = async (field: RegExp, value: string) => {
+      await form.getByRole('button', { name: field }).click()
+      await page.locator('#prompt-input').fill(value)
+      await page.keyboard.press('Enter')
+    }
+    await fill(/^Servidor/, `${app.url}/fake-jellyfin`)
+    await fill(/^Usuário/, 'stanley')
+    await fill(/^Senha/, 'errada')
+    await form.getByRole('button', { name: 'Entrar com o servidor' }).click()
+    await expect(page.getByRole('alert')).toContainText('senha')
+    await fill(/^Senha/, 'senha123')
+    await form.getByRole('button', { name: 'Entrar com o servidor' }).click()
+
+    await expect(page.getByRole('heading', { name: 'Boas-vindas! Monte seu perfil' })).toBeVisible()
+    await expect(page.getByRole('button', { name: /^Nome/ })).toContainText('Stanley')
+    await page.getByRole('button', { name: 'Começar' }).click()
+    await page.locator('[data-section="watch"]').click()
+    await expect(page.getByRole('heading', { name: 'O Grande Teste' })).toBeVisible()
+    expect(app.read(`${app.data}/jellyfin.json`)).not.toContain('senha123')
+    expect(app.exists(`${app.data}/romm.json`)).toBe(false)
+  })
+
   test('app novo abre na configuração do perfil: nome e personagem', async ({ page, app }) => {
     await page.goto(app.url)
     await page.getByRole('button', { name: 'Jogar offline' }).click()

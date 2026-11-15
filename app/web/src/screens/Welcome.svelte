@@ -1,6 +1,7 @@
 <script lang="ts">
-  // Primeira vez do app: entrar no servidor RomM ou jogar offline. Depois vem
-  // a configuração do perfil. A senha só vai pro login (o app guarda um token).
+  // Primeira vez do app: entrar no RomM (jogos) ou no Jellyfin (filmes e
+  // séries), ou usar offline. Depois vem a configuração do perfil. A senha só
+  // vai pro login (o app guarda um token); o outro servidor liga depois.
   import { tick } from 'svelte'
   import Icon from '../components/Icon.svelte'
   import { api } from '../lib/api'
@@ -11,6 +12,14 @@
   import { app, prompt, resetTo } from '../lib/state.svelte'
 
   const FACES = ['pac-man', 'mario', 'link', 'samus', 'mega-man', 'sonic', 'kirby', 'donkey-kong', 'pikachu', 'simon', 'fox', 'ryu', 'yoshi', 'snake', 'cloud', 'terry']
+
+  type Kind = 'romm' | 'jellyfin'
+  const KINDS: Record<Kind, { label: string; server: string; form: string; host: string }> = {
+    romm: { label: 'Jogos', server: 'RomM', form: 'Entrar no servidor RomM', host: 'meu-romm.duckdns.org' },
+    jellyfin: { label: 'Filmes e séries', server: 'Jellyfin', form: 'Entrar no Jellyfin', host: 'meu-jellyfin.duckdns.org' },
+  }
+  let kind = $state<Kind>('romm')
+  const k = $derived(KINDS[kind])
 
   let host = $state('')
   let user = $state('')
@@ -54,10 +63,16 @@
     busy = true
     error = ''
     try {
-      const info = await api.connectRemote(host, user, pass)
+      let who: string
+      if (kind === 'romm') {
+        who = (await api.connectRemote(host, user, pass)).user
+      } else {
+        app.watch = await api.connectWatch('main', host, user, pass)
+        who = app.watch.user
+      }
       pass = ''
       play('accept')
-      const name = info.user.charAt(0).toUpperCase() + info.user.slice(1)
+      const name = who.charAt(0).toUpperCase() + who.slice(1)
       next(name)
     } catch (err) {
       error = (err as Error).message
@@ -77,11 +92,30 @@
   <main class="card panel" aria-labelledby="welcome-title">
     <p class="logo pixel" aria-hidden="true">ARK<span>FLIX</span></p>
     <h1 id="welcome-title" class="pixel">Bem-vindo!</h1>
-    <p class="muted lead">Entre no seu servidor RomM pra ver os jogos de lá e guardar os saves na nuvem, ou jogue só com o que está neste computador.</p>
+    <p class="muted lead">Entre no RomM pra ver os jogos e guardar os saves na nuvem, ou no Jellyfin pra assistir filmes e séries. Ou use só o que está neste computador.</p>
+
+    <div class="kinds" role="radiogroup" aria-label="Entrar em">
+      {#each Object.entries(KINDS) as [id, info] (id)}
+        <button
+          type="button"
+          class="kind"
+          role="radio"
+          data-nav
+          aria-checked={kind === id}
+          onclick={() => {
+            kind = id as Kind
+            error = ''
+          }}
+        >
+          <span class="kind-name"><Icon name={id === 'romm' ? 'cloud' : 'film'} /> {info.label}</span>
+          <span class="kind-server">{info.server}</span>
+        </button>
+      {/each}
+    </div>
 
     <form
       class="form"
-      aria-label="Entrar no servidor RomM"
+      aria-label={k.form}
       onsubmit={(e) => {
         e.preventDefault()
         login()
@@ -89,13 +123,13 @@
     >
       <button type="button" class="field" data-nav data-nav-default onclick={async () => (host = (await ask('Endereço do servidor', host)) ?? host)}>
         <span class="label">Servidor</span>
-        <span class="value" class:empty={!host}>{host || 'meu-romm.duckdns.org'}</span>
+        <span class="value" class:empty={!host}>{host || k.host}</span>
       </button>
-      <button type="button" class="field" data-nav onclick={async () => (user = (await ask('Usuário do RomM', user)) ?? user)}>
+      <button type="button" class="field" data-nav onclick={async () => (user = (await ask(`Usuário do ${k.server}`, user)) ?? user)}>
         <span class="label">Usuário</span>
         <span class="value" class:empty={!user}>{user || 'seu usuário'}</span>
       </button>
-      <button type="button" class="field" data-nav onclick={async () => (pass = (await ask('Senha do RomM', '', true)) ?? pass)}>
+      <button type="button" class="field" data-nav onclick={async () => (pass = (await ask(`Senha do ${k.server}`, '', true)) ?? pass)}>
         <span class="label">Senha</span>
         <span class="value" class:empty={!pass}>{pass ? '•'.repeat(Math.min(pass.length, 12)) : 'sua senha'}</span>
       </button>
@@ -107,7 +141,7 @@
 
     <div class="or" aria-hidden="true"><span>ou</span></div>
     <button class="btn wide" data-nav onclick={() => next()}><Icon name="play" /> Jogar offline</button>
-    <p class="muted small">Dá pra conectar depois em Configurações › Servidor.</p>
+    <p class="muted small">O outro servidor liga depois: RomM em Configurações › Servidor, Jellyfin no perfil › Contas.</p>
   </main>
 </div>
 
@@ -167,6 +201,43 @@
   }
   .lead {
     text-align: center;
+  }
+  .kinds {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.6rem;
+  }
+  .kind {
+    display: grid;
+    justify-items: center;
+    gap: 0.15rem;
+    padding: 0.7rem 0.6rem;
+    font: inherit;
+    font-weight: 700;
+    color: var(--text);
+    background: color-mix(in srgb, var(--bg) 70%, #000);
+    border: 2px solid color-mix(in srgb, var(--accent-2) 70%, transparent);
+    border-radius: 999px;
+    cursor: pointer;
+  }
+  .kind-name {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+  .kind-server {
+    font-size: 0.8rem;
+    font-weight: 400;
+    color: var(--muted);
+  }
+  .kind[aria-checked='true'] {
+    border-color: var(--accent);
+    background: color-mix(in srgb, var(--accent) 22%, var(--bg));
+    box-shadow: 3px 3px 0 var(--accent);
+  }
+  .kind:focus-visible,
+  .kind:hover {
+    border-color: var(--focus);
   }
   .form {
     display: grid;
