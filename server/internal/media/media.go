@@ -3,9 +3,10 @@
 package media
 
 import (
-	"context"
-	"io"
 	"net/http"
+	"os"
+	"path/filepath"
+	"strings"
 
 	"github.com/stanleygomes/arkflix/server/internal/config"
 )
@@ -19,52 +20,46 @@ type Media struct {
 // New cria o Media com cache em <data>/cache.
 func New(cfg *config.Config) *Media { return &Media{Cfg: cfg, Cache: cfg.Data + "/cache"} }
 
-// ServeFile manda o arquivo com Range, Content-Type pela extensão e
-// Accept-Ranges; HEAD funciona. 404 se não existir.
-func (m *Media) ServeFile(w http.ResponseWriter, r *http.Request, path string) {
-	http.ServeFile(w, r, path) // A FAZER: tipos de mídia (mkv, flac...) e sem listar pasta
+// mimeTypes cobre o que o mime do sistema costuma não saber (ou erra).
+var mimeTypes = map[string]string{
+	"mkv": "video/x-matroska", "mka": "audio/x-matroska", "webm": "video/webm", "mp4": "video/mp4",
+	"m4v": "video/x-m4v", "mov": "video/quicktime", "avi": "video/x-msvideo", "wmv": "video/x-ms-wmv",
+	"ts": "video/mp2t", "m2ts": "video/mp2t", "mts": "video/mp2t", "mpg": "video/mpeg", "mpeg": "video/mpeg",
+	"flv": "video/x-flv", "ogv": "video/ogg", "3gp": "video/3gpp",
+	"mp3": "audio/mpeg", "flac": "audio/flac", "ogg": "audio/ogg", "oga": "audio/ogg", "opus": "audio/ogg",
+	"m4a": "audio/mp4", "m4b": "audio/mp4", "aac": "audio/aac", "wav": "audio/wav", "wma": "audio/x-ms-wma",
+	"aiff": "audio/aiff", "aif": "audio/aiff", "ape": "audio/x-ape", "wv": "audio/x-wavpack", "dsf": "audio/x-dsf",
+	"srt": "application/x-subrip", "vtt": "text/vtt; charset=utf-8", "ass": "text/x-ssa", "ssa": "text/x-ssa",
+	"jpg": "image/jpeg", "jpeg": "image/jpeg", "png": "image/png", "webp": "image/webp", "gif": "image/gif",
+	"zip": "application/zip", "7z": "application/x-7z-compressed", "rar": "application/vnd.rar",
+	"iso": "application/x-iso9660-image", "chd": "application/octet-stream", "nfo": "text/plain; charset=utf-8",
 }
 
-// ImageOpts pede um tamanho: 0 = sem limite. Format "" = mantém (jpg/png);
-// "webp" não é suportado e vira jpg.
-type ImageOpts struct {
-	MaxWidth, MaxHeight int
-	Width, Height       int // exato (Jellyfin fillWidth/fillHeight: corta pra preencher)
-	Quality             int // jpeg, padrão 90
-	Format              string
-}
-
-// Image manda a imagem src redimensionada (cache em disco por src+mtime+
-// opções). src pode ser um arquivo de imagem, "embedded:<audio>" (capa
-// dentro da tag) ou "frame:<vídeo>" (quadro tirado pelo ffmpeg a 10% do
-// filme). 404 se não tiver imagem.
-func (m *Media) Image(w http.ResponseWriter, r *http.Request, src string, o ImageOpts) {
-	http.NotFound(w, r) // A FAZER
-}
-
-// AudioOpts pede uma transcodificação.
-type AudioOpts struct {
-	Format  string  // mp3 | opus | ogg | aac | flac (padrão mp3)
-	Bitrate int     // kbit/s (padrão 192; ignorado em flac)
-	Offset  float64 // segundos a pular do começo
-}
-
-// ContentType do formato transcodificado.
-func ContentType(format string) string {
-	switch format {
-	case "opus", "ogg":
-		return "audio/ogg"
-	case "aac":
-		return "audio/aac"
-	case "flac":
-		return "audio/flac"
-	default:
-		return "audio/mpeg"
+// MimeType pela extensão; desconhecido vira application/octet-stream
+// (ROMs: .sfc, .bin, .cue...).
+func MimeType(path string) string {
+	e := strings.ToLower(strings.TrimPrefix(filepath.Ext(path), "."))
+	if t, ok := mimeTypes[e]; ok {
+		return t
 	}
+	return "application/octet-stream" // sem depender do mime do sistema
 }
 
-// TranscodeAudio escreve em out o áudio de src transcodificado pelo ffmpeg
-// até acabar ou ctx ser cancelado. Erro se não houver ffmpeg.
-func (m *Media) TranscodeAudio(ctx context.Context, out io.Writer, src string, o AudioOpts) error {
-	return nil // A FAZER
+// ServeFile manda o arquivo com Range, Content-Type pela extensão e
+// Accept-Ranges; HEAD funciona. 404 se não existir (ou for pasta).
+func (m *Media) ServeFile(w http.ResponseWriter, r *http.Request, path string) {
+	f, err := os.Open(path)
+	if err != nil {
+		http.NotFound(w, r)
+		return
+	}
+	defer f.Close()
+	fi, err := f.Stat()
+	if err != nil || fi.IsDir() {
+		http.NotFound(w, r)
+		return
+	}
+	w.Header().Set("Content-Type", MimeType(path))
+	w.Header().Set("Accept-Ranges", "bytes")
+	http.ServeContent(w, r, fi.Name(), fi.ModTime(), f)
 }
