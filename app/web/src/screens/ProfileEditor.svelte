@@ -9,7 +9,6 @@
   import { api } from '../lib/api'
   import { pushHandler } from '../lib/input'
   import { focusDefault, focusWithin } from '../lib/nav'
-  import { applyPalette, highContrastPalette, homePalette } from '../lib/palette'
   import { play } from '../lib/sound'
   import { avatarName } from '../lib/avatars'
   import { app, askPIN, back, confirm, prompt, resetTo, toast } from '../lib/state.svelte'
@@ -76,7 +75,6 @@
   }
 
   $effect(() => {
-    applyPalette(app.settings?.a11y.highContrast ? highContrastPalette : homePalette)
     if (!embedded) tick().then(focusDefault)
   })
 
@@ -192,14 +190,14 @@
   {#if !embedded}<TopBar actions={false} />{/if}
   <main class="editor" aria-labelledby={embedded ? undefined : 'editor-title'}>
     <div class="preview">
-      <Avatar {avatar} {color} size="10rem" />
-      <p class="pixel big-name">{name || 'Sem nome'}</p>
+      <Avatar {avatar} {color} size="9rem" variant="cameo" mark />
+      <p class="plate">{name || 'Sem nome'}</p>
     </div>
     <div class="form">
-      {#if !embedded}<h1 id="editor-title" class="pixel">{setup ? 'Boas-vindas! Monte seu perfil' : existing ? 'Editar perfil' : 'Novo perfil'}</h1>{/if}
+      {#if !embedded}<h1 id="editor-title">{setup ? 'Boas-vindas! Monte seu perfil' : existing ? 'Editar perfil' : 'Novo perfil'}</h1>{/if}
       {#if setup}<p class="muted">Escolha seu nome e um personagem. Dá pra mudar depois e criar perfis pra mais gente.</p>{/if}
-      <button class="btn field" data-nav data-nav-default onclick={editName}>
-        <span class="muted">Nome</span> <strong>{name || 'Escolher nome'}</strong>
+      <button class="field" data-nav data-nav-default onclick={editName}>
+        <span class="field-label">Nome</span> <span class="value" class:empty={!name}>{name || 'Escolher nome'}</span>
       </button>
 
       <fieldset>
@@ -207,7 +205,8 @@
         <div class="choices" role="radiogroup" aria-label="Avatar">
           {#each avatars as a (a)}
             <button class="choice" data-nav role="radio" aria-checked={avatar === a} aria-label={avatarName(a)} onclick={() => (avatar = a)}>
-              <Avatar avatar={a} color={color} size="3.6rem" />
+              <Avatar avatar={a} size="3.4rem" />
+              {#if avatar === a}<span class="tick" aria-hidden="true">✓</span>{/if}
             </button>
           {/each}
         </div>
@@ -215,10 +214,12 @@
 
       <fieldset>
         <legend>Cor</legend>
+        <p class="muted hint">Só uma marquinha no canto do avatar, pra achar o seu perfil rápido.</p>
         <div class="choices" role="radiogroup" aria-label="Cor">
           {#each colors as c, i (c)}
             <button class="choice swatch" data-nav role="radio" aria-checked={color === c} aria-label={COLOR_NAMES[i] ?? c} onclick={() => (color = c)}>
-              <span style:background={c}></span>
+              <span class="ink" style:background={c}></span>
+              {#if color === c}<span class="tick" aria-hidden="true">✓</span>{/if}
             </button>
           {/each}
         </div>
@@ -240,8 +241,9 @@
       {#if existing && !existing.main && existing.id !== app.profile?.current}
         <fieldset>
           <legend>Infantil</legend>
-          <button class="btn" data-nav role="switch" aria-checked={kids} aria-describedby="kids-help" onclick={toggleKids}>
-            <Icon name="star" /> Perfil infantil: {kids ? 'sim' : 'não'}
+          <button class="switch" data-nav role="switch" aria-checked={kids} aria-describedby="kids-help" onclick={toggleKids}>
+            <span class="knob" aria-hidden="true"></span>
+            <span>Perfil infantil</span>
           </button>
           <p class="muted" id="kids-help">
             Só jogos liberados (no editor de cada jogo), botões maiores e nada de configurações, importar, apagar saves
@@ -264,7 +266,7 @@
         </fieldset>
       {/if}
 
-      <div class="row">
+      <div class="row actions">
         <button class="btn primary" data-nav disabled={!name} onclick={save}><Icon name="check" /> {setup ? 'Começar' : existing ? 'Salvar' : 'Criar perfil'}</button>
         {#if existing && !existing.main && existing.id !== app.profile?.current}
           <button class="btn danger" data-nav onclick={remove}><Icon name="trash" /> Apagar perfil</button>
@@ -296,88 +298,266 @@
     min-height: 0;
     overflow-y: auto;
     display: grid;
-    grid-template-columns: minmax(12rem, 18rem) 1fr;
+    grid-template-columns: minmax(12rem, 16rem) 1fr;
     gap: 3rem;
     padding: 1rem 3rem 2rem;
     align-items: start;
   }
+  /* 🎬 retrato único da tela (cameo) com a plaquinha do nome embaixo */
   .preview {
+    position: sticky;
+    top: 0;
     display: grid;
     justify-items: center;
-    gap: 1rem;
-    padding-top: 3rem;
+    gap: 1.25rem;
+    padding-top: 2.5rem;
   }
-  .big-name {
-    font-size: 1.3rem;
+  .plate {
+    max-width: 100%;
+    padding: 0.3rem 0.8rem 0.15rem;
+    font-family: var(--font-hud);
+    font-size: 0.95rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
     text-align: center;
     overflow-wrap: anywhere;
+    color: var(--bg);
+    background: var(--text);
   }
   .form {
     display: flex;
     flex-direction: column;
-    gap: 1.2rem;
-    max-width: 44rem;
+    gap: 1.5rem;
+    max-width: 46rem;
   }
   h1 {
-    font-size: clamp(1.6rem, 3vw, 2.4rem);
+    font-size: clamp(2.2rem, 4vw, 3.4rem);
   }
+
+  /* campo: rótulo em Bevan em cima, valor numa caixa de texto */
   .field {
-    justify-content: flex-start;
-    gap: 1rem;
+    display: grid;
+    gap: 0.35rem;
+    width: min(100%, 24rem);
+    padding: 0;
+    font: inherit;
+    color: var(--text);
+    text-align: start;
+    background: none;
+    border: none;
+    cursor: text;
   }
+  .field-label {
+    font-family: var(--font-label);
+    font-size: 0.78rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  .value {
+    display: block;
+    min-height: 2.9rem;
+    padding: 0.6rem 0.75rem;
+    font-weight: 700;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    background: var(--balloon);
+    border: var(--edge) solid var(--outline);
+    border-radius: var(--radii-sm);
+    box-shadow: var(--hard-sm);
+  }
+  .field:hover .value,
+  .field:focus-visible .value {
+    border-color: var(--focus);
+    box-shadow: 4px 4px 0 var(--focus);
+  }
+  .value.empty {
+    color: var(--muted);
+    font-style: italic;
+    font-weight: 400;
+  }
+
+  /* grupo: sem caixa, régua de 3px em cima, legenda em Bevan */
   fieldset {
     border: none;
-    padding: 0;
+    border-top: var(--edge) solid var(--outline);
+    padding: 1rem 0 0;
     margin: 0;
     display: grid;
-    gap: 0.6rem;
+    gap: 0.75rem;
   }
   legend {
-    font-weight: 700;
-    margin-bottom: 0.4rem;
+    float: left;
+    width: 100%;
+    font-family: var(--font-label);
+    font-size: 0.9rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+  .hint {
+    font-size: 0.9rem;
   }
   .choices {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.6rem;
+    gap: 0.75rem;
     padding: 0.3rem;
   }
+  /* escolha: a moldura sobe no foco; a escolhida afunda e ganha ✓ */
   .choice {
-    padding: 0.25rem;
+    position: relative;
+    padding: 0;
     background: none;
-    border: 3px solid transparent;
+    border: none;
+    border-radius: var(--radii-sm);
     cursor: pointer;
+    transition: transform var(--t) var(--ease);
+  }
+  .choice:hover,
+  .choice:focus-visible {
+    transform: translate(-2px, -2px);
   }
   .choice[aria-checked='true'] {
-    border-color: var(--accent);
+    transform: translate(3px, 3px);
   }
-  .choice:focus-visible {
-    outline: 3px dashed var(--text);
-    outline-offset: 2px;
+  .choice[aria-checked='true'] :global(.avatar) {
+    box-shadow: none;
+    background: var(--accent-2);
   }
-  .swatch span {
+  .tick {
+    position: absolute;
+    inset-block-start: -0.5rem;
+    inset-inline-end: -0.5rem;
+    display: grid;
+    place-items: center;
+    width: 1.4rem;
+    height: 1.4rem;
+    font-family: var(--font-label);
+    font-size: 0.8rem;
+    color: var(--bg);
+    background: var(--accent-2);
+    border: 2px solid var(--outline);
+    border-radius: 4px;
+  }
+  .ink {
     display: block;
-    width: 2.6rem;
-    height: 2.6rem;
-    border: 3px solid rgba(0, 0, 0, 0.35);
+    width: 2.8rem;
+    height: 2.8rem;
+    border: var(--edge) solid var(--outline);
+    border-radius: var(--radii-sm);
+    box-shadow: var(--hard-sm);
   }
-  .limit-label {
+  .swatch[aria-checked='true'] .ink {
+    box-shadow: none;
+  }
+
+  /* interruptor: trilho de 3px, botão que pula pro lado; ligado = verde-azulado */
+  .switch {
+    display: flex;
+    gap: 0.9rem;
+    align-items: center;
+    width: fit-content;
+    min-height: 3rem;
+    padding: 0.3rem 0.5rem;
+    font: inherit;
     font-weight: 700;
+    color: var(--text);
+    background: none;
+    border: none;
+    border-radius: var(--radii-sm);
+    cursor: pointer;
+  }
+  .knob {
+    position: relative;
+    flex: none;
+    width: 3.4rem;
+    height: 1.8rem;
+    background: var(--balloon);
+    border: var(--edge) solid var(--outline);
+    border-radius: 999px;
+    box-shadow: 2px 2px 0 var(--outline);
+  }
+  .knob::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    inset-inline-start: 0.2rem;
+    width: 1.05rem;
+    height: 1.05rem;
+    translate: 0 -50%;
+    background: var(--outline);
+    border-radius: var(--radii-sm);
+    transition: inset-inline-start 150ms steps(3);
+  }
+  .switch[aria-checked='true'] .knob {
+    background: var(--accent-2);
+  }
+  .switch[aria-checked='true'] .knob::after {
+    inset-inline-start: calc(100% - 1.25rem);
+    background: var(--bg);
+  }
+  .switch:hover .knob {
+    box-shadow: 3px 3px 0 var(--outline);
+  }
+
+  .limit-label {
+    font-family: var(--font-label);
+    font-size: 0.78rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
     margin: 0.4rem 0 0;
   }
+  /* grupo de alternância numa peça só (toggle group da noemi-ui) */
   .segmented {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.6rem;
+    width: fit-content;
+    background: var(--surface);
+    border: var(--edge) solid var(--outline);
+    border-radius: var(--radii-sm);
+    box-shadow: var(--hard-sm);
+    overflow: hidden;
+  }
+  .segmented .btn {
+    border: none;
+    border-inline-end: var(--edge) solid var(--outline);
+    border-radius: 0;
+    box-shadow: none;
+    transform: none;
+    background: none;
+  }
+  .segmented .btn:last-child {
+    border-inline-end: none;
+  }
+  .segmented .btn:hover {
+    background: color-mix(in srgb, var(--outline) 12%, var(--surface));
+  }
+  .segmented .btn[aria-pressed='true'] {
+    background: var(--accent-2);
+    color: var(--bg);
+    box-shadow: inset 3px 3px 0 color-mix(in srgb, var(--outline) 45%, transparent);
+  }
+  .segmented .btn[data-nav]:focus-visible {
+    outline-offset: -7px;
+  }
+  .segmented .btn[aria-pressed='true'][data-nav]:focus-visible {
+    outline-color: var(--bg);
   }
   .row {
     display: flex;
     flex-wrap: wrap;
     gap: 0.9rem;
   }
+  .actions {
+    padding-top: 1.25rem;
+    border-top: var(--edge) solid var(--outline);
+  }
   @media (max-width: 760px) {
     .editor {
       grid-template-columns: 1fr;
+    }
+    .preview {
+      position: static;
     }
   }
 </style>
