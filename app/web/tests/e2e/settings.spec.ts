@@ -34,7 +34,7 @@ test('tipografia da noemi-ui: título em Limelight, texto em Alegreya', async ({
   expect(body).toContain('Alegreya')
   await expect.poll(() => page.evaluate(() => document.fonts.check('16px Limelight'))).toBe(true)
   // aberração cromática leve nos títulos e textura de filme parada no app
-  expect(await page.locator('h1').first().evaluate((el) => getComputedStyle(el).filter)).toContain('#chroma')
+  expect(await page.locator('h1').first().evaluate((el) => getComputedStyle(el).textShadow)).toContain('rgba(224, 87, 74')
   expect(await page.locator('body').evaluate((el) => getComputedStyle(el).filter)).toBe('none')
   await expect(page.locator('.film canvas')).toHaveCount(1)
   expect(await page.evaluate(() => document.getAnimations().filter((a) => a.playState === 'running').length)).toBe(0)
@@ -42,7 +42,7 @@ test('tipografia da noemi-ui: título em Limelight, texto em Alegreya', async ({
   await pickItem(page, 'Acessibilidade e som')
   await page.getByRole('switch', { name: 'Alto contraste' }).click()
   await expect(page.locator('.film')).toBeHidden()
-  expect(await page.locator('h1').first().evaluate((el) => getComputedStyle(el).filter)).toBe('none')
+  expect(await page.locator('h1').first().evaluate((el) => getComputedStyle(el).textShadow)).toBe('none')
 })
 
 test('biblioteca: adicionar pasta e salvar procura os jogos de novo', async ({ page, app }) => {

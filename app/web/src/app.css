@@ -108,10 +108,14 @@ h1,
   color: var(--accent);
   -webkit-text-stroke: 1.5px var(--n-on-mustard);
   paint-order: stroke fill;
-  text-shadow: 3px 3px 0 var(--outline);
   /* aberração cromática leve e parada, de cópia de filme velha (só nos
-     títulos grandes: o texto corrido fica limpo) */
-  filter: url(#chroma);
+     títulos grandes): vermelho e verde-azulado a 1px. Por sombra de texto,
+     não por filtro SVG: no WebKit do app o filtro num título desenhava uma
+     caixa escura a partir do canto da tela. */
+  text-shadow:
+    -1.5px 0 rgb(224 87 74 / 0.6),
+    1.5px 0 rgb(95 168 161 / 0.6),
+    3px 3px 0 var(--outline);
   margin: 0;
 }
 h2,
@@ -388,7 +392,6 @@ body.high-contrast h1,
 body.high-contrast .title {
   -webkit-text-stroke: 0;
   text-shadow: none;
-  filter: none;
 }
 body.high-contrast .sketched::before {
   filter: none;
