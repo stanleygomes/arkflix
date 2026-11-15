@@ -137,7 +137,8 @@
     place-items: center;
     font-family: var(--font-mono);
     font-weight: 700;
-    font-size: 1.6rem;
+    font-size: 2.6rem;
+    line-height: 1;
     background: var(--balloon);
     border: var(--edge) solid var(--outline);
     border-radius: var(--radii-sm);
