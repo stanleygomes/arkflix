@@ -24,10 +24,10 @@ type libStatus struct {
 }
 
 type session struct {
-	User     string `json:"user"`
-	Client   string `json:"client"`
-	Device   string `json:"device"`
-	LastSeen string `json:"lastSeen"`
+	User     string  `json:"user"`
+	Client   string  `json:"client"`
+	Device   string  `json:"device"`
+	LastSeen *string `json:"lastSeen"`
 }
 
 // sessionWindow: token usado nesse intervalo conta como conectado.

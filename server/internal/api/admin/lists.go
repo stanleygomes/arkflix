@@ -20,8 +20,8 @@ type listJSON struct {
 	Name      string      `json:"name"`
 	Count     int         `json:"count"`
 	Kinds     []string    `json:"kinds"`
-	CreatedAt string      `json:"createdAt"`
-	UpdatedAt string      `json:"updatedAt"`
+	CreatedAt *string     `json:"createdAt"`
+	UpdatedAt *string     `json:"updatedAt"`
 	Cover     string      `json:"cover"`
 	Items     *[]itemJSON `json:"items,omitempty"`
 }

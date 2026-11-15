@@ -200,12 +200,14 @@ func readJSON(w http.ResponseWriter, r *http.Request, v any) bool {
 	return true
 }
 
-// date formata em RFC 3339 UTC ("" = nunca).
-func date(t time.Time) string {
+// date formata em RFC 3339 UTC; nunca = null (string vazia quebra cliente
+// que lê data tipada, como o time.Time do Go).
+func date(t time.Time) *string {
 	if t.IsZero() {
-		return ""
+		return nil
 	}
-	return t.UTC().Format(time.RFC3339)
+	s := t.UTC().Format(time.RFC3339)
+	return &s
 }
 
 // GET /info (sem login)

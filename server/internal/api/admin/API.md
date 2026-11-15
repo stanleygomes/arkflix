@@ -2,7 +2,7 @@
 
 API própria do arkflix-server, além das três compatíveis. O app arkflix usa
 pra administrar o servidor e pras listas. JSON em camelCase, datas RFC 3339
-(UTC; `""` = nunca/sem data). Erro: status HTTP + `{"error": "mensagem em
+(UTC; `null` = nunca/sem data). Erro: status HTTP + `{"error": "mensagem em
 português"}`.
 
 ## Login
