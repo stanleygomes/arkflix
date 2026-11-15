@@ -337,7 +337,7 @@
                 {#if autoState.thumb}<img src={`/media/thumb/${autoState.id}`} alt="" />{:else}<span class="nothumb" aria-hidden="true">AUTO</span>{/if}
                 <span class="text">
                   <span class="label">Continuar de onde parou</span>
-                  <span class="muted">salvo {ago(autoState.modified)} · {playTime(selected.playTime)} jogados</span>
+                  <span class="muted">salvo {ago(autoState.modified)}{selected.playTime ? ` · ${playTime(selected.playTime)} jogados` : ''}</span>
                 </span>
               </button>
             {/if}
@@ -776,6 +776,20 @@
     }
     .row {
       padding-block: 0.7rem 1.2rem;
+    }
+    /* "continuar de onde parou" na altura dos botões: não empurra a fileira */
+    .card-act {
+      max-width: none;
+      padding-block: 0.3rem;
+    }
+    .card-act img,
+    .card-act .nothumb,
+    .card-act .trophy {
+      width: 3.8rem;
+      height: 2.4rem;
+    }
+    .card-act .label {
+      white-space: nowrap;
     }
   }
 
