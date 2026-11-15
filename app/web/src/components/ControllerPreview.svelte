@@ -1,6 +1,8 @@
 <script lang="ts">
-  // Desenho do controle (Xbox, PlayStation ou estilo SNES/8BitDo). Botões
-  // apertados acendem; o botão sendo configurado pisca.
+  // Desenho do controle (Xbox, PlayStation ou estilo SNES/8BitDo), traço de
+  // nanquim com sombra dura. Botão apertado fica mostarda; o que está sendo
+  // configurado ganha contorno verde-azulado grosso e pisca 3 vezes (nunca em
+  // loop).
   import { glyph } from '../lib/keys'
   import type { Family } from '../lib/types'
 
@@ -53,6 +55,11 @@
     ]
   })
   const face = new Set(['north', 'south', 'east', 'west'])
+  const body = $derived(
+    snes
+      ? 'M40 46 h160 a38 38 0 0 1 0 76 h-160 a38 38 0 0 1 0 -76 z'
+      : 'M62 42 C42 42 32 54 26 76 C18 106 16 132 32 138 C46 143 56 130 68 114 L172 114 C184 130 194 143 208 138 C224 132 222 106 214 76 C208 54 198 42 178 42 C150 40 90 40 62 42 Z',
+  )
 </script>
 
 <figure class="preview">
@@ -60,27 +67,21 @@
     {#each layout.filter((b) => shoulders.has(b.id)) as b (b.id)}
       <rect class={`btn ${pressed.has(b.id) ? 'pressed' : ''} ${highlight === b.id ? 'highlight' : ''}`} data-button={b.id} x={b.x} y={b.y} width={b.w} height={b.h} rx={b.rx} />
     {/each}
-    {#if snes}
-      <path class="body" d="M40 46 h160 a38 38 0 0 1 0 76 h-160 a38 38 0 0 1 0 -76 z" />
-    {:else}
-      <path
-        class="body"
-        d="M62 42 C42 42 32 54 26 76 C18 106 16 132 32 138 C46 143 56 130 68 114 L172 114 C184 130 194 143 208 138 C224 132 222 106 214 76 C208 54 198 42 178 42 C150 40 90 40 62 42 Z"
-      />
-    {/if}
+    <path class="shade" d={body} transform="translate(4 4)" />
+    <path class="body" d={body} />
     {#each layout.filter((b) => !shoulders.has(b.id)) as b (b.id)}
       {@const cls = `btn ${pressed.has(b.id) ? 'pressed' : ''} ${highlight === b.id ? 'highlight' : ''}`}
       {#if b.r}
         <circle class={cls} data-button={b.id} cx={b.x} cy={b.y} r={b.r} />
         {#if face.has(b.id)}
-          <text class="label" x={b.x} y={b.y + 3.2}>{glyph(b.id, kind === 'playstation' ? 'playstation' : snes ? '8bitdo' : 'xbox')}</text>
+          <text class={`label ${pressed.has(b.id) ? 'pressed' : ''}`} x={b.x} y={b.y + 3.2}>{glyph(b.id, kind === 'playstation' ? 'playstation' : snes ? '8bitdo' : 'xbox')}</text>
         {/if}
       {:else}
         <rect class={cls} data-button={b.id} x={b.x} y={b.y} width={b.w} height={b.h} rx={b.rx} />
       {/if}
     {/each}
   </svg>
-  <figcaption class="muted">{name}</figcaption>
+  <figcaption class="meta muted">{name}</figcaption>
 </figure>
 
 <style>
@@ -94,39 +95,44 @@
   svg {
     width: 100%;
     max-width: 30rem;
-    shape-rendering: crispEdges;
+    overflow: visible;
+  }
+  .shade {
+    fill: var(--outline);
   }
   .body {
-    fill: color-mix(in srgb, var(--surface) 80%, #fff 6%);
-    stroke: var(--accent-2);
-    stroke-width: 1.5;
-    filter: drop-shadow(0 0 3px color-mix(in srgb, var(--accent-2) 60%, transparent));
+    fill: var(--surface);
+    stroke: var(--outline);
+    stroke-width: 2.5;
+    stroke-linejoin: round;
   }
   .btn {
-    fill: #1b1924;
-    stroke: color-mix(in srgb, var(--accent-2) 70%, #000);
-    stroke-width: 1.2;
-    transition: fill 80ms;
+    fill: var(--balloon);
+    stroke: var(--outline);
+    stroke-width: 1.8;
+    transition: fill 80ms steps(1);
   }
   .btn.pressed {
     fill: var(--accent);
   }
   .btn.highlight {
-    stroke: var(--accent-2);
-    stroke-width: 3;
-    animation: flash 0.6s steps(2) infinite;
+    stroke: var(--focus);
+    stroke-width: 3.5;
+    animation: flash 0.6s steps(2) 3;
   }
   @keyframes flash {
     50% {
-      stroke: #fff;
+      stroke: var(--outline);
     }
   }
   .label {
-    font-family: var(--font-body);
-    font-weight: 700;
-    font-size: 9px;
+    font-family: var(--font-label);
+    font-size: 8px;
     fill: var(--text);
     text-anchor: middle;
     pointer-events: none;
+  }
+  .label.pressed {
+    fill: var(--on-accent);
   }
 </style>

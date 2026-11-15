@@ -130,7 +130,7 @@
       {/if}
       <p class="live muted" aria-live="polite">
         {#if waiting}
-          <strong class="wait pixel">Aperte {mode === 'keyboard' ? 'a tecla' : 'o botão'} pra {app.retroPad.find((b) => b.id === waiting)?.label}…</strong>
+          <strong class="wait">Aperte {mode === 'keyboard' ? 'a tecla' : 'o botão'} pra {app.retroPad.find((b) => b.id === waiting)?.label}…</strong>
         {:else if pressed.size}
           Apertado: {[...pressed].map((b) => glyph(b, family)).join(' + ')}
         {:else}
@@ -165,7 +165,7 @@
 
   {#if conflicts.length}
     <div class="conflicts" role="alert">
-      <Icon name="warn" /> Botão usado mais de uma vez: {conflicts.join('; ')}
+      <Icon name="warn" /> <span>Botão usado mais de uma vez: {conflicts.join('; ')}</span>
     </div>
   {/if}
 
@@ -178,15 +178,47 @@
   .panel-body {
     display: flex;
     flex-direction: column;
-    gap: 1.2rem;
+    gap: 1.25rem;
   }
   h2 {
     font-size: 1.5rem;
   }
+  /* grupo de alternância numa peça só (toggle group da noemi-ui) */
   .segmented {
     display: flex;
-    gap: 0.6rem;
     flex-wrap: wrap;
+    width: fit-content;
+    max-width: 100%;
+    background: var(--surface);
+    border: var(--edge) solid var(--outline);
+    border-radius: var(--radii-sm);
+    box-shadow: var(--hard-sm);
+    overflow: hidden;
+  }
+  .segmented .btn {
+    border: none;
+    border-inline-end: var(--edge) solid var(--outline);
+    border-radius: 0;
+    box-shadow: none;
+    transform: none;
+    background: none;
+  }
+  .segmented .btn:last-child {
+    border-inline-end: none;
+  }
+  .segmented .btn:hover {
+    background: color-mix(in srgb, var(--outline) 12%, var(--surface));
+  }
+  .segmented .btn[aria-pressed='true'] {
+    background: var(--accent-2);
+    color: var(--bg);
+    box-shadow: inset 3px 3px 0 color-mix(in srgb, var(--outline) 45%, transparent);
+  }
+  .segmented .btn[data-nav]:focus-visible {
+    outline-offset: -7px;
+  }
+  .segmented .btn[aria-pressed='true'][data-nav]:focus-visible {
+    outline-color: var(--bg);
   }
   .grid {
     display: grid;
@@ -197,48 +229,80 @@
   .preview {
     display: flex;
     flex-direction: column;
-    gap: 0.8rem;
+    gap: 0.9rem;
     position: sticky;
     top: 0;
+    padding: 1.25rem;
+    background: var(--surface);
+    border: var(--edge) solid var(--outline);
+    border-radius: var(--radii-sm);
+    box-shadow: var(--hard);
   }
   .live {
     text-align: center;
     min-height: 1.6em;
   }
   .wait {
+    font-family: var(--font-label);
+    font-weight: 400;
     color: var(--accent);
   }
+  /* mapeamento: lista de itens, cada linha um botão; a que espera tecla fica
+     com fundo mostarda 22% e barra na borda */
   .bindings {
     list-style: none;
-    padding: 0.3rem;
     margin: 0;
-    display: grid;
-    gap: 0.45rem;
+    padding: 0;
+    background: var(--surface);
+    border: var(--edge) solid var(--outline);
+    border-radius: var(--radii-sm);
+    box-shadow: var(--hard);
+  }
+  .bindings li + li {
+    border-top: 2px solid color-mix(in srgb, var(--outline) 25%, transparent);
   }
   .binding {
     width: 100%;
+    min-height: 3rem;
+    padding: 0.45rem 0.9rem;
     font: inherit;
     color: var(--text);
-    background: color-mix(in srgb, var(--bg) 60%, var(--surface));
-    border: 3px solid transparent;
-    padding: 0.45rem 0.8rem;
+    background: none;
+    border: none;
     display: flex;
     justify-content: space-between;
     align-items: center;
+    gap: 0.75rem;
     cursor: pointer;
   }
-  .binding.waiting {
-    border-color: var(--accent);
+  .binding:hover {
+    background: color-mix(in srgb, var(--accent) 14%, transparent);
   }
+  .binding[data-nav]:focus-visible {
+    outline-offset: -4px;
+  }
+  .binding.waiting {
+    background: color-mix(in srgb, var(--accent) 22%, transparent);
+    box-shadow: inset 4px 0 0 var(--accent);
+  }
+  /* tecla (kbd da noemi-ui): Courier Prime, caixa de balão com sombra dura */
   .key,
   .keycap kbd {
-    font-family: var(--font-title);
-    background: #f4f1e8;
-    color: #111;
-    border: 2px solid #05040a;
-    box-shadow: 2px 2px 0 #05040a;
-    padding: 0.1rem 0.45rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 1.8rem;
+    min-height: 1.8rem;
+    padding: 0 0.45rem;
+    font-family: var(--font-mono);
+    font-weight: 700;
     font-size: 0.85rem;
+    line-height: 1;
+    color: var(--text);
+    background: var(--balloon);
+    border: 2px solid var(--outline);
+    border-radius: 4px 5px 4px 5px;
+    box-shadow: 2px 2px 0 var(--outline);
   }
   .keyboard {
     display: grid;
@@ -249,23 +313,41 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 0.25rem;
-    padding: 0.4rem;
+    gap: 0.3rem;
+    padding: 0.45rem;
     border: 2px solid transparent;
+    border-radius: var(--radii-sm);
   }
   .keycap.focus {
+    background: color-mix(in srgb, var(--accent) 22%, transparent);
     border-color: var(--accent);
   }
+  .keycap.focus kbd {
+    transform: translate(2px, 2px);
+    box-shadow: none;
+    color: var(--on-accent);
+    background: var(--accent);
+  }
   .keycap small {
-    color: var(--muted);
+    font-family: var(--font-hud);
     font-size: 0.75rem;
     text-align: center;
+    color: var(--muted);
   }
+  /* alerta sóbrio de aviso: barra mostarda de 8px por dentro da borda */
   .conflicts {
-    color: #ffd27a;
     display: flex;
-    gap: 0.5rem;
+    gap: 0.6rem;
     align-items: center;
+    padding: 0.75rem 1rem 0.75rem 1.4rem;
+    background: var(--surface);
+    border: var(--edge) solid var(--outline);
+    border-radius: var(--radii-sm);
+    box-shadow: var(--hard), inset 8px 0 0 var(--accent);
+  }
+  .conflicts :global(svg) {
+    flex: none;
+    color: var(--accent);
   }
   .actions {
     display: flex;

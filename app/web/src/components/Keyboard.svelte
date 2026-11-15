@@ -27,7 +27,7 @@
       {#each row.split('') as ch, c (c)}
         <button
           type="button"
-          class="key pixel"
+          class="key"
           data-nav
           data-key={ch}
           data-sfx="none"
@@ -49,48 +49,72 @@
 </div>
 
 <style>
+  /* teclado na tela: teclas grandes (kbd lg da noemi-ui) num painel sóbrio */
   .osk {
     display: flex;
     flex-direction: column;
-    gap: 0.4rem;
-    padding: 0.8rem;
-    background: color-mix(in srgb, var(--bg) 60%, #000);
-    border: 3px solid color-mix(in srgb, var(--text) 25%, transparent);
+    gap: 0.5rem;
+    padding: 0.9rem;
     width: fit-content;
+    background: var(--surface);
+    border: var(--edge) solid var(--outline);
+    border-radius: var(--radii-sm);
+    box-shadow: var(--hard);
   }
   .row {
     display: flex;
-    gap: 0.4rem;
+    gap: 0.5rem;
   }
   .key {
-    font: inherit;
-    font-family: var(--font-title);
-    min-width: 2.6rem;
-    height: 2.6rem;
-    font-size: 1.05rem;
-    color: var(--text);
-    background: var(--surface);
-    border: 2px solid color-mix(in srgb, var(--text) 30%, var(--surface));
-    box-shadow: 2px 2px 0 var(--shadow);
-    cursor: pointer;
-  }
-  .key.wide {
-    font-family: var(--font-body);
+    min-width: 2.7rem;
+    height: 2.7rem;
+    padding: 0 0.4rem;
+    font-family: var(--font-mono);
     font-weight: 700;
-    font-size: 0.85rem;
-    padding: 0 0.6rem;
+    font-size: 1.05rem;
+    text-transform: uppercase;
+    color: var(--text);
+    background: var(--balloon);
+    border: var(--edge) solid var(--outline);
+    border-radius: 4px 5px 4px 5px;
+    box-shadow: var(--hard-sm);
+    cursor: pointer;
+    transition:
+      transform var(--t) var(--ease),
+      box-shadow var(--t) var(--ease);
+  }
+  /* letra minúscula aparece minúscula: só as teclas de letra seguem o Shift */
+  .key[data-key] {
+    text-transform: none;
+  }
+  .key:hover,
+  .key:focus-visible {
+    transform: translate(-2px, -2px);
+    box-shadow: 5px 5px 0 var(--outline);
+  }
+  .key:active {
+    transform: translate(3px, 3px);
+    box-shadow: none;
+  }
+  .key.wide,
+  .key.space {
+    font-family: var(--font-label);
+    font-weight: 400;
+    font-size: 0.72rem;
+    letter-spacing: 0.06em;
+    padding: 0 0.7rem;
   }
   .key.space {
     flex: 1;
-    font-family: var(--font-body);
-    font-weight: 700;
-    font-size: 0.85rem;
   }
   .key.ok {
     background: var(--accent);
     color: var(--on-accent);
   }
   .key[aria-pressed='true'] {
-    border-color: var(--accent);
+    transform: translate(3px, 3px);
+    box-shadow: none;
+    background: var(--accent-2);
+    color: var(--bg);
   }
 </style>

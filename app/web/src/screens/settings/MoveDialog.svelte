@@ -117,7 +117,7 @@
   .backdrop {
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, 0.65);
+    background: rgb(36 23 15 / 0.72);
     display: grid;
     place-items: center;
     z-index: 80;
@@ -128,6 +128,7 @@
     gap: 1rem;
     min-width: 24rem;
     max-width: min(40rem, 92vw);
+    box-shadow: var(--hard-up);
   }
   h2 {
     font-size: 1.3rem;
@@ -136,21 +137,34 @@
     display: grid;
     gap: 0.4rem;
   }
+  /* opção de rádio: bolinha de 22px com borda de 3px; a marcada ganha ponto */
   .check {
+    min-height: 3rem;
+    padding: 0.55rem 0.75rem;
     font: inherit;
     color: var(--text);
-    background: color-mix(in srgb, var(--bg) 60%, var(--surface));
-    border: 3px solid transparent;
-    padding: 0.5rem 0.7rem;
+    background: none;
+    border: none;
+    border-radius: var(--radii-sm);
     display: flex;
-    gap: 0.6rem;
+    gap: 0.75rem;
     align-items: center;
     cursor: pointer;
-    text-align: left;
+    text-align: start;
+  }
+  .check:hover:not(:disabled) {
+    background: color-mix(in srgb, var(--accent) 14%, transparent);
+  }
+  .check[aria-checked='true'] {
+    background: color-mix(in srgb, var(--accent) 22%, transparent);
+  }
+  .check:hover:not(:disabled) .muted,
+  .check[aria-checked='true'] .muted {
+    color: var(--text);
   }
   .check:disabled {
     cursor: not-allowed;
-    opacity: 0.6;
+    color: var(--muted);
   }
   .target {
     display: flex;
@@ -158,26 +172,42 @@
     flex: 1;
   }
   .box {
-    width: 1rem;
-    height: 1rem;
-    border: 2px solid var(--text);
+    position: relative;
     flex: none;
+    width: 22px;
+    height: 22px;
+    background: var(--balloon);
+    border: var(--edge) solid var(--outline);
+    border-radius: 50%;
+    box-shadow: 2px 2px 0 var(--outline);
   }
-  .check[aria-checked='true'] .box {
-    background: var(--accent);
+  .check[aria-checked='true'] .box::after {
+    content: '';
+    position: absolute;
+    inset: 3px;
+    border-radius: 50%;
+    background: var(--outline);
+  }
+  .check:disabled .box {
+    border-color: var(--muted);
+    background: var(--surface);
+    box-shadow: none;
   }
   .small {
     font-size: 0.85rem;
   }
   .path {
+    font-family: var(--font-mono);
     overflow-wrap: anywhere;
   }
   .error {
-    color: #ff9c9c;
+    color: var(--danger);
   }
   .actions {
     display: flex;
     gap: 0.8rem;
     justify-content: flex-end;
+    padding-top: 1rem;
+    border-top: var(--edge) solid var(--outline);
   }
 </style>

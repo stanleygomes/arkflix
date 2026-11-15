@@ -114,11 +114,11 @@
       Entre no seu RomM pra ver os jogos de lá na biblioteca, baixar pra jogar aqui e sincronizar os saves. A senha só é
       usada pra entrar: o app guarda um token próprio, que você pode apagar no RomM.
     </p>
-    <button class="btn field" data-nav data-nav-default onclick={async () => (host = (await ask('Endereço do servidor', host)) ?? host)}>
-      <span class="muted">Endereço</span> <strong>{host || 'ex.: meu-romm.duckdns.org'}</strong>
+    <button class="field" data-nav data-nav-default onclick={async () => (host = (await ask('Endereço do servidor', host)) ?? host)}>
+      <span class="field-label">Endereço</span> <span class="value" class:empty={!host}>{host || 'ex.: meu-romm.duckdns.org'}</span>
     </button>
-    <button class="btn field" data-nav onclick={async () => (user = (await ask('Usuário do RomM', user, 60)) ?? user)}>
-      <span class="muted">Usuário</span> <strong>{user || 'escolher'}</strong>
+    <button class="field" data-nav onclick={async () => (user = (await ask('Usuário do RomM', user, 60)) ?? user)}>
+      <span class="field-label">Usuário</span> <span class="value" class:empty={!user}>{user || 'escolher'}</span>
     </button>
     <div class="actions">
       <button class="btn primary" data-nav disabled={busy || !host || !user} onclick={connect}><Icon name="cloud" /> Entrar</button>
@@ -141,16 +141,59 @@
     align-items: center;
     flex-wrap: wrap;
   }
+  .status :global(svg) {
+    color: var(--accent-2);
+  }
   .facts {
     margin: 0;
-    padding-left: 1.2rem;
+    padding-inline-start: 1.2rem;
     display: grid;
     gap: 0.5rem;
   }
+  .facts li::marker {
+    color: var(--accent-2);
+  }
+  /* campo: rótulo em Bevan em cima, valor numa caixa de texto */
   .field {
-    justify-content: flex-start;
-    gap: 1rem;
-    width: fit-content;
+    display: grid;
+    gap: 0.35rem;
+    width: min(100%, 24rem);
+    padding: 0;
+    font: inherit;
+    color: var(--text);
+    text-align: start;
+    background: none;
+    border: none;
+    cursor: text;
+  }
+  .field-label {
+    font-family: var(--font-label);
+    font-size: 0.78rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  .value {
+    display: block;
+    min-height: 2.9rem;
+    padding: 0.6rem 0.75rem;
+    font-weight: 700;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    background: var(--balloon);
+    border: var(--edge) solid var(--outline);
+    border-radius: var(--radii-sm);
+    box-shadow: var(--hard-sm);
+  }
+  .field:hover .value,
+  .field:focus-visible .value {
+    border-color: var(--focus);
+    box-shadow: 4px 4px 0 var(--focus);
+  }
+  .value.empty {
+    color: var(--muted);
+    font-style: italic;
+    font-weight: 400;
   }
   .actions {
     display: flex;

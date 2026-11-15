@@ -93,7 +93,7 @@
     <p class="muted" aria-busy="true">Procurando…</p>
   {:else}
     {#if !info.canInstall && info.reason}
-      <p class="note" role="note"><Icon name="info" /> {info.reason}</p>
+      <p class="note" role="note"><Icon name="info" /> <span>{info.reason}</span></p>
     {/if}
     {#if task}
       <section class="progress" aria-label="Instalação">
@@ -179,34 +179,85 @@
   h2 {
     font-size: 1.5rem;
   }
-  .emus,
-  .bios-list {
+  h3 {
+    font-family: var(--font-label);
+    font-size: 0.9rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  /* lista de itens: moldura de 3px, linhas divididas, ícone numa caixinha */
+  .emus {
     list-style: none;
     margin: 0;
     padding: 0;
-    display: grid;
-    gap: 0.6rem;
+    background: var(--surface);
+    border: var(--edge) solid var(--outline);
+    border-radius: var(--radii-sm);
+    box-shadow: var(--hard);
+    overflow: hidden;
   }
-  .emus li,
-  .bios-list li {
+  .emus > li {
     display: grid;
     grid-template-columns: auto 1fr auto;
     gap: 0.9rem;
     align-items: center;
-    padding: 0.8rem 1rem;
-    border: 2px solid color-mix(in srgb, #ff6b6b 60%, transparent);
+    min-height: 4rem;
+    padding: 0.75rem 1rem;
   }
-  .emus li.ok,
-  .bios-list li.ok {
-    border-color: color-mix(in srgb, var(--accent-2) 45%, transparent);
+  .emus > li + li {
+    border-top: 2px solid color-mix(in srgb, var(--outline) 25%, transparent);
   }
+  .emus > li > :global(svg:first-child) {
+    box-sizing: content-box;
+    padding: 0.45rem;
+    background: var(--bg);
+    border: var(--edge) solid var(--outline);
+    border-radius: var(--radii-sm);
+  }
+  /* lista de itens: moldura de 3px, linhas divididas, ícone numa caixinha */
+  .bios-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    background: var(--surface);
+    border: var(--edge) solid var(--outline);
+    border-radius: var(--radii-sm);
+    box-shadow: var(--hard);
+    overflow: hidden;
+  }
+  .bios-list > li {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 0.9rem;
+    align-items: center;
+    min-height: 4rem;
+    padding: 0.75rem 1rem;
+  }
+  .bios-list > li + li {
+    border-top: 2px solid color-mix(in srgb, var(--outline) 25%, transparent);
+  }
+  .bios-list > li > :global(svg:first-child) {
+    box-sizing: content-box;
+    padding: 0.45rem;
+    background: var(--bg);
+    border: var(--edge) solid var(--outline);
+    border-radius: var(--radii-sm);
+  }
+  /* faltando = vermelho (erro), ok = verde-azulado, opcional = neutro */
   .emus li :global(svg),
   .bios-list li :global(svg) {
-    color: #ff6b6b;
+    color: var(--danger);
   }
   .emus li.ok :global(svg),
   .bios-list li.ok :global(svg) {
-    color: #5dc44f;
+    color: var(--accent-2);
+  }
+  .bios-list li.optional :global(svg) {
+    color: var(--muted);
+  }
+  .emus li :global(.btn svg),
+  .bios-list li :global(.btn svg) {
+    color: inherit;
   }
   .text {
     display: flex;
@@ -215,32 +266,31 @@
     min-width: 0;
   }
   .label {
+    font-family: var(--font-body);
+    font-size: 1.05rem;
     font-weight: 700;
+    text-transform: none;
+    letter-spacing: 0;
   }
   .small {
     font-size: 0.85rem;
   }
   .path {
+    font-family: var(--font-mono);
     overflow-wrap: anywhere;
   }
   .missing {
-    color: #ff9b9b;
+    color: var(--danger);
   }
   .warn {
-    color: var(--focus);
+    color: var(--accent);
+  }
+  .error {
+    color: var(--danger);
   }
   .bios {
     display: grid;
-    gap: 0.8rem;
-  }
-  h3 {
-    font-size: 1.2rem;
-  }
-  .bios-list li.optional {
-    border-color: color-mix(in srgb, var(--muted, #b8bbc8) 35%, transparent);
-  }
-  .bios-list li.optional :global(svg) {
-    color: inherit;
+    gap: 0.9rem;
   }
   .progress {
     display: grid;
@@ -253,10 +303,19 @@
   .energy {
     width: 100%;
   }
+  /* alerta sóbrio de informação: barra verde-azulada de 8px */
   .note {
     display: flex;
-    gap: 0.5rem;
+    gap: 0.6rem;
     align-items: center;
-    color: var(--focus);
+    padding: 0.75rem 1rem 0.75rem 1.4rem;
+    background: var(--surface);
+    border: var(--edge) solid var(--outline);
+    border-radius: var(--radii-sm);
+    box-shadow: var(--hard), inset 8px 0 0 var(--accent-2);
+  }
+  .note :global(svg) {
+    flex: none;
+    color: var(--accent-2);
   }
 </style>

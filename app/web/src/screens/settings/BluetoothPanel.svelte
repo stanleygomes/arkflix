@@ -118,7 +118,7 @@
   .panel-body {
     display: flex;
     flex-direction: column;
-    gap: 1.2rem;
+    gap: 1.25rem;
   }
   .head {
     display: flex;
@@ -130,42 +130,72 @@
     font-size: 1.5rem;
   }
   h3 {
-    font-size: 1rem;
+    font-family: var(--font-label);
+    font-size: 0.9rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  h3 {
     margin-bottom: 0.6rem;
   }
+  /* lista de itens: moldura de 3px, linhas divididas, ícone numa caixinha */
   .devs {
     list-style: none;
     margin: 0;
     padding: 0;
-    display: grid;
-    gap: 0.6rem;
+    background: var(--surface);
+    border: var(--edge) solid var(--outline);
+    border-radius: var(--radii-sm);
+    box-shadow: var(--hard);
+    overflow: hidden;
   }
-  .devs li {
+  .devs > li {
     display: grid;
     grid-template-columns: auto 1fr auto;
     gap: 0.9rem;
     align-items: center;
-    padding: 0.8rem 1rem;
-    border: 2px solid color-mix(in srgb, var(--accent-2) 40%, transparent);
+    min-height: 4rem;
+    padding: 0.75rem 1rem;
   }
-  .devs li.on {
-    border-color: color-mix(in srgb, #5dc44f 70%, transparent);
+  .devs > li + li {
+    border-top: 2px solid color-mix(in srgb, var(--outline) 25%, transparent);
+  }
+  .devs > li > :global(svg:first-child) {
+    box-sizing: content-box;
+    padding: 0.45rem;
+    background: var(--bg);
+    border: var(--edge) solid var(--outline);
+    border-radius: var(--radii-sm);
+  }
+  .devs li :global(svg) {
+    color: var(--muted);
+  }
+  .devs li.on :global(svg) {
+    color: var(--accent-2);
   }
   .text {
     display: flex;
     flex-direction: column;
     gap: 0.2rem;
+    min-width: 0;
   }
   .label {
+    font-family: var(--font-body);
+    font-size: 1.05rem;
     font-weight: 700;
+    text-transform: none;
+    letter-spacing: 0;
   }
   .small {
     font-size: 0.85rem;
   }
+  .error {
+    color: var(--danger);
+  }
   .acts,
   .actions {
     display: flex;
-    gap: 0.5rem;
+    gap: 0.6rem;
     flex-wrap: wrap;
   }
 </style>
