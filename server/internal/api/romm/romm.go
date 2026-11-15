@@ -18,8 +18,9 @@ import (
 )
 
 // Version é a versão do RomM que o servidor diz ser (os clientes checam
-// recurso pela versão: client tokens precisam de 4.4+).
-const Version = "4.8.0"
+// recurso pela versão: client tokens precisam de 4.4+). A de produção hoje
+// é a 5.4.1.
+const Version = "5.4.1"
 
 type api struct {
 	d     *deps.Deps

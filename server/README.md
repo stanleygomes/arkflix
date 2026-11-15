@@ -71,7 +71,7 @@ Jellyfin, coleção no RomM (só as ROMs), playlist no Subsonic (só as faixas).
   apiKey), XML/JSON/JSONP, navegação por pasta e por ID3, listas, busca
   (vazia = tudo, pra sincronizar), stream com transcodificação, capa, letras
   (`.lrc`), estrela/nota/scrobble, playlists, fila e marcadores.
-- **RomM** (anuncia 4.8.0): OAuth2 (senha/refresh), Basic, client tokens
+- **RomM** (anuncia 5.4.1): OAuth2 (senha/refresh), Basic, client tokens
   `rmm_`, consoles, ROMs com filtros, download (multidisco vira zip com `.m3u`),
   BIOS, capas, saves/states/screenshots por usuário em
   `<data>/romm/...`, props do jogo, coleções (= listas).
