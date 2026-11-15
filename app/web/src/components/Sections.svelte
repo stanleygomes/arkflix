@@ -1,16 +1,18 @@
 <script lang="ts">
-  // Jogos ou Filmes e séries: as duas metades do arkflix, no topo do Início
-  // de cada uma. Trocar é "mudar de canal" (recomeça a navegação).
+  // Jogos, Filmes e séries ou Músicas: as partes do arkflix, no topo do
+  // Início de cada uma. Trocar é "mudar de canal" (recomeça a navegação).
   import { play } from '../lib/sound'
   import { resetTo } from '../lib/state.svelte'
   import Icon from './Icon.svelte'
 
-  let { current }: { current: 'games' | 'watch' } = $props()
+  type Section = 'games' | 'watch' | 'music'
+  let { current }: { current: Section } = $props()
+  const SCREENS = { games: 'home', watch: 'watch', music: 'music' } as const
 
-  function goTo(s: 'games' | 'watch') {
+  function goTo(s: Section) {
     if (s === current) return
     play('accept')
-    resetTo({ name: s === 'games' ? 'home' : 'watch' })
+    resetTo({ name: SCREENS[s] })
   }
 </script>
 
@@ -20,6 +22,9 @@
   </button>
   <button class="section" data-nav data-section="watch" aria-current={current === 'watch' ? 'page' : undefined} onclick={() => goTo('watch')}>
     <Icon name="film" /> Filmes e séries
+  </button>
+  <button class="section" data-nav data-section="music" aria-current={current === 'music' ? 'page' : undefined} onclick={() => goTo('music')}>
+    <Icon name="music" /> Músicas
   </button>
 </nav>
 

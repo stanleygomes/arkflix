@@ -44,8 +44,18 @@
   import { refreshArk } from './lib/ark'
   import Title from './screens/Title.svelte'
   import Player from './screens/Player.svelte'
+  import Music from './screens/Music.svelte'
+  import MusicAlbum from './screens/MusicAlbum.svelte'
+  import MusicArtist from './screens/MusicArtist.svelte'
+  import MusicPlaylist from './screens/MusicPlaylist.svelte'
+  import NowPlaying from './screens/NowPlaying.svelte'
+  import MiniPlayer from './components/MiniPlayer.svelte'
+  import { active as musicActive, refreshMusicServer, startMusic } from './lib/music.svelte'
 
   const current = $derived(screen())
+  // a barrinha da música: em toda tela, menos no Tocando agora, no vídeo e
+  // antes de escolher o perfil (a camada das telas encolhe pra ela caber)
+  const mini = $derived(app.ready && musicActive() && !['nowplaying', 'player', 'welcome', 'profiles'].includes(current.name))
 
   // troca de tela: chega de lado, na direção da navegação; no recomeço
   // (trocar de perfil, entrar no app) quem cobre é a íris
@@ -102,6 +112,7 @@
     startInput(native, padsChanged)
     watchDownloads()
     watchTasks()
+    startMusic()
     await tick()
     focusDefault()
     api.ready().catch(() => {})
@@ -134,7 +145,9 @@
     if (!app.ready) return
     void app.profile?.current
     void app.watch?.base
+    void app.music?.base
     refreshArk()
+    refreshMusicServer()
   })
 
   // som de troca de tela (o da primeira tela é o do boot)
@@ -168,7 +181,7 @@
       <!-- o player ocupa a tela inteira: fora da camada (margem do tubo, transições) -->
       <Player id={current.id} start={current.start ?? -1} />
     {:else}
-    <div class="layer" in:screenIn={motionFor()} out:screenOut={motionFor()}>
+    <div class="layer" class:with-mini={mini} in:screenIn={motionFor()} out:screenOut={motionFor()}>
     {#if current.name === 'home'}
       <Home />
     {:else if current.name === 'game'}
@@ -201,12 +214,23 @@
       <Title id={current.id} />
     {:else if current.name === 'arklist'}
       <ArkListScreen id={current.id} />
+    {:else if current.name === 'music'}
+      <Music />
+    {:else if current.name === 'album'}
+      <MusicAlbum id={current.id} />
+    {:else if current.name === 'artist'}
+      <MusicArtist id={current.id} />
+    {:else if current.name === 'playlist'}
+      <MusicPlaylist id={current.id} />
+    {:else if current.name === 'nowplaying'}
+      <NowPlaying />
     {/if}
     </div>
     {/if}
   {/key}
 {/if}
 
+{#if mini}<MiniPlayer />{/if}
 <Playing />
 <Tasks />
 <Toasts />
@@ -228,6 +252,10 @@
     position: fixed;
     inset: var(--safe); /* longe da borda do tubo */
     transform-origin: center;
+  }
+  /* com música: a barrinha mora embaixo, a tela sobe junto */
+  .layer.with-mini {
+    inset-block-end: calc(var(--safe) * 2 + var(--mini-h));
   }
   .fatal,
   .loading {

@@ -66,6 +66,7 @@
   --glow-focus: none;
   --tube: 0px;
   --safe: clamp(16px, 2.2vmin, 32px);
+  --mini-h: 4.4rem; /* barrinha da música */
   --ease: steps(2, end);
   --t: 120ms;
   color-scheme: dark;

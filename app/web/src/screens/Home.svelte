@@ -457,12 +457,15 @@
   }
 
   /* barra de cima: seções | visões, nav sóbria (traço mostarda no atual) */
+  /* três seções + as visões não cabem numa linha: quebra como em filmes */
   .top-nav {
     display: flex;
     align-items: center;
-    gap: 0.8rem;
+    flex-wrap: wrap;
+    gap: 0 1.4rem;
   }
   .divider {
+    display: none;
     width: var(--edge);
     height: 1.8rem;
     background: color-mix(in srgb, var(--outline) 30%, transparent);

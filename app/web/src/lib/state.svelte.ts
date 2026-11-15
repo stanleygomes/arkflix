@@ -1,7 +1,7 @@
 // Estado global da interface (Svelte 5 runes).
 import { play } from './sound'
 import { glitch } from './glitch'
-import type { ArkInfo, ArkList, Boot, Family, WatchInfo, Game, GameEvent, GameList, Mapping, Pad, ProfileState, Settings, System, RetroPadButton, UpdateInfo } from './types'
+import type { ArkInfo, ArkList, Boot, Family, MusicInfo, MusicServer, WatchInfo, Game, GameEvent, GameList, Mapping, Pad, ProfileState, Settings, System, RetroPadButton, UpdateInfo } from './types'
 
 export type Screen =
   | { name: 'home' }
@@ -21,6 +21,11 @@ export type Screen =
   | { name: 'title'; id: string }
   | { name: 'player'; id: string; start?: number }
   | { name: 'arklist'; id: string }
+  | { name: 'music' }
+  | { name: 'album'; id: string }
+  | { name: 'artist'; id: string }
+  | { name: 'playlist'; id: string }
+  | { name: 'nowplaying' }
 
 export type SettingsTab = 'library' | 'server' | 'storage' | 'emulators' | 'bluetooth' | 'updates' | 'cheevos' | 'controls' | 'a11y' | 'about'
 
@@ -107,6 +112,10 @@ export const app = $state({
   // arkflix-server do perfil (null = não tem) e as listas do usuário de lá
   ark: null as ArkInfo | null,
   arkLists: [] as ArkList[],
+  // músicas: conta do perfil, o que o servidor libera (admin, arkflix) e a aba
+  music: null as MusicInfo | null,
+  musicServer: null as MusicServer | null,
+  musicTab: 'home' as 'home' | 'artists' | 'albums' | 'playlists' | 'starred' | 'local',
 })
 
 export function screen(): Screen {
@@ -227,6 +236,7 @@ export function applyBoot(boot: Boot) {
     profile: boot.profile,
     platform: boot.platform || 'linux',
     watch: boot.watch ?? null,
+    music: boot.music ?? null,
   })
 }
 
@@ -243,6 +253,7 @@ export function resetTo(s: Screen) {
   app.selected = ''
   app.watchTab = 'home'
   app.watchSelected = ''
+  app.musicTab = 'home'
 }
 
 export function putList(l: GameList) {

@@ -23,6 +23,7 @@ const CANCELLABLE = [
   'move',
   'meta',
   'arkupload',
+  'musicdl',
 ]
 
 /** Ainda não terminou (em andamento, na fila, esperando ou pausado). */

@@ -1,7 +1,8 @@
 <script lang="ts">
-  // Contas online do perfil: Jellyfin (filmes e séries, uma conta por perfil)
-  // e RomM (um servidor pro app; aqui só escolhe qual perfil sincroniza os
-  // saves). A senha vai direto pro login: o app guarda um token.
+  // Contas online do perfil: Jellyfin (filmes e séries, uma conta por perfil),
+  // músicas (Navidrome/Subsonic, uma por perfil) e RomM (um servidor pro app;
+  // aqui só escolhe qual perfil sincroniza os saves). A senha vai direto pro
+  // login: o app guarda um token (ou, no Subsonic, o par salgado t/s).
   import { api } from '../lib/api'
   import { play } from '../lib/sound'
   import { app, confirm, go, prompt, toast } from '../lib/state.svelte'
@@ -14,6 +15,8 @@
   let host = $state('')
   let user = $state('')
   let busy = $state(false)
+  let mHost = $state('')
+  let mUser = $state('')
 
   async function load() {
     try {
@@ -40,7 +43,49 @@
 
   // o perfil em uso ganha a conta na hora (a aba Filmes e séries já abre)
   async function syncCurrent() {
-    if (profile === app.profile?.current) app.watch = await api.watchStatus()
+    if (profile === app.profile?.current) {
+      app.watch = await api.watchStatus()
+      app.music = await api.musicStatus()
+      app.musicServer = null
+    }
+  }
+
+  async function linkMusic() {
+    if (!mHost || !mUser) {
+      toast('Informe o endereço e o usuário', 'info')
+      return
+    }
+    busy = true
+    let linked = false
+    await prompt('Senha do Navidrome', '', 'Conectar', async (pass) => {
+      try {
+        await api.connectMusic(profile, mHost, mUser, pass)
+        linked = true
+        return null
+      } catch (err) {
+        return (err as Error).message
+      }
+    }, { max: 200, secret: true })
+    busy = false
+    if (linked) {
+      play('accept')
+      await load()
+      await syncCurrent()
+      toast(`Músicas conectadas: ${acc?.music.base}`, 'ok')
+    }
+  }
+
+  async function unlinkMusic() {
+    const ok = await confirm('Desconectar as músicas deste perfil? As playlists e favoritas continuam no servidor; o que foi baixado fica no PC.', 'Desconectar', true)
+    if (!ok) return
+    try {
+      await api.disconnectMusic(profile)
+      await load()
+      await syncCurrent()
+      toast('Músicas desconectadas', 'ok')
+    } catch (err) {
+      toast((err as Error).message, 'error')
+    }
   }
 
   async function link() {
@@ -115,6 +160,30 @@
         </button>
         <div class="row">
           <button class="btn primary" data-nav disabled={busy || !host || !user} onclick={link}><Icon name="film" /> Vincular</button>
+        </div>
+      {/if}
+    </div>
+
+    <div class="account" data-account="music">
+      <h3><Icon name="music" /> Músicas <span class="meta muted">Navidrome/Subsonic</span></h3>
+      {#if acc.music.connected}
+        <p class="status">
+          Conectado a <strong>{acc.music.base}</strong> como <strong>{acc.music.user}</strong>{acc.music.server ? ` (${acc.music.server})` : ''}.
+        </p>
+        <p class="muted">Playlists, favoritas e o que este perfil ouviu vêm dessa conta. O app guarda só um token derivado da senha.</p>
+        <div class="row">
+          <button class="btn danger" data-nav onclick={unlinkMusic}>Desconectar músicas</button>
+        </div>
+      {:else}
+        <p class="muted">Navidrome ou outro servidor Subsonic (o arkflix-server também serve). Cada perfil usa a própria conta; o infantil só ouve.</p>
+        <button class="field" data-nav onclick={async () => (mHost = (await ask('Endereço do Navidrome', mHost)) ?? mHost)}>
+          <span class="field-label">Servidor de músicas</span> <span class="value" class:empty={!mHost}>{mHost || 'ex.: musica.duckdns.org'}</span>
+        </button>
+        <button class="field" data-nav onclick={async () => (mUser = (await ask('Usuário do Navidrome', mUser, 60)) ?? mUser)}>
+          <span class="field-label">Conta de músicas</span> <span class="value" class:empty={!mUser}>{mUser || 'escolher'}</span>
+        </button>
+        <div class="row">
+          <button class="btn primary" data-nav disabled={busy || !mHost || !mUser} onclick={linkMusic}><Icon name="music" /> Conectar músicas</button>
         </div>
       {/if}
     </div>

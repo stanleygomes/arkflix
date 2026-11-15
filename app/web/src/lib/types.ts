@@ -432,6 +432,7 @@ export interface Boot {
   nativePads: boolean
   platform: string
   watch: WatchInfo
+  music: MusicInfo
 }
 
 export interface Profile {
@@ -539,6 +540,7 @@ export interface WatchInfo {
 
 export interface Accounts {
   jellyfin: WatchInfo
+  music: MusicInfo
   romm: { connected: boolean; base: string; user: string; mine: boolean; owner: string }
 }
 
@@ -679,3 +681,125 @@ export interface ArkList {
 
 export type ArkKind = 'watch' | 'game'
 export type ArkUploadKind = 'movie' | 'episode' | 'rom' | 'bios' | 'music' | 'subtitle'
+
+// Músicas (Subsonic/Navidrome): capas e áudio já vêm com o endereço do proxy.
+export interface MusicInfo {
+  connected: boolean
+  base: string
+  user: string
+  server: string // navidrome, arkflix...
+  version: string
+}
+
+export interface MusicServer extends MusicInfo {
+  admin: boolean
+  ark: boolean
+  arkPanel: boolean
+  upload: boolean
+  error?: string
+}
+
+export interface MusicTrack {
+  id: string
+  title: string
+  album: string
+  albumId: string
+  artist: string
+  artistId: string
+  track: number
+  disc: number
+  year: number
+  duration: number
+  cover: string
+  starred: boolean
+  suffix: string
+  contentType: string
+  size: number
+  local: boolean
+}
+
+export interface MusicAlbum {
+  id: string
+  name: string
+  artist: string
+  artistId: string
+  year: number
+  genre: string
+  songs: number
+  duration: number
+  cover: string
+  starred: boolean
+  local: boolean
+}
+
+export interface MusicArtist {
+  id: string
+  name: string
+  albums: number
+  cover: string
+  starred: boolean
+}
+
+export interface MusicPlaylist {
+  id: string
+  name: string
+  owner: string
+  mine: boolean
+  songs: number
+  duration: number
+  cover: string
+  changed: string
+  local: boolean
+  tracks: MusicTrack[]
+  offline: boolean
+}
+
+export interface MusicHome {
+  newest: MusicAlbum[]
+  frequent: MusicAlbum[]
+  recent: MusicAlbum[]
+  random: MusicAlbum[]
+  starred: MusicAlbum[]
+}
+
+export interface MusicIndex {
+  name: string
+  artists: MusicArtist[]
+}
+
+export interface MusicFound {
+  artists: MusicArtist[]
+  albums: MusicAlbum[]
+  tracks: MusicTrack[]
+}
+
+export interface MusicLocalSet {
+  kind: 'album' | 'playlist'
+  id: string
+  name: string
+  artist: string
+  year: number
+  songs: number
+  cover: string
+}
+
+export interface MusicStream {
+  url: string
+  fallback: string
+  local: boolean
+}
+
+export interface MusicUser {
+  username: string
+  email: string
+  adminRole: boolean
+  streamRole: boolean
+  downloadRole: boolean
+  playlistRole: boolean
+}
+
+export interface MusicAdminInfo {
+  scan: { scanning: boolean; count: number; folderCount: number; lastScan: string }
+  users: MusicUser[]
+  error?: string
+}

@@ -12,8 +12,11 @@
   import Icon from '../components/Icon.svelte'
   import Poster from '../components/Poster.svelte'
   import { api } from '../lib/api'
-  import type { WatchItem } from '../lib/types'
+  import type { MusicFound, WatchItem } from '../lib/types'
   import { cardLabel } from '../lib/watch'
+  import Cover from '../components/Cover.svelte'
+  import TrackList from '../components/TrackList.svelte'
+  import { playTracks } from '../lib/music.svelte'
 
   let query = $state('')
   const results = $derived(search(shown(), query))
@@ -38,6 +41,21 @@
     }
     const t = setTimeout(() => {
       api.watchSearch(q).then((r) => query.trim() === q && (videos = r)).catch(() => (videos = []))
+    }, 300)
+    return () => clearTimeout(t)
+  })
+
+  // músicas da conta do perfil (artistas, álbuns e faixas; também com atraso)
+  let music = $state<MusicFound | null>(null)
+  const musicCount = $derived(music ? music.artists.length + music.albums.length + music.tracks.length : 0)
+  $effect(() => {
+    const q = query.trim()
+    if (!app.music?.connected || q.length < 2) {
+      music = null
+      return
+    }
+    const t = setTimeout(() => {
+      api.musicSearch(q).then((r) => query.trim() === q && (music = r)).catch(() => (music = null))
     }, 300)
     return () => clearTimeout(t)
   })
@@ -78,7 +96,7 @@
         data-nav
         data-nav-default={typing ? '' : undefined}
         bind:value={query}
-        placeholder={app.watch?.connected ? "Jogo, filme, série ou configuração" : "Jogo, console ou configuração"}
+        placeholder={app.watch?.connected || app.music?.connected ? `Jogo${app.watch?.connected ? ', filme, série' : ''}${app.music?.connected ? ', música' : ''} ou configuração` : 'Jogo, console ou configuração'}
         autocomplete="off"
         spellcheck="false"
         onkeydown={(e) => {
@@ -95,10 +113,10 @@
       <p id="results-count" class="count">
         {#if !query.trim()}
           Jogo, console, lista ou configuração ("bluetooth", "tela cheia"). Acento e maiúscula não importam.
-        {:else if results.length === 0 && extra.length === 0 && videos.length === 0}
+        {:else if results.length === 0 && extra.length === 0 && videos.length === 0 && musicCount === 0}
           Nada encontrado pra "{query}".
         {:else}
-          {results.length} jogo{results.length === 1 ? '' : 's'}{videos.length ? `, ${videos.length} filme${videos.length === 1 ? '' : 's'} ou série${videos.length === 1 ? '' : 's'}` : ''}{extra.length ? ` e ${extra.length} atalho${extra.length === 1 ? '' : 's'}` : ''}
+          {results.length} jogo{results.length === 1 ? '' : 's'}{videos.length ? `, ${videos.length} filme${videos.length === 1 ? '' : 's'} ou série${videos.length === 1 ? '' : 's'}` : ''}{musicCount ? `, ${musicCount} de música` : ''}{extra.length ? ` e ${extra.length} atalho${extra.length === 1 ? '' : 's'}` : ''}
         {/if}
       </p>
       {#if extra.length}
@@ -128,6 +146,32 @@
             </li>
           {/each}
         </ul>
+      {/if}
+      {#if music && musicCount}
+        <h2 class="sub-title">Músicas</h2>
+        {#if music.artists.length || music.albums.length}
+          <ul class="videos music-found" aria-label="Artistas e álbuns encontrados">
+            {#each music.artists as a (a.id)}
+              <li>
+                <button class="video" data-nav data-item={`artist:${a.id}`} aria-label={`${a.name}, artista`} onclick={() => go({ name: 'artist', id: a.id })}>
+                  <Cover showName={false} src={a.cover} name={a.name} round />
+                  <span class="cap">{a.name}</span>
+                </button>
+              </li>
+            {/each}
+            {#each music.albums as a (a.id)}
+              <li>
+                <button class="video" data-nav data-item={`album:${a.id}`} aria-label={`${a.name}, álbum de ${a.artist}`} onclick={() => go({ name: 'album', id: a.id })}>
+                  <Cover showName={false} src={a.cover} name={a.name} local={a.local} />
+                  <span class="cap">{a.name}</span>
+                </button>
+              </li>
+            {/each}
+          </ul>
+        {/if}
+        {#if music.tracks.length}
+          <TrackList tracks={music.tracks} label="Faixas encontradas" album numbers="index" group="found" onplay={(i) => playTracks(music!.tracks, i)} />
+        {/if}
       {/if}
     </section>
   </main>
@@ -227,6 +271,16 @@
     background: none;
     cursor: pointer;
     border-radius: 6px;
+  }
+  .cap {
+    display: block;
+    margin-top: 0.4rem;
+    font-weight: 700;
+    font-size: 0.9rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: var(--text);
   }
   .count {
     font-family: var(--font-hud);

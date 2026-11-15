@@ -244,6 +244,8 @@ type MusicPlaylist struct {
 	Changed  string       `json:"changed"`
 	Local    bool         `json:"local"`
 	Tracks   []MusicTrack `json:"tracks"`
+	// Offline: o servidor não respondeu e veio da cópia baixada.
+	Offline bool `json:"offline"`
 }
 
 func (s *Service) musicProxy() string {
@@ -618,7 +620,7 @@ func (s *Service) MusicPlaylist(id string) (MusicPlaylist, error) {
 	p, err := c.Playlist(ctx, id)
 	if err != nil {
 		if set := s.localSet(c.Base, "playlist", id); set != nil && !errors.Is(err, subsonic.ErrAuth) && !isNotFound(err) {
-			return MusicPlaylist{ID: id, Name: set.Name, Songs: len(set.Tracks), Local: true, Tracks: s.localTracks(c.Base, set)}, nil
+			return MusicPlaylist{ID: id, Name: set.Name, Songs: len(set.Tracks), Local: true, Mine: true, Offline: true, Tracks: s.localTracks(c.Base, set)}, nil
 		}
 		return MusicPlaylist{}, err
 	}

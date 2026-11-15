@@ -21,6 +21,8 @@
   import ArkStatusPanel from './settings/ArkStatusPanel.svelte'
   import ArkUsersPanel from './settings/ArkUsersPanel.svelte'
   import ArkUploadPanel from './settings/ArkUploadPanel.svelte'
+  import MusicAdminPanel from './settings/MusicAdminPanel.svelte'
+  import { refreshMusicServer } from '../lib/music.svelte'
   import { refreshArk } from '../lib/ark'
   import Activity from './Activity.svelte'
   import ImportScreen from './Import.svelte'
@@ -54,6 +56,7 @@
     api.stats('all').then((s) => (summary = summarize(s))).catch(() => {})
     if (isKids()) return
     refreshArk()
+    refreshMusicServer()
     api.remoteStatus().then((r) => (remote = r)).catch(() => {})
     api.storage().then((s) => (storage = s)).catch(() => {})
     api.emulatorStatus().then((e) => (emus = e)).catch(() => {})
@@ -150,6 +153,17 @@
                 { id: 'arkusers', label: 'Usuários', panel: ArkUsersPanel },
                 ...(app.ark.writable ? [{ id: 'arkupload', label: 'Enviar arquivos', panel: ArkUploadPanel }] : []),
               ],
+            },
+          ]
+        : []),
+      ...(app.musicServer?.admin
+        ? [
+            {
+              id: 'music',
+              label: 'Músicas',
+              icon: 'music' as IconName,
+              value: `${app.musicServer.server || 'Subsonic'} · admin`,
+              subs: [{ id: 'musicadmin', label: 'Servidor de músicas', panel: MusicAdminPanel }],
             },
           ]
         : []),

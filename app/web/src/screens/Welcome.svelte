@@ -1,6 +1,6 @@
 <script lang="ts">
-  // Primeira vez do app: entrar no RomM (jogos) ou no Jellyfin (filmes e
-  // séries), ou usar offline. Depois vem a configuração do perfil. A senha só
+  // Primeira vez do app: entrar no RomM (jogos), no Jellyfin (filmes e
+  // séries) ou no Navidrome (músicas), ou usar offline. Depois vem a configuração do perfil. A senha só
   // vai pro login (o app guarda um token); o outro servidor liga depois.
   import { tick } from 'svelte'
   import Icon from '../components/Icon.svelte'
@@ -13,10 +13,11 @@
   // o elenco: uma fileira parada de personagens em cima do cartão
   const FACES = ['mario', 'link', 'samus', 'sonic', 'kirby', 'pikachu']
 
-  type Kind = 'romm' | 'jellyfin'
-  const KINDS: Record<Kind, { label: string; server: string; form: string; host: string }> = {
-    romm: { label: 'Jogos', server: 'RomM', form: 'Entrar no servidor RomM', host: 'meu-romm.duckdns.org' },
-    jellyfin: { label: 'Filmes e séries', server: 'Jellyfin', form: 'Entrar no Jellyfin', host: 'meu-jellyfin.duckdns.org' },
+  type Kind = 'romm' | 'jellyfin' | 'navidrome'
+  const KINDS: Record<Kind, { label: string; server: string; form: string; host: string; icon: 'cloud' | 'film' | 'music' }> = {
+    romm: { label: 'Jogos', server: 'RomM', form: 'Entrar no servidor RomM', host: 'meu-romm.duckdns.org', icon: 'cloud' },
+    jellyfin: { label: 'Filmes e séries', server: 'Jellyfin', form: 'Entrar no Jellyfin', host: 'meu-jellyfin.duckdns.org', icon: 'film' },
+    navidrome: { label: 'Músicas', server: 'Navidrome', form: 'Entrar no Navidrome', host: 'meu-navidrome.duckdns.org', icon: 'music' },
   }
   let kind = $state<Kind>('romm')
   const k = $derived(KINDS[kind])
@@ -65,6 +66,9 @@
       let who: string
       if (kind === 'romm') {
         who = (await api.connectRemote(host, user, pass)).user
+      } else if (kind === 'navidrome') {
+        app.music = await api.connectMusic('main', host, user, pass)
+        who = app.music.user
       } else {
         app.watch = await api.connectWatch('main', host, user, pass)
         who = app.watch.user
@@ -92,7 +96,7 @@
       {/each}
     </ul>
     <h1 id="welcome-title">Bem-vindo!</h1>
-    <p class="lead">Entre no RomM pra ver os jogos e guardar os saves na nuvem, ou no Jellyfin pra assistir filmes e séries. Ou use só o que está neste computador.</p>
+    <p class="lead">Entre no RomM pra ver os jogos e guardar os saves na nuvem, no Jellyfin pra assistir filmes e séries ou no Navidrome pra ouvir música. Ou use só o que está neste computador.</p>
 
     <div class="kinds" role="radiogroup" aria-label="Entrar em">
       {#each Object.entries(KINDS) as [id, info] (id)}
@@ -107,7 +111,7 @@
             error = ''
           }}
         >
-          <span class="kind-name"><Icon name={id === 'romm' ? 'cloud' : 'film'} /> {info.label}</span>
+          <span class="kind-name"><Icon name={info.icon} /> {info.label}</span>
           <span class="kind-server">{info.server}</span>
         </button>
       {/each}
@@ -209,7 +213,7 @@
   /* grupo de alternância numa peça só: o escolhido fica verde-azulado */
   .kinds {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: repeat(3, 1fr);
     background: var(--surface);
     border: var(--edge) solid var(--outline);
     border-radius: var(--radii-sm);
@@ -229,8 +233,10 @@
     cursor: pointer;
     transition: background var(--t) var(--ease);
   }
-  .kind:first-child {
+  .kind:not(:last-child) {
     border-inline-end: var(--edge) solid var(--outline);
+  }
+  .kind:first-child {
     border-start-start-radius: 6px;
     border-end-start-radius: 6px;
   }
