@@ -9,6 +9,8 @@ package compat
 
 import (
 	"context"
+	"crypto/md5"
+	"encoding/hex"
 	"io"
 	"net"
 	"net/http"
@@ -272,5 +274,33 @@ func TestRomMClient(t *testing.T) {
 	}
 	if err := c.FetchFirmware(ctx, fws[0], filepath.Join(dir, fws[0].FileName)); err != nil {
 		t.Fatal(err)
+	}
+}
+
+func TestSubsonic(t *testing.T) {
+	s := start(t)
+	get := func(method string, q string) (int, string) {
+		salt := "c19b2d"
+		sum := md5.Sum([]byte("senha123" + salt))
+		u := s.base + "/rest/" + method + ".view?u=stanley&s=" + salt + "&t=" + hex.EncodeToString(sum[:]) + "&v=1.16.1&c=compat&f=json&" + q
+		resp, err := http.Get(u)
+		if err != nil {
+			t.Fatal(err)
+		}
+		defer resp.Body.Close()
+		b, _ := io.ReadAll(resp.Body)
+		return resp.StatusCode, string(b)
+	}
+	if _, body := get("ping", ""); !strings.Contains(body, `"status":"ok"`) || !strings.Contains(body, `"openSubsonic":true`) {
+		t.Fatalf("ping: %s", body)
+	}
+	_, body := get("search3", "query=")
+	if !strings.Contains(body, `"title":"Bip"`) {
+		t.Fatalf("search3: %s", body)
+	}
+	id := body[strings.Index(body, `"song":[{"id":"`)+15:]
+	id = id[:strings.Index(id, `"`)]
+	if code, audio := get("stream", "id="+id+"&format=raw"); code != 200 || len(audio) < 1000 {
+		t.Fatalf("stream: %d %d", code, len(audio))
 	}
 }
