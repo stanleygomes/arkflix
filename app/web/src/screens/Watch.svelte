@@ -11,7 +11,6 @@
   import { api } from '../lib/api'
   import { pushHandler } from '../lib/input'
   import { current, focusEl } from '../lib/nav'
-  import { applyPalette, highContrastPalette, homePalette } from '../lib/palette'
   import { play } from '../lib/sound'
   import { shade } from '../lib/motion'
   import { app, go, isKids, toast } from '../lib/state.svelte'
@@ -40,11 +39,6 @@
   let sort = $state('added')
   let loading = $state(false)
   let failed = $state('')
-
-  $effect(() => {
-    if (app.settings?.a11y.highContrast) return applyPalette(highContrastPalette)
-    applyPalette(homePalette)
-  })
 
   async function load(tab: Tab, order: string) {
     if (!connected) return
@@ -209,8 +203,9 @@
 
   <main class="content" aria-labelledby="watch-title">
     {#if !connected}
-      <section class="empty panel">
-        <h1 class="pixel" id="watch-title">Filmes e séries</h1>
+      <section class="empty">
+        <Icon name="film" size="3rem" />
+        <h1 id="watch-title">Filmes e séries</h1>
         {#if isKids()}
           <p class="muted">Este perfil ainda não tem conta do Jellyfin. Peça pra um adulto vincular uma em Perfis da casa.</p>
           <div class="actions">
@@ -227,8 +222,9 @@
         {/if}
       </section>
     {:else if failed}
-      <section class="empty panel" role="alert">
-        <h1 class="pixel" id="watch-title">Sem sinal</h1>
+      <section class="alert panel" role="alert">
+        <span class="chip error">Erro</span>
+        <h1 id="watch-title">Sem sinal</h1>
         <p class="muted">{failed}</p>
         <div class="actions">
           <button class="btn primary" data-nav data-nav-default onclick={() => load(app.watchTab, sort)}><Icon name="resume" /> Tentar de novo</button>
@@ -236,8 +232,9 @@
         </div>
       </section>
     {:else if empty}
-      <section class="empty panel">
-        <h1 class="pixel" id="watch-title">{app.watchTab === 'favorites' ? 'Lista vazia' : 'Nada por aqui'}</h1>
+      <section class="empty">
+        <Icon name={app.watchTab === 'favorites' ? 'star' : 'film'} size="3rem" />
+        <h1 id="watch-title">{app.watchTab === 'favorites' ? 'Lista vazia' : 'Nada por aqui'}</h1>
         <p class="muted">
           {app.watchTab === 'favorites' ? 'Aperte o botão de favorito num filme ou série pra guardar aqui.' : 'O servidor não tem nada desse tipo pra esta conta.'}
         </p>
@@ -246,23 +243,27 @@
         </div>
       </section>
     {:else if !selected}
-      <p class="loading pixel" aria-busy="true" id="watch-title">Sintonizando…</p>
+      <div class="loading" role="status" aria-busy="true">
+        <span class="reel sketched" aria-hidden="true"></span>
+        <p class="meta" id="watch-title">Rodando o projetor…</p>
+      </div>
     {:else}
       <section class="hero" class:compact={app.watchTab !== 'home'}>
-        <p class="kind pixel">
-          {selected.type === 'Series' ? 'Série' : selected.type === 'Episode' ? `Série · ${episodeTag(selected)}` : 'Filme'}
+        <p class="kind">
+          <span class="chip">{selected.type === 'Series' || selected.type === 'Episode' ? 'Série' : 'Filme'}</span>
+          {#if selected.type === 'Episode'}<span class="chip">{episodeTag(selected)}</span>{/if}
         </p>
         {#key selected.id}
           {#if selected.logo}
             <h1 class="logo" id="watch-title"><img src={selected.logo} alt={displayName(selected)} /></h1>
           {:else}
-            <h1 class="pixel title" id="watch-title">{displayName(selected)}</h1>
+            <h1 class="title" id="watch-title">{displayName(selected)}</h1>
           {/if}
         {/key}
         <p class="meta">
           {#if selected.type === 'Episode'}<span>{selected.name}</span>{/if}
           {#if selected.year}<span>{selected.year}</span>{/if}
-          {#if selected.rating}<span class="rating">{selected.rating}</span>{/if}
+          {#if selected.rating}<span class="chip rating">{selected.rating}</span>{/if}
           {#if runtime(selected.runtime) && selected.type !== 'Series'}<span>{runtime(selected.runtime)}</span>{/if}
           {#if remaining(selected)}<span class="left">{remaining(selected)}</span>{/if}
           {#each selected.genres.slice(0, 2) as g (g)}<span>{g}</span>{/each}
@@ -271,10 +272,13 @@
         {#if selected.overview && app.watchTab === 'home'}<p class="summary">{selected.overview}</p>{/if}
         {#if app.watchTab === 'home'}
           <div class="actions">
-            <button class="btn primary" data-nav data-nav-group="actions" onclick={playSelected}>
-              <Icon name={selected.position > 0 && !selected.played ? 'resume' : 'play'} />
-              {selected.type === 'Episode' ? (selected.position > 0 ? 'Continuar' : 'Assistir') : playLabel(selected, null)}
-            </button>
+            <!-- 🎬 bilhete: a ação da tela (o anel de foco fica no invólucro) -->
+            <span class="ticket">
+              <button data-nav data-nav-group="actions" onclick={playSelected}>
+                <Icon name={selected.position > 0 && !selected.played ? 'resume' : 'play'} />
+                {selected.type === 'Episode' ? (selected.position > 0 ? 'Continuar' : 'Assistir') : playLabel(selected, null)}
+              </button>
+            </span>
             <button class="btn" data-nav data-nav-group="actions" onclick={() => details(selected)}><Icon name="info" /> Detalhes</button>
             <button class="btn" data-nav data-nav-group="actions" aria-pressed={selected.favorite} onclick={() => toggleFav(selected)}>
               <Icon name={selected.favorite ? 'check' : 'plus'} /> Minha lista
@@ -317,7 +321,7 @@
         </div>
       {:else}
         <div class="toolbar">
-          <p class="count">{total} {app.watchTab === 'movies' ? `filme${total === 1 ? '' : 's'}` : app.watchTab === 'series' ? `série${total === 1 ? '' : 's'}` : `título${total === 1 ? '' : 's'}`}</p>
+          <p class="count meta">{total} {app.watchTab === 'movies' ? `filme${total === 1 ? '' : 's'}` : app.watchTab === 'series' ? `série${total === 1 ? '' : 's'}` : `título${total === 1 ? '' : 's'}`}</p>
           <div class="segmented" role="group" aria-label="Ordem">
             {#each SORTS as s (s.id)}
               <button class="btn small" data-nav aria-pressed={sort === s.id} onclick={() => (sort = s.id)}>{s.label}</button>
@@ -334,7 +338,7 @@
           {/each}
           {#if list.length < total}
             <li>
-              <button class="card more pixel" data-nav onclick={more}><Icon name="plus" size="1.6em" /> Mais</button>
+              <button class="card more" data-nav onclick={more}><Icon name="plus" size="1.6em" /> Mais</button>
             </li>
           {/if}
         </ul>
@@ -361,12 +365,13 @@
     flex-direction: column;
     position: relative;
   }
+  /* a arte do item em foco fica no fundo, apagada, e some no fundo da sala */
   .backdrop {
     position: fixed;
     inset: 0;
     background-size: cover;
     background-position: center 25%;
-    opacity: 0.45;
+    opacity: 0.4;
     z-index: -1;
     mask-image: linear-gradient(to bottom, #000 35%, transparent 90%);
   }
@@ -376,8 +381,14 @@
     z-index: -1;
     pointer-events: none;
     background:
-      linear-gradient(to top, var(--bg) 0%, color-mix(in srgb, var(--bg) 88%, transparent) 35%, transparent 60%),
-      linear-gradient(90deg, var(--bg) 0%, color-mix(in srgb, var(--bg) 90%, transparent) 30%, color-mix(in srgb, var(--bg) 50%, transparent) 65%, color-mix(in srgb, var(--bg) 20%, transparent) 100%);
+      linear-gradient(to top, var(--bg) 0%, color-mix(in srgb, var(--bg) 90%, transparent) 35%, transparent 60%),
+      linear-gradient(
+        90deg,
+        var(--bg) 0%,
+        color-mix(in srgb, var(--bg) 92%, transparent) 30%,
+        color-mix(in srgb, var(--bg) 55%, transparent) 65%,
+        color-mix(in srgb, var(--bg) 25%, transparent) 100%
+      );
   }
   .top-nav {
     display: flex;
@@ -385,29 +396,30 @@
     gap: 1.4rem;
     flex-wrap: wrap;
   }
+  /* abas: navegação sóbria, sublinhado mostarda no item atual */
   .tabs {
     display: flex;
-    gap: 0.3rem;
+    gap: 0.4rem;
   }
   .tab {
-    font-family: var(--font-body);
-    font-weight: 700;
-    letter-spacing: 0.04em;
+    font-family: var(--font-label);
+    font-size: 0.8rem;
+    letter-spacing: 0.06em;
     text-transform: uppercase;
-    font-size: 1rem;
-    color: #d8cfe6;
+    color: var(--text);
     background: none;
-    border: 3px solid transparent;
-    padding: 0.35rem 0.7rem;
+    border: none;
+    border-bottom: var(--edge) solid transparent;
+    padding: 0.55rem 0.7rem 0.4rem;
+    min-height: 2.6rem;
     cursor: pointer;
   }
   .tab:hover {
-    border-color: color-mix(in srgb, var(--accent) 60%, transparent);
+    border-bottom-color: var(--outline);
   }
   .tab[aria-current='page'] {
-    color: #fff;
-    text-shadow: 0 0 10px var(--accent);
     border-bottom-color: var(--accent);
+    color: var(--accent);
   }
   .content {
     flex: 1;
@@ -418,16 +430,47 @@
     padding: 1rem 2.5rem 0;
     overflow-y: auto;
   }
+  /* 🎬 rolo de filme parado (espera grande da tela): dá uma volta ao
+     aparecer e para */
   .loading {
     margin: auto;
-    font-size: 1.4rem;
-    animation: blink 1s steps(2) infinite;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+  }
+  .loading .meta {
+    color: var(--muted);
+    font-size: 1rem;
+  }
+  .reel {
+    width: 4rem;
+    height: 4rem;
+    border-radius: 50%;
+    box-shadow: var(--hard-sm);
+    background:
+      radial-gradient(circle at 50% 50%, var(--outline) 0 0.45rem, transparent 0.5rem),
+      radial-gradient(circle at 50% 18%, var(--bg) 0 0.42rem, transparent 0.45rem),
+      radial-gradient(circle at 80% 40%, var(--bg) 0 0.42rem, transparent 0.45rem),
+      radial-gradient(circle at 69% 77%, var(--bg) 0 0.42rem, transparent 0.45rem),
+      radial-gradient(circle at 31% 77%, var(--bg) 0 0.42rem, transparent 0.45rem),
+      radial-gradient(circle at 20% 40%, var(--bg) 0 0.42rem, transparent 0.45rem),
+      var(--surface);
+    animation: reel 1.2s steps(12) 1;
+  }
+  .reel::before {
+    border-radius: 50%;
+  }
+  @keyframes reel {
+    to {
+      transform: rotate(360deg);
+    }
   }
   .hero {
     max-width: 62rem;
     display: flex;
     flex-direction: column;
-    gap: 1.1rem;
+    gap: 1rem;
     min-height: 40vh;
     justify-content: flex-end;
   }
@@ -436,16 +479,11 @@
     gap: 0.6rem;
   }
   .kind {
-    color: var(--accent-2);
-    font-size: 0.95rem;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
+    display: flex;
+    gap: 0.5rem;
   }
   .title {
-    font-size: clamp(2rem, min(4.6vw, 6.5vh), 4.4rem);
-    line-height: 1.05;
-    color: #fff;
-    text-shadow: 5px 5px 0 color-mix(in srgb, var(--accent) 55%, #000);
+    font-size: clamp(2.2rem, min(5vw, 7vh), 4.6rem);
     max-width: 22ch;
   }
   .compact .title {
@@ -459,7 +497,7 @@
     max-height: 9rem;
     object-fit: contain;
     object-position: left bottom;
-    filter: drop-shadow(4px 4px 0 #000);
+    filter: drop-shadow(4px 4px 0 var(--n-on-mustard));
     display: block;
   }
   .compact .logo img {
@@ -468,16 +506,16 @@
   .meta {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.5rem 1.4rem;
-    color: #e6deef;
-    font-size: 1.05rem;
+    align-items: center;
+    gap: 0.5rem 1.2rem;
+    color: var(--text);
+    font-size: 1rem;
   }
   .rating {
-    border: 2px solid currentColor;
-    padding: 0 0.35rem;
+    letter-spacing: 0.04em;
   }
   .left {
-    color: var(--focus);
+    color: var(--accent-2);
   }
   .fav {
     color: var(--accent);
@@ -487,9 +525,7 @@
   }
   .summary {
     max-width: 44rem;
-    color: #fff;
     font-size: 1.08rem;
-    line-height: 1.65;
     display: -webkit-box;
     -webkit-line-clamp: 3;
     line-clamp: 3;
@@ -499,62 +535,144 @@
   .actions {
     display: flex;
     flex-wrap: wrap;
+    align-items: center;
     gap: 1.2rem;
   }
+
+  /* 🎬 bilhete de cinema: retângulo com um entalhe de cada lado. A máscara
+     corta a sombra e o anel de foco, então os dois moram no invólucro. */
+  .ticket {
+    display: inline-flex;
+    border-radius: var(--radii-sm);
+    filter: drop-shadow(3px 4px 0 var(--outline));
+    transition:
+      transform var(--t) var(--ease),
+      filter var(--t) var(--ease);
+  }
+  .ticket:hover,
+  .ticket:focus-within {
+    transform: translate(-2px, -2px);
+    filter: drop-shadow(5px 6px 0 var(--outline));
+  }
+  .ticket:focus-within {
+    outline: 3px solid var(--focus);
+    outline-offset: 3px;
+  }
+  .ticket:active {
+    transform: translate(3px, 4px);
+    filter: none;
+  }
+  .ticket button {
+    --notch: radial-gradient(circle 8px at 0 50%, #0000 97%, #000);
+    --notch-end: radial-gradient(circle 8px at 100% 50%, #0000 97%, #000);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-height: 3.2rem;
+    padding: 0.75rem 1.7rem;
+    font-family: var(--font-label);
+    font-size: 0.85rem;
+    line-height: 1;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--on-accent);
+    background: var(--accent);
+    border: none;
+    border-radius: var(--radii-sm);
+    cursor: pointer;
+    -webkit-mask:
+      var(--notch) left / 51% 100% no-repeat,
+      var(--notch-end) right / 51% 100% no-repeat;
+    mask:
+      var(--notch) left / 51% 100% no-repeat,
+      var(--notch-end) right / 51% 100% no-repeat;
+  }
+  .ticket button:focus {
+    outline: none;
+  }
+  /* contorno à mão, seguindo os entalhes */
+  .ticket button::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border: var(--edge) solid var(--n-on-mustard);
+    border-radius: inherit;
+    background:
+      radial-gradient(circle 11px at 0 50%, transparent 8px, var(--n-on-mustard) 8.5px 11px, transparent 11.5px),
+      radial-gradient(circle 11px at 100% 50%, transparent 8px, var(--n-on-mustard) 8.5px 11px, transparent 11.5px);
+    filter: url(#sketch);
+    pointer-events: none;
+  }
+
   .shelves {
     display: flex;
     flex-direction: column;
-    gap: 1.6rem;
+    gap: 1.4rem;
     padding-bottom: 0.5rem;
   }
   .row-title {
-    font-size: 1.2rem;
-    color: #fff;
-    margin-bottom: 0.3rem;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+  }
+  .row-title::before {
+    content: '';
+    width: 0.6rem;
+    height: 0.6rem;
+    background: var(--accent);
+    border: 2px solid var(--outline);
   }
   .row {
     list-style: none;
     margin: 0;
-    padding: 0.8rem 0.5rem 1.2rem;
+    padding: 0.8rem 0.6rem 1.2rem;
     display: flex;
     gap: 1.5rem;
     overflow-x: auto;
     scroll-snap-type: x proximity;
     scrollbar-width: none;
   }
+  /* cartão: o pôster é a moldura; no foco ele sobe, a sombra cresce e ganha
+     o anel verde-azulado (dá pra ver do sofá) */
   .card {
     position: relative;
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
+    gap: 0.55rem;
     width: clamp(7.5rem, min(11vw, 17vh), 11rem);
     padding: 0;
     font: inherit;
     color: var(--text);
-    text-align: left;
+    text-align: start;
     border: none;
     background: none;
-    border-radius: 6px;
     cursor: pointer;
     scroll-snap-align: center;
-    transition: transform var(--t) var(--ease);
-  }
-  .card :global(.poster) {
-    box-shadow:
-      0 0 0 3px color-mix(in srgb, var(--accent) 80%, #000),
-      6px 6px 0 3px var(--press);
   }
   .card.wide {
     width: clamp(13rem, min(20vw, 30vh), 19rem);
   }
-  .card:focus {
-    transform: translateY(-0.4rem) scale(1.05);
+  .card:focus,
+  .card:focus-visible {
     outline: none;
   }
+  .card:hover :global(.poster) {
+    transform: translate(-2px, -2px);
+    box-shadow: var(--hard-up);
+  }
   .card:focus :global(.poster) {
-    box-shadow:
-      0 0 0 4px var(--focus),
-      var(--glow-focus);
+    transform: translate(-4px, -4px);
+    box-shadow: 8px 8px 0 var(--outline);
+    outline: 3px solid var(--focus);
+    outline-offset: 3px;
+  }
+  .card:active :global(.poster) {
+    transform: translate(4px, 4px);
+    box-shadow: none;
   }
   .caption {
     display: flex;
@@ -569,10 +687,15 @@
     white-space: nowrap;
   }
   .caption .muted {
-    font-size: 0.85rem;
+    font-family: var(--font-hud);
+    font-size: 0.8rem;
+    letter-spacing: 0.04em;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+  }
+  .card:focus .caption .name {
+    color: var(--accent);
   }
   .toolbar {
     display: flex;
@@ -586,15 +709,15 @@
   }
   .segmented {
     display: flex;
-    gap: 0.5rem;
+    gap: 0.6rem;
   }
   .grid {
     list-style: none;
     margin: 0;
-    padding: 0.8rem 0.5rem 1.5rem;
+    padding: 0.8rem 0.6rem 1.5rem;
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(9rem, 1fr));
-    gap: 1.8rem 1.4rem;
+    gap: 1.8rem 1.5rem;
   }
   .grid .card {
     width: 100%;
@@ -603,17 +726,56 @@
     aspect-ratio: 2 / 3;
     align-items: center;
     justify-content: center;
-    background: color-mix(in srgb, var(--surface) 80%, transparent);
-    border: 3px dashed color-mix(in srgb, var(--text) 40%, transparent);
+    font-family: var(--font-label);
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    border: var(--edge) dashed var(--muted);
+    border-radius: var(--radii-sm);
   }
+  .more:focus {
+    outline: 3px solid var(--focus) !important;
+    outline-offset: 3px;
+    border-style: solid;
+    border-color: var(--outline);
+  }
+  /* vazio: caixa tracejada, sem fundo, sem sombra; diz o porquê e o passo */
   .empty {
     margin: auto;
     display: flex;
     flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 1rem;
+    max-width: 34rem;
+    padding: 2rem 1.25rem;
+    border: var(--edge) dashed var(--muted);
+    border-radius: var(--radii-sm);
+    color: var(--muted);
+  }
+  .empty h1,
+  .alert h1 {
+    font-family: var(--font-label);
+    font-size: 1.25rem;
+    color: var(--text);
+    -webkit-text-stroke: 0;
+    text-shadow: none;
+  }
+  .empty p {
+    max-width: 44ch;
+  }
+  /* erro: painel com borda e sombra vermelhas, nunca a tela toda */
+  .alert {
+    margin: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
     gap: 1rem;
     max-width: 38rem;
+    border-color: var(--danger);
+    box-shadow: 4px 4px 0 var(--danger);
   }
-  :global(.reduce-motion) .card {
-    transition: none;
+  :global(.reduce-motion) .reel {
+    animation: none;
   }
 </style>
