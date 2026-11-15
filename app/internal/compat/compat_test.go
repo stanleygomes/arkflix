@@ -11,6 +11,7 @@ import (
 	"context"
 	"crypto/md5"
 	"encoding/hex"
+	"fmt"
 	"io"
 	"net"
 	"net/http"
@@ -21,6 +22,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/stanleygomes/arkflix/app/internal/arkserver"
 	"github.com/stanleygomes/arkflix/app/internal/jellyfin"
 	"github.com/stanleygomes/arkflix/app/internal/romm"
 )
@@ -44,7 +46,7 @@ type server struct {
 	base string
 }
 
-func start(t *testing.T) server {
+func start(t *testing.T, extra ...string) server {
 	t.Helper()
 	root := t.TempDir()
 	testdata, _ := filepath.Abs("../../../server/internal/testkit/testdata")
@@ -81,7 +83,7 @@ func start(t *testing.T) server {
 	if out, err := exec.Command(bin, append(args, "scan")...).CombinedOutput(); err != nil {
 		t.Fatalf("scan: %v\n%s", err, out)
 	}
-	srv := exec.Command(bin, args...)
+	srv := exec.Command(bin, append(args, extra...)...)
 	logs := &strings.Builder{}
 	srv.Stdout, srv.Stderr = logs, logs
 	if err := srv.Start(); err != nil {
@@ -302,5 +304,99 @@ func TestSubsonic(t *testing.T) {
 	id = id[:strings.Index(id, `"`)]
 	if code, audio := get("stream", "id="+id+"&format=raw"); code != 200 || len(audio) < 1000 {
 		t.Fatalf("stream: %d %d", code, len(audio))
+	}
+}
+
+func TestArkServerClient(t *testing.T) {
+	s := start(t, "--writable")
+	ctx := context.Background()
+	info, err := arkserver.GetInfo(ctx, nil, s.base)
+	if err != nil || info.Product != "arkflix-server" || !info.Writable || !info.Has("lists") {
+		t.Fatalf("info: %+v %v", info, err)
+	}
+	acc, err := jellyfin.Login(ctx, s.base, "stanley", "senha123", jellyfin.Account{DeviceID: "compat-ark", Device: "teste", Version: "1"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	c := &arkserver.Client{Base: s.base, Token: acc.Token, Jellyfin: true}
+	me, err := c.Me(ctx)
+	if err != nil || !me.Admin || me.Name != "stanley" {
+		t.Fatalf("me: %+v %v", me, err)
+	}
+	st, err := c.Status(ctx)
+	if err != nil || len(st.Libraries) != 4 || !st.Writable {
+		t.Fatalf("status: %+v %v", st, err)
+	}
+	if err := c.Scan(ctx); err != nil {
+		t.Fatal(err)
+	}
+	plats, err := c.Platforms(ctx)
+	if err != nil || len(plats) != 2 {
+		t.Fatalf("consoles: %+v %v", plats, err)
+	}
+	users, err := c.Users(ctx)
+	if err != nil || len(users) != 1 {
+		t.Fatalf("usuários: %+v %v", users, err)
+	}
+	bia, err := c.CreateUser(ctx, "bia", "senha-bia", false)
+	if err != nil || bia.Admin {
+		t.Fatalf("criar: %+v %v", bia, err)
+	}
+	if _, err := c.UpdateUser(ctx, bia.ID, arkserver.UserPatch{}); err != nil {
+		t.Fatal(err)
+	}
+	if err := c.DeleteUser(ctx, bia.ID); err != nil {
+		t.Fatal(err)
+	}
+
+	// listas: filme pelo id do Jellyfin e jogo pelo id do RomM
+	jf := &jellyfin.API{Account: acc}
+	movies, _, err := jf.Items(ctx, jellyfin.Query{Types: "Movie", Sort: "name"})
+	if err != nil || len(movies) == 0 {
+		t.Fatal(err)
+	}
+	racc, err := romm.Login(ctx, s.base, "stanley", "senha123", "pc")
+	if err != nil {
+		t.Fatal(err)
+	}
+	roms, err := (&romm.Client{Base: racc.Base, Token: racc.Token}).Roms(ctx)
+	if err != nil || len(roms) == 0 {
+		t.Fatal(err)
+	}
+	l, err := c.CreateList(ctx, "Fim de semana")
+	if err != nil {
+		t.Fatal(err)
+	}
+	l, err = c.AddToList(ctx, l.ID, movies[0].ID, fmt.Sprintf("rom:%d", roms[0].ID))
+	if err != nil || l.Count != 2 {
+		t.Fatalf("adicionar: %+v %v", l, err)
+	}
+	full, err := c.List(ctx, l.ID)
+	if err != nil || len(full.Items) != 2 || full.Items[0].ID != movies[0].ID || full.Items[1].RID != roms[0].ID {
+		t.Fatalf("lista: %+v %v", full, err)
+	}
+	if all, err := c.Lists(ctx); err != nil || len(all) != 1 {
+		t.Fatalf("listas: %+v %v", all, err)
+	}
+	if err := c.RemoveFromList(ctx, l.ID, full.Items[0].ID); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := c.RenameList(ctx, l.ID, "Sábado"); err != nil {
+		t.Fatal(err)
+	}
+
+	// envio e esconder: o arquivo vai pra pasta certa e some do acervo
+	dir := t.TempDir()
+	rom := filepath.Join(dir, "Novo Jogo (USA).sfc")
+	os.WriteFile(rom, []byte("rom nova"), 0o644)
+	saved, err := c.Upload(ctx, map[string]string{"kind": "rom", "platform": "snes"}, []string{rom}, func(int64, int64) {})
+	if err != nil || len(saved) != 1 || !strings.Contains(saved[0], "roms/snes/Novo Jogo (USA).sfc") {
+		t.Fatalf("envio: %v %v", saved, err)
+	}
+	if err := c.Hide(ctx, fmt.Sprintf("rom:%d", roms[0].ID)); err != nil {
+		t.Fatal(err)
+	}
+	if err := c.DeleteList(ctx, l.ID); err != nil {
+		t.Fatal(err)
 	}
 }
