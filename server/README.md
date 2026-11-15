@@ -74,11 +74,81 @@ Estado compartilhado: estrela no Subsonic = favorito no Jellyfin; onde parou e
 Fora: HLS de áudio, cliente web embutido do Jellyfin, coleções do RomM,
 podcasts/rádio/compartilhamento do Subsonic, controle remoto pelo websocket.
 
-## Migração (ainda não feita)
+## Migração
 
-Usuários, onde parou, estrelas, playlists e os saves que já estão no RomM não
-vêm sozinhos. O próximo passo é um `arkflix-server import` lendo os bancos do
-Jellyfin (SQLite), do Navidrome (SQLite) e do RomM (MariaDB + pasta de saves).
+`arkflix-server import` traz, uma vez, o que está nos três servidores de hoje.
+Só lê os bancos de origem (SQLite em `mode=ro`, MariaDB numa transação
+`READ ONLY`) e pode rodar quantas vezes quiser: não duplica nada, só junta.
+Os itens casam pelo **caminho do arquivo**, então o acervo precisa estar
+escaneado antes, e cada fonte vê a mídia num caminho diferente: `--map
+ANTIGO=NOVO` (repete) troca o prefixo. `--dry-run` mostra o que mudaria; o
+resumo lista os primeiros caminhos sem par (`--show N`) pra acertar o `--map`.
+
+| Fonte | Traz | Fica de fora |
+| --- | --- | --- |
+| Navidrome (`navidrome.db`) | usuários com a senha de verdade (decifrada com `--key`), estrelas, vezes, nota e última vez de faixas/álbuns/artistas, fila, marcadores, playlists | playlists inteligentes, rádio, compartilhamentos, scrobbles |
+| Jellyfin (`jellyfin.db`, 10.11+) | usuários (admin; desativado fica de fora), assistido, vezes, onde parou, última vez, favorito | preferências de exibição, aparelhos, coleções e playlists |
+| RomM (MariaDB + `/romm/assets`) | usuários, saves/states/screenshots (copiados pra `<data>/romm/`), props do jogo (status, nota, backlog...), última vez, coleções | coleções inteligentes/virtuais, notas, memory cards, conquistas |
+
+Senhas: o Navidrome guarda a senha cifrada, então o usuário já nasce com
+ela e o token do Subsonic funciona na hora. O RomM guarda bcrypt e o
+Jellyfin PBKDF2-SHA512: o hash é importado e o usuário entra com a senha
+antiga; no **primeiro login** (Jellyfin, RomM ou Subsonic com `p=`) ela é
+regravada e só a partir daí o token do Subsonic (`t=`/`s=`) funciona. Mesmo
+nome em várias fontes vira um usuário só (sem diferenciar maiúsculas); quem
+já tem senha fica com ela, a não ser com `--passwords=overwrite`. Por isso o
+Navidrome vai primeiro. Usuário sem senha na fonte (OIDC no RomM, sem senha
+no Jellyfin) precisa de `user passwd`.
+
+Playlists e coleções ainda não têm destino no arkflix: por enquanto o
+import só lista quais seriam trazidas.
+
+Na VPS (stack em `/opt/media-stack`, com o serviço `arkflix-server` montando
+`/var/lib/arkflix-server` em `/data` e `/var/media` em `/media`):
+
+```sh
+cd /opt/media-stack
+ark() { docker compose run --rm "$@"; }
+
+# 0. acervo escaneado (o import casa os itens pelo caminho)
+ark arkflix-server scan
+
+# 1. cópia dos bancos SQLite com o serviço parado (o WAL vai pro .db)
+docker stop navidrome jellyfin
+sudo install -d -o 1000 -g 1000 /var/lib/arkflix-server/import
+sudo cp /var/lib/navidrome/navidrome.db /var/lib/jellyfin/config/data/jellyfin.db \
+  /var/lib/arkflix-server/import/
+sudo chown 1000:1000 /var/lib/arkflix-server/import/*.db
+docker start navidrome jellyfin
+
+# 2. Navidrome primeiro (senha de verdade). /music dele = /media/musicas aqui.
+#    --key: o ND_PASSWORDENCRYPTIONKEY do Navidrome, se tiver; sem ele, omita.
+ark arkflix-server import navidrome --db /data/import/navidrome.db \
+  --map /music=/media/musicas --dry-run
+ark arkflix-server import navidrome --db /data/import/navidrome.db \
+  --map /music=/media/musicas
+
+# 3. Jellyfin: ele vê a mídia em /media, igual o contêiner do arkflix
+ark arkflix-server import jellyfin --db /data/import/jellyfin.db --dry-run
+ark arkflix-server import jellyfin --db /data/import/jellyfin.db
+
+# 4. RomM: credenciais do romm.env, saves de /var/lib/romm/assets
+set -a; . /opt/media-stack/romm.env; set +a
+ark -v /var/lib/romm/assets:/romm-assets:ro arkflix-server import romm \
+  --dsn "$DB_USER:$DB_PASSWD@tcp(romm-db:3306)/${DB_NAME:-romm}" \
+  --assets /romm-assets --map /romm/library=/media/jogos --dry-run
+# (repete sem --dry-run)
+
+# 5. limpeza
+sudo rm -r /var/lib/arkflix-server/import
+```
+
+O `romm-db` precisa estar na mesma rede do contêiner (mesmo compose); se não
+estiver, `--network <rede do romm-db>` no `docker compose run`. Rodando o
+binário direto no host, os caminhos do arkflix são os do host:
+`--map /media=/var/media` no Jellyfin, `--map /music=/var/media/musicas` no
+Navidrome, `--map /romm/library=/var/media/jogos` e `--assets
+/var/lib/romm/assets` no RomM.
 
 ## Desenvolvimento
 
