@@ -2,74 +2,41 @@ package subsonic
 
 import (
 	"context"
-	"database/sql"
+	"errors"
 	"slices"
 	"strconv"
 
-	"github.com/stanleygomes/arkflix/server/internal/auth"
+	"github.com/stanleygomes/arkflix/server/internal/lists"
 	"github.com/stanleygomes/arkflix/server/internal/store"
 )
 
-// plRow é uma playlist do banco (sem as faixas).
-type plRow struct {
-	id, userID, owner, name, comment string
-	public                           bool
-	created, changed                 string
+// As playlists são as listas de internal/lists (as mesmas do Jellyfin, do
+// RomM e do app): aqui aparecem as que têm faixa (ou estão vazias), só com
+// as faixas.
+
+func (a *API) lists() *lists.Lists { return lists.New(a.d.Store) }
+
+// plLoad: a playlist é do usuário ou é pública.
+func (a *API) plLoad(c *call, id string) (*lists.List, error) {
+	l, err := a.lists().Get(c.ctx, cleanID(id))
+	if errors.Is(err, store.ErrNotFound) || (err == nil && !l.CanSee(c.user.ID)) {
+		return nil, fail(errNotFound, "playlist not found")
+	}
+	return l, err
 }
 
-const plSelect = `SELECT p.id, p.user_id, COALESCE(us.name,''), p.name, p.comment, p.public, p.created_at, p.changed_at
-FROM subsonic_playlists p LEFT JOIN users us ON us.id = p.user_id `
-
-func (a *API) plRows(ctx context.Context, tail string, args ...any) ([]plRow, error) {
-	rows, err := a.d.Store.DB.QueryContext(ctx, plSelect+tail, args...)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var out []plRow
-	for rows.Next() {
-		var p plRow
-		if err := rows.Scan(&p.id, &p.userID, &p.owner, &p.name, &p.comment, &p.public, &p.created, &p.changed); err != nil {
-			return nil, err
-		}
-		out = append(out, p)
-	}
-	return out, rows.Err()
-}
-
-// visible: a playlist é do usuário ou é pública.
-func (a *API) plLoad(c *call, id string) (plRow, error) {
-	ps, err := a.plRows(c.ctx, `WHERE p.id = ? AND (p.user_id = ? OR p.public = 1)`, cleanID(id), c.user.ID)
-	if err != nil {
-		return plRow{}, err
-	}
-	if len(ps) == 0 {
-		return plRow{}, fail(errNotFound, "playlist not found")
-	}
-	return ps[0], nil
-}
-
+// plItemIDs são as faixas da lista, na ordem (com repetição).
 func (a *API) plItemIDs(ctx context.Context, id string) ([]string, error) {
-	rows, err := a.d.Store.DB.QueryContext(ctx, `SELECT item_id FROM subsonic_playlist_items WHERE playlist_id = ? ORDER BY pos`, id)
+	es, err := a.lists().Entries(ctx, id)
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
-	var out []string
-	for rows.Next() {
-		var s string
-		if err := rows.Scan(&s); err != nil {
-			return nil, err
-		}
-		out = append(out, s)
-	}
-	return out, rows.Err()
+	return lists.ItemIDs(es, store.KindTrack), nil
 }
 
-func (a *API) plBuild(c *call, p plRow, ts []*track) playlist {
-	pl := playlist{ID: p.id, Name: p.name, Comment: p.comment, Public: p.public, Owner: p.owner,
-		Created: ms(parseT(p.created)), Changed: ms(parseT(p.changed)), SongCount: len(ts),
-		Readonly: p.userID != c.user.ID}
+func (a *API) plBuild(c *call, l *lists.List, ts []*track) playlist {
+	pl := playlist{ID: l.ID, Name: l.Name, Comment: l.Comment, Public: l.Public, Owner: l.Owner,
+		Created: ms(l.Created), Changed: ms(l.Updated), SongCount: len(ts), Readonly: l.UserID != c.user.ID}
 	var dur float64
 	for _, t := range ts {
 		dur += t.Duration
@@ -82,21 +49,24 @@ func (a *API) plBuild(c *call, p plRow, ts []*track) playlist {
 }
 
 func (a *API) getPlaylists(c *call) (*resp, error) {
-	ps, err := a.plRows(c.ctx, `WHERE p.user_id = ? OR p.public = 1 ORDER BY p.name COLLATE NOCASE`, c.user.ID)
+	ls, err := a.lists().Visible(c.ctx, c.user.ID)
 	if err != nil {
 		return nil, err
 	}
 	out := &playlists{}
-	for _, p := range ps {
-		ids, err := a.plItemIDs(c.ctx, p.id)
+	for _, l := range ls {
+		es, err := a.lists().Entries(c.ctx, l.ID)
 		if err != nil {
 			return nil, err
 		}
-		ts, err := a.tracksByIDs(c.ctx, c.user.ID, ids)
+		if !lists.HasKinds(es, store.KindTrack) {
+			continue
+		}
+		ts, err := a.tracksByIDs(c.ctx, c.user.ID, lists.ItemIDs(es, store.KindTrack))
 		if err != nil {
 			return nil, err
 		}
-		out.Playlist = append(out.Playlist, a.plBuild(c, p, ts))
+		out.Playlist = append(out.Playlist, a.plBuild(c, l, ts))
 	}
 	res := a.newResp()
 	res.Playlists = out
@@ -104,11 +74,11 @@ func (a *API) getPlaylists(c *call) (*resp, error) {
 }
 
 func (a *API) playlistResp(c *call, id string) (*resp, error) {
-	p, err := a.plLoad(c, id)
+	l, err := a.plLoad(c, id)
 	if err != nil {
 		return nil, err
 	}
-	ids, err := a.plItemIDs(c.ctx, p.id)
+	ids, err := a.plItemIDs(c.ctx, l.ID)
 	if err != nil {
 		return nil, err
 	}
@@ -117,7 +87,7 @@ func (a *API) playlistResp(c *call, id string) (*resp, error) {
 		return nil, err
 	}
 	res := a.newResp()
-	res.Playlist = &playlistFull{playlist: a.plBuild(c, p, ts), Entry: trackChildren(ts)}
+	res.Playlist = &playlistFull{playlist: a.plBuild(c, l, ts), Entry: trackChildren(ts)}
 	return res, nil
 }
 
@@ -130,40 +100,28 @@ func (a *API) getPlaylist(c *call) (*resp, error) {
 }
 
 // own carrega a playlist e exige que seja do usuário (senão 50).
-func (a *API) own(c *call, id string) (plRow, error) {
-	p, err := a.plLoad(c, id)
+func (a *API) own(c *call, id string) (*lists.List, error) {
+	l, err := a.plLoad(c, id)
 	if err != nil {
-		return p, err
+		return nil, err
 	}
-	if p.userID != c.user.ID {
-		return p, fail(errNotAllowed, "")
+	if l.UserID != c.user.ID {
+		return nil, fail(errNotAllowed, "")
 	}
-	return p, nil
+	return l, nil
 }
 
-func (a *API) plWrite(ctx context.Context, fn func(tx *sql.Tx) error) error {
-	tx, err := a.d.Store.DB.BeginTx(ctx, nil)
-	if err != nil {
-		return err
-	}
-	if err := fn(tx); err != nil {
-		tx.Rollback()
-		return err
-	}
-	return tx.Commit()
-}
-
-func setItems(ctx context.Context, tx *sql.Tx, plID string, ids []string) error {
-	if _, err := tx.ExecContext(ctx, `DELETE FROM subsonic_playlist_items WHERE playlist_id = ?`, plID); err != nil {
-		return err
-	}
+func cleanIDs(ids []string) []string {
+	out := make([]string, len(ids))
 	for i, id := range ids {
-		if _, err := tx.ExecContext(ctx, `INSERT INTO subsonic_playlist_items (playlist_id, pos, item_id) VALUES (?,?,?)`, plID, i, cleanID(id)); err != nil {
-			return err
-		}
+		out[i] = cleanID(id)
 	}
-	_, err := tx.ExecContext(ctx, `UPDATE subsonic_playlists SET changed_at = ? WHERE id = ?`, store.Now(), plID)
-	return err
+	return out
+}
+
+// setTracks troca as faixas da lista (o resto da lista fica).
+func (a *API) setTracks(ctx context.Context, listID string, ids []string) error {
+	return a.lists().SetKinds(ctx, listID, []string{store.KindTrack}, cleanIDs(ids))
 }
 
 // createPlaylist cria; com playlistId troca as faixas da existente.
@@ -173,49 +131,42 @@ func (a *API) createPlaylist(c *call) (*resp, error) {
 		return nil, fail(errMissingParam, "required parameter name is missing")
 	}
 	if plID != "" {
-		p, err := a.own(c, plID)
+		l, err := a.own(c, plID)
 		if err != nil {
 			return nil, err
 		}
-		err = a.plWrite(c.ctx, func(tx *sql.Tx) error {
-			if name != "" {
-				if _, err := tx.ExecContext(c.ctx, `UPDATE subsonic_playlists SET name = ? WHERE id = ?`, name, p.id); err != nil {
-					return err
-				}
+		if name != "" {
+			if err := a.lists().Update(c.ctx, l.ID, lists.Changes{Name: &name}); err != nil {
+				return nil, err
 			}
-			return setItems(c.ctx, tx, p.id, songIDs)
-		})
-		if err != nil {
+		}
+		if err := a.setTracks(c.ctx, l.ID, songIDs); err != nil {
 			return nil, err
 		}
-		return a.playlistResp(c, p.id)
+		return a.playlistResp(c, l.ID)
 	}
-	id := auth.RandomHex(16)
-	err := a.plWrite(c.ctx, func(tx *sql.Tx) error {
-		now := store.Now()
-		if _, err := tx.ExecContext(c.ctx, `INSERT INTO subsonic_playlists (id, user_id, name, created_at, changed_at) VALUES (?,?,?,?,?)`,
-			id, c.user.ID, name, now, now); err != nil {
-			return err
-		}
-		return setItems(c.ctx, tx, id, songIDs)
-	})
+	l, err := a.lists().Create(c.ctx, c.user.ID, name)
 	if err != nil {
 		return nil, err
 	}
-	return a.playlistResp(c, id)
+	if err := a.setTracks(c.ctx, l.ID, songIDs); err != nil {
+		return nil, err
+	}
+	return a.playlistResp(c, l.ID)
 }
 
-// updatePlaylist: name, comment, public, tira por índice e acrescenta no fim.
+// updatePlaylist: name, comment, public, tira por índice (das faixas) e
+// acrescenta no fim.
 func (a *API) updatePlaylist(c *call) (*resp, error) {
 	plID, err := c.p.need("playlistId")
 	if err != nil {
 		return nil, err
 	}
-	p, err := a.own(c, plID)
+	l, err := a.own(c, plID)
 	if err != nil {
 		return nil, err
 	}
-	ids, err := a.plItemIDs(c.ctx, p.id)
+	ids, err := a.plItemIDs(c.ctx, l.ID)
 	if err != nil {
 		return nil, err
 	}
@@ -232,25 +183,23 @@ func (a *API) updatePlaylist(c *call) (*resp, error) {
 		}
 	}
 	keep = append(keep, c.p.strs("songIdToAdd")...)
-	err = a.plWrite(c.ctx, func(tx *sql.Tx) error {
-		if c.p.has("name") {
-			if _, err := tx.ExecContext(c.ctx, `UPDATE subsonic_playlists SET name = ? WHERE id = ?`, c.p.str("name"), p.id); err != nil {
-				return err
-			}
-		}
-		if c.p.has("comment") {
-			if _, err := tx.ExecContext(c.ctx, `UPDATE subsonic_playlists SET comment = ? WHERE id = ?`, c.p.str("comment"), p.id); err != nil {
-				return err
-			}
-		}
-		if c.p.has("public") {
-			if _, err := tx.ExecContext(c.ctx, `UPDATE subsonic_playlists SET public = ? WHERE id = ?`, c.p.bool("public", false), p.id); err != nil {
-				return err
-			}
-		}
-		return setItems(c.ctx, tx, p.id, keep)
-	})
-	if err != nil {
+	var ch lists.Changes
+	if c.p.has("name") {
+		n := c.p.str("name")
+		ch.Name = &n
+	}
+	if c.p.has("comment") {
+		cm := c.p.str("comment")
+		ch.Comment = &cm
+	}
+	if c.p.has("public") {
+		pub := c.p.bool("public", false)
+		ch.Public = &pub
+	}
+	if err := a.lists().Update(c.ctx, l.ID, ch); err != nil && !errors.Is(err, lists.ErrName) {
+		return nil, err
+	}
+	if err := a.setTracks(c.ctx, l.ID, keep); err != nil {
 		return nil, err
 	}
 	return a.newResp(), nil
@@ -261,11 +210,11 @@ func (a *API) deletePlaylist(c *call) (*resp, error) {
 	if err != nil {
 		return nil, err
 	}
-	p, err := a.own(c, id)
+	l, err := a.own(c, id)
 	if err != nil {
 		return nil, err
 	}
-	if _, err := a.d.Store.DB.ExecContext(c.ctx, `DELETE FROM subsonic_playlists WHERE id = ?`, p.id); err != nil {
+	if err := a.lists().Delete(c.ctx, l.ID); err != nil {
 		return nil, err
 	}
 	return a.newResp(), nil
