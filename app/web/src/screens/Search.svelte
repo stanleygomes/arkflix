@@ -7,7 +7,6 @@
   import { pushHandler } from '../lib/input'
   import { search } from '../lib/library'
   import { focusEl } from '../lib/nav'
-  import { applyPalette, highContrastPalette, homePalette } from '../lib/palette'
   import { app, go, isKids, shown } from '../lib/state.svelte'
   import { shortcuts, type Shortcut } from '../lib/shortcuts'
   import Icon from '../components/Icon.svelte'
@@ -50,10 +49,6 @@
   // quem usa teclado físico começa no campo; quem usa controle, no teclado na tela
   const typing = app.family === 'keyboard'
 
-  $effect(() => {
-    applyPalette(app.settings?.a11y.highContrast ? highContrastPalette : homePalette)
-  })
-
   // F/Y favorita o resultado em foco (nos campos de texto o F digita)
   $effect(() =>
     pushHandler((a) => {
@@ -75,7 +70,7 @@
   <TopBar actions={false} />
   <main class="layout">
     <section class="query" aria-labelledby="search-title">
-      <h1 class="pixel" id="search-title">Buscar</h1>
+      <h1 id="search-title">Buscar</h1>
       <label class="sr-only" for="search-input">Buscar jogo, console ou configuração</label>
       <input
         id="search-input"
@@ -159,46 +154,63 @@
     gap: 1rem;
   }
   h1 {
-    font-size: 2.2rem;
+    font-size: 2.6rem;
   }
   .results {
     overflow-y: auto;
     min-height: 0;
+    padding-top: 0.4rem;
   }
   .shortcuts {
     list-style: none;
-    margin: 0 0 1rem;
-    padding: 0.3rem;
+    margin: 0 0 1.2rem;
+    padding: 0.4rem;
     display: flex;
     flex-wrap: wrap;
-    gap: 0.6rem;
+    gap: 0.9rem;
   }
+  /* atalho: item sóbrio clicável (ícone, nome, dica datilografada) */
   .shortcut {
     display: grid;
     grid-template-columns: auto auto;
-    gap: 0.1rem 0.6rem;
+    gap: 0.2rem 0.7rem;
     align-items: center;
-    padding: 0.6rem 0.9rem;
+    padding: 0.6rem 1rem 0.55rem 0.8rem;
     font: inherit;
     color: var(--text);
-    text-align: left;
-    background: color-mix(in srgb, var(--surface) 85%, transparent);
-    border: 2px solid color-mix(in srgb, var(--accent-2) 45%, transparent);
+    text-align: start;
+    background: var(--surface);
+    border: var(--edge) solid var(--outline);
+    border-radius: var(--radii-sm);
+    box-shadow: var(--hard-sm);
     cursor: pointer;
+    transition:
+      transform var(--t) var(--ease),
+      box-shadow var(--t) var(--ease);
+  }
+  .shortcut:hover,
+  .shortcut:focus {
+    transform: translate(-2px, -2px);
+    box-shadow: var(--hard-up);
   }
   .shortcut :global(svg) {
     grid-row: span 2;
+    width: 1.5em;
+    height: 1.5em;
     color: var(--accent);
   }
   .shortcut .label {
-    font-weight: 700;
+    font-family: var(--font-label);
+    font-size: 0.85rem;
+    letter-spacing: 0.04em;
   }
   .shortcut .hint {
+    font-family: var(--font-hud);
     font-size: 0.8rem;
   }
   .sub-title {
-    font-size: 1.15rem;
-    margin: 1.2rem 0 0.4rem;
+    font-size: 1.1rem;
+    margin: 1.4rem 0 0.4rem;
   }
   .videos {
     list-style: none;
@@ -216,11 +228,10 @@
     cursor: pointer;
     border-radius: 6px;
   }
-  .video:focus-visible :global(.poster) {
-    box-shadow: 0 0 0 4px var(--focus), var(--glow-focus);
-  }
   .count {
+    font-family: var(--font-hud);
+    letter-spacing: 0.03em;
     color: var(--muted);
-    margin-bottom: 0.6rem;
+    margin-bottom: 0.8rem;
   }
 </style>

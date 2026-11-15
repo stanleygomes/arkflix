@@ -14,8 +14,10 @@
     <li>
       <button class="card" data-nav data-game={g.id} onclick={() => go({ name: 'game', id: g.id })}>
         <GameArt game={g} system={sys} />
-        <span class="name">{g.name}</span>
-        {#if showSystem}<span class="sys">{sys?.short ?? g.system}{g.year ? ` · ${g.year}` : ''}</span>{/if}
+        <span class="caption">
+          <span class="name">{g.name}</span>
+          {#if showSystem}<span class="sys">{sys?.short ?? g.system}{g.year ? ` · ${g.year}` : ''}</span>{/if}
+        </span>
         {#if g.favorite}<span class="badge" aria-label="favorito"><Icon name="star" /></span>{/if}
       </button>
     </li>
@@ -26,28 +28,58 @@
   .grid {
     list-style: none;
     margin: 0;
-    padding: 0.6rem;
+    padding: 0.6rem 0.6rem 1.2rem;
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(9rem, 1fr));
-    gap: 1.4rem 1.1rem;
+    grid-template-columns: repeat(auto-fill, minmax(10rem, 1fr));
+    gap: 1.8rem 1.6rem;
   }
+  /* cartão de imagem sóbrio e clicável: capa em cima, legenda embaixo */
   .card {
+    position: relative;
     width: 100%;
+    height: 100%;
     padding: 0;
-    border: none;
-    background: none;
     color: var(--text);
     font: inherit;
-    text-align: left;
+    text-align: start;
     display: flex;
     flex-direction: column;
-    gap: 0.35rem;
+    background: var(--surface);
+    border: var(--edge) solid var(--outline);
+    border-radius: var(--radii-sm);
+    box-shadow: var(--hard);
+    overflow: hidden;
     cursor: pointer;
+    transition:
+      transform var(--t) var(--ease),
+      box-shadow var(--t) var(--ease);
+  }
+  /* a capa ocupa a largura toda; a borda do cartão é a dela */
+  .card :global(.art) {
+    border: none;
+    border-bottom: var(--edge) solid var(--outline);
+    border-radius: 0;
+  }
+  .card:hover,
+  .card:focus-visible,
+  .card:focus {
+    transform: translate(-2px, -2px);
+    box-shadow: var(--hard-up);
+  }
+  .card:active {
+    transform: translate(4px, 4px);
+    box-shadow: none;
+  }
+  .caption {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    padding: 0.7rem 0.85rem 0.8rem;
   }
   .name {
-    font-weight: 700;
-    font-size: 0.95rem;
-    line-height: 1.2;
+    font-family: var(--font-label);
+    font-size: 0.88rem;
+    line-height: 1.25;
     overflow: hidden;
     display: -webkit-box;
     -webkit-line-clamp: 2;
@@ -55,16 +87,21 @@
     -webkit-box-orient: vertical;
   }
   .sys {
-    font-size: 0.8rem;
+    font-family: var(--font-hud);
+    font-size: 0.78rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
     color: var(--muted);
   }
+  /* favorito: etiqueta mostarda no canto da capa */
   .badge {
     position: absolute;
-    top: -0.5rem;
-    right: -0.5rem;
+    top: 0.5rem;
+    inset-inline-start: 0.5rem;
     color: var(--on-accent);
     background: var(--accent);
-    border: 2px solid #05040a;
+    border: 2px solid var(--on-accent);
+    border-radius: 4px;
     padding: 0.2rem;
     display: grid;
   }

@@ -8,12 +8,11 @@
   import { focusedGameId, toggleFavorite } from '../lib/actions'
   import { pushHandler } from '../lib/input'
   import { SORTS, filterGames, filterGroups, pickRandom, sortGames } from '../lib/library'
-  import { applyPalette, highContrastPalette, homePalette } from '../lib/palette'
   import { play } from '../lib/sound'
   import { filtersOf, isSmart, sortOf, sourceGames, sourceTitle } from '../lib/sources'
   import { focusEl } from '../lib/nav'
   import { api } from '../lib/api'
-  import { app, back, confirm, prompt, putList, system, toast } from '../lib/state.svelte'
+  import { app, back, confirm, prompt, putList, toast } from '../lib/state.svelte'
   import type { Settings } from '../lib/types'
   import { saveSoon } from './settings/save.svelte'
 
@@ -26,11 +25,6 @@
   const groups = $derived(filterGroups(all))
   const games = $derived(sortGames(filterGames(all, filters), sort))
   const title = $derived(sourceTitle(source))
-
-  $effect(() => {
-    const sys = source.startsWith('system:') ? system(source.slice(7)) : undefined
-    applyPalette(app.settings?.a11y.highContrast ? highContrastPalette : (sys?.palette ?? homePalette))
-  })
 
   function saveUI(sortKey: string, active: string[]) {
     const s = app.settings as Settings
@@ -135,11 +129,11 @@
   <TopBar />
   <main class="body">
     <header class="head">
-      <h1 class="pixel">{title}</h1>
+      <h1>{title}</h1>
       {#if smart}
         <span class="smart muted"><Icon name="auto" /> Lista automática</span>
       {/if}
-      <span class="count muted">
+      <span class="count meta">
         {games.length} jogo{games.length === 1 ? '' : 's'}{filters.length ? ` de ${all.length}` : ''}
       </span>
       {#if filters.length}
@@ -153,9 +147,15 @@
     {#if games.length}
       <GameGrid {games} label={`Jogos: ${title}`} showSystem={!source.startsWith('system:')} />
     {:else if filters.length}
-      <p class="muted">Nenhum jogo com esses filtros. Tire algum filtro ou limpe todos.</p>
+      <div class="empty">
+        <p class="label">Nada com esses filtros</p>
+        <p class="muted">Nenhum jogo com esses filtros. Tire algum filtro ou limpe todos.</p>
+      </div>
     {:else}
-      <p class="muted">Nenhum jogo aqui.</p>
+      <div class="empty">
+        <p class="label">Lista vazia</p>
+        <p class="muted">Nenhum jogo aqui.</p>
+      </div>
     {/if}
   </main>
   <HelpBar
@@ -192,7 +192,29 @@
     flex-wrap: wrap;
   }
   h1 {
-    font-size: 2.2rem;
+    font-size: 2.6rem;
+  }
+  .count {
+    color: var(--muted);
+    font-size: 0.95rem;
+  }
+  /* vazio: caixa tracejada, título e uma frase */
+  .empty {
+    max-width: 30rem;
+    margin: 3rem auto;
+    padding: 2rem 1.25rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.6rem;
+    text-align: center;
+    border: var(--edge) dashed var(--muted);
+    border-radius: var(--radii-sm);
+  }
+  .empty .label {
+    font-size: 1.1rem;
+    text-transform: none;
+    letter-spacing: 0.02em;
   }
   .smart {
     display: inline-flex;
