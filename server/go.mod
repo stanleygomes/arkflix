@@ -3,7 +3,10 @@ module github.com/stanleygomes/arkflix/server
 go 1.26.0
 
 require (
+	github.com/coder/websocket v1.8.15
+	github.com/dhowden/tag v0.0.0-20240417053706-3d75831295e8
 	golang.org/x/crypto v0.59.0
+	golang.org/x/image v0.48.0
 	modernc.org/sqlite v1.62.0
 )
 
