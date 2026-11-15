@@ -70,6 +70,10 @@ animado dos anos 30. Decisões já tomadas:
 - **CRT só em momento** (`lib/tube.svelte.ts`): abrir o app, começar filme,
   fechar jogo (~1,6 s, depois some). **Glitch só por evento**: erro =
   estática, trocar perfil = desmagnetizar. Nada de ambiente.
+- **Aberração cromática** (filtros `#chroma`/`#chroma-strong` em
+  `components/Sketch.svelte`): leve e parada nos `h1`, forte no momento de
+  CRT; nunca no texto corrido. **Textura de filme** (`components/Film.svelte`):
+  grão pintado uma vez + vinheta, parada. Alto contraste desliga os dois.
 - **Nada anima em loop** (WebKit repinta e gasta CPU): animação em degraus
   (`steps`), curta, ligada a um evento. Troca de tela = swap; recomeço = íris.
 - Sons de navegação ficam. Alto contraste troca os tokens; "reduzir

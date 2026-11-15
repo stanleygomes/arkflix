@@ -70,6 +70,10 @@
     place-items: center;
     background: radial-gradient(ellipse at center, #2a1a10, #0c0608 70%, #000);
   }
+  /* aberração forte: o tubo velho separa as cores na borda das letras */
+  .picture .card {
+    filter: url(#chroma-strong);
+  }
   .on .picture {
     animation: power-on 0.6s steps(5) both;
   }

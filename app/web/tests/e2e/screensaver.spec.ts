@@ -105,7 +105,7 @@ test('descanso: depois de 15 min de protetor a tela apaga, e um botão acorda', 
   const rest = page.getByRole('dialog', { name: 'Descanso' })
   await expect(rest).toBeVisible()
   await expect(saver(page)).toHaveCount(0)
-  await expect(page.locator('canvas')).toHaveCount(0) // nada animando
+  await expect(page.locator('.saver canvas')).toHaveCount(0) // nada animando (o grão de filme é parado)
   await page.keyboard.press('Enter')
   await expect(rest).toHaveCount(0)
   await expect(page.getByRole('dialog', { name: /Jogando/ })).toHaveCount(0) // só acordou

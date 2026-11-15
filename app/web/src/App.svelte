@@ -11,6 +11,7 @@
   import PinDialog from './components/PinDialog.svelte'
   import Iris from './components/Iris.svelte'
   import Sketch from './components/Sketch.svelte'
+  import Film from './components/Film.svelte'
   import { screenIn, screenOut, type ScreenMotion } from './lib/motion'
   import PowerMenu from './components/PowerMenu.svelte'
   import Screensaver from './components/Screensaver.svelte'
@@ -217,6 +218,7 @@
 <Guide />
 <Screensaver />
 <Restarting />
+<Film />
 <Crt />
 <Sketch />
 {#if app.ready}<Boot />{/if}
