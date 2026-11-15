@@ -25,6 +25,7 @@ import (
 	"github.com/stanleygomes/arkflix/app/internal/arkserver"
 	"github.com/stanleygomes/arkflix/app/internal/jellyfin"
 	"github.com/stanleygomes/arkflix/app/internal/romm"
+	"github.com/stanleygomes/arkflix/app/internal/subsonic"
 )
 
 // arquivos de teste do servidor
@@ -304,6 +305,145 @@ func TestSubsonic(t *testing.T) {
 	id = id[:strings.Index(id, `"`)]
 	if code, audio := get("stream", "id="+id+"&format=raw"); code != 200 || len(audio) < 1000 {
 		t.Fatalf("stream: %d %d", code, len(audio))
+	}
+}
+
+// TestSubsonicClient: o cliente de músicas do app (o mesmo que fala com o
+// Navidrome) contra a API Subsonic do servidor.
+func TestSubsonicClient(t *testing.T) {
+	s := start(t)
+	ctx := context.Background()
+	if _, err := subsonic.Login(ctx, s.base, "stanley", "errada", ""); err == nil {
+		t.Fatal("senha errada devia falhar")
+	}
+	acc, err := subsonic.Login(ctx, s.base, "stanley", "senha123", "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if acc.Server != "arkflix" || acc.Token == "" || !acc.Has("apiKeyAuthentication") {
+		t.Fatalf("conta: %+v", acc)
+	}
+	c := &subsonic.API{Account: acc}
+	if u, err := c.GetUser(ctx, "stanley"); err != nil || !u.AdminRole {
+		t.Fatalf("usuário: %+v %v", u, err)
+	}
+	idx, err := c.Artists(ctx)
+	if err != nil || len(idx) != 1 || idx[0].Artists[0].Name != "Banda Teste" {
+		t.Fatalf("artistas: %+v %v", idx, err)
+	}
+	ar, albums, err := c.Artist(ctx, idx[0].Artists[0].ID)
+	if err != nil || ar.Name != "Banda Teste" || len(albums) != 1 || albums[0].Name != "Disco Teste" {
+		t.Fatalf("artista: %+v %+v %v", ar, albums, err)
+	}
+	al, songs, err := c.Album(ctx, albums[0].ID)
+	if err != nil || al.SongCount != 1 || len(songs) != 1 || songs[0].Title != "Bip" || songs[0].Suffix != "mp3" {
+		t.Fatalf("álbum: %+v %+v %v", al, songs, err)
+	}
+	song := songs[0]
+	if list, err := c.AlbumList2(ctx, "newest", 10, 0); err != nil || len(list) != 1 {
+		t.Fatalf("novos: %+v %v", list, err)
+	}
+	if found, err := c.Search(ctx, "bip", 10); err != nil || len(found.Songs) != 1 {
+		t.Fatalf("busca: %+v %v", found, err)
+	}
+	if _, err := c.TopSongs(ctx, ar.Name, 5); err != nil {
+		t.Fatal(err)
+	}
+
+	// áudio pelo proxy do app, com Range (o <audio> pede assim)
+	p := &subsonic.Proxy{Account: func() (subsonic.Account, bool) { return acc, true }}
+	defer p.Close()
+	base, err := p.URL()
+	if err != nil {
+		t.Fatal(err)
+	}
+	req, _ := http.NewRequest(http.MethodGet, base+"/rest/stream?id="+song.ID+"&format=raw", nil)
+	req.Header.Set("Range", "bytes=0-")
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	audio, _ := io.ReadAll(resp.Body)
+	resp.Body.Close()
+	if resp.StatusCode/100 != 2 || len(audio) < 1000 || !strings.HasPrefix(resp.Header.Get("Content-Type"), "audio/") {
+		t.Fatalf("stream: %d %d %s", resp.StatusCode, len(audio), resp.Header.Get("Content-Type"))
+	}
+	if r, err := http.Get(base + "/rest/getCoverArt?id=" + al.CoverArt + "&size=300"); err != nil {
+		t.Fatal(err)
+	} else {
+		r.Body.Close()
+	}
+	var buf strings.Builder
+	if n, err := c.Download(ctx, song.ID, 0, &buf, nil); err != nil || buf.Len() != len(audio) || (n > 0 && n != int64(len(audio))) {
+		t.Fatalf("download: %d %d %v", n, buf.Len(), err)
+	}
+
+	// estrela, scrobble e fila
+	if err := c.Star(ctx, "song", song.ID, true); err != nil {
+		t.Fatal(err)
+	}
+	if st, err := c.Starred(ctx); err != nil || len(st.Songs) != 1 {
+		t.Fatalf("favoritas: %+v %v", st, err)
+	}
+	if err := c.Star(ctx, "album", al.ID, true); err != nil {
+		t.Fatal(err)
+	}
+	if err := c.Scrobble(ctx, song.ID, false, time.Time{}); err != nil {
+		t.Fatal(err)
+	}
+	if err := c.Scrobble(ctx, song.ID, true, time.Now()); err != nil {
+		t.Fatal(err)
+	}
+	if got, _ := c.Song(ctx, song.ID); got.PlayCount != 1 {
+		t.Fatalf("o scrobble conta a execução: %+v", got)
+	}
+	if err := c.SaveQueue(ctx, []string{song.ID}, song.ID, 1500*time.Millisecond); err != nil {
+		t.Fatal(err)
+	}
+	if q, err := c.Queue(ctx); err != nil || q.Current != song.ID || q.Position != 1500 {
+		t.Fatalf("fila: %+v %v", q, err)
+	}
+
+	// playlist: criar, renomear, pôr, tirar, reordenar e apagar
+	pl, err := c.CreatePlaylist(ctx, "Compat", []string{song.ID})
+	if err != nil || pl.ID == "" || len(pl.Entry) != 1 {
+		t.Fatalf("criar playlist: %+v %v", pl, err)
+	}
+	name := "Compat 2"
+	if err := c.UpdatePlaylist(ctx, pl.ID, subsonic.PlaylistChange{Name: &name, Add: []string{song.ID}}); err != nil {
+		t.Fatal(err)
+	}
+	if got, err := c.Playlist(ctx, pl.ID); err != nil || got.Name != "Compat 2" || len(got.Entry) != 2 {
+		t.Fatalf("playlist depois de mexer: %+v %v", got, err)
+	}
+	if err := c.UpdatePlaylist(ctx, pl.ID, subsonic.PlaylistChange{Remove: []int{0, 1}}); err != nil {
+		t.Fatal(err)
+	}
+	if got, _ := c.Playlist(ctx, pl.ID); len(got.Entry) != 0 {
+		t.Fatalf("tirar: %+v", got)
+	}
+	if err := c.SetPlaylistSongs(ctx, pl.ID, []string{song.ID}); err != nil {
+		t.Fatal(err)
+	}
+	if lists, err := c.Playlists(ctx); err != nil || len(lists) != 1 || lists[0].SongCount != 1 {
+		t.Fatalf("playlists: %+v %v", lists, err)
+	}
+	if err := c.DeletePlaylist(ctx, pl.ID); err != nil {
+		t.Fatal(err)
+	}
+
+	// admin: scan e usuários
+	if _, err := c.StartScan(ctx); err != nil {
+		t.Fatal(err)
+	}
+	if st, err := c.Scan(ctx); err != nil || st.LastScan == "" {
+		t.Fatalf("scan: %+v %v", st, err)
+	}
+	if users, err := c.Users(ctx); err != nil || len(users) != 1 {
+		t.Fatalf("usuários: %+v %v", users, err)
+	}
+	if strings.Contains(fmt.Sprintf("%+v", acc), "senha123") {
+		t.Fatal("a conta guardada tem a senha")
 	}
 }
 
