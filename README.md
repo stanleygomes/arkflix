@@ -6,7 +6,7 @@
 ![Tela inicial do arkflix: Mario Kart 64 em destaque e a fileira de jogos com capas](site/img/inicio.webp)
 
 App desktop de jogos, filmes e séries para Linux, Windows e macOS (Go +
-Svelte), feito para controle e TV, com visual retrô de fliperama. Filmes e
+Svelte), feito para controle e TV, com visual de cinema antigo. Filmes e
 séries vêm do seu servidor [Jellyfin](https://jellyfin.org), com player
 embutido. Os jogos abrem no [RetroArch](https://www.retroarch.com)
 com oito cores, no [PPSSPP](https://www.ppsspp.org) e no
@@ -176,11 +176,12 @@ Emuladores › BIOS mostra o que falta de cada console e abre a pasta certa.
 
 ## O app
 
-Interface pensada pra controle, com cara de fliperama: fundo de tubo de TV com
-scanlines, contorno neon com brilho na cor de cada console, letreiro e placar
-(1UP, HI-SCORE) na fonte de arcade, seleção em amarelo e INSERT COIN piscando.
-Títulos e rótulos na Press Start 2P; texto corrido na Atkinson Hyperlegible, de
-leitura fácil. Sons de menu e trilha chiptune, tudo desligável.
+Interface pensada pra controle, com cara de cinema dos anos 30 (sistema
+noemi-ui): fundo escuro de sala de projeção, borda reta e sombra dura, cartazes,
+ingressos, rolo de filme e carimbos. Títulos na Limelight, rótulos na Bevan,
+texto corrido na Alegreya. A TV de tubo aparece só por um instante, ao ligar o
+app, começar um filme e fechar um jogo; nada fica animando parado. Sons de menu
+e trilha chiptune, tudo desligável.
 
 | Tela | O que faz |
 | --- | --- |
@@ -203,10 +204,9 @@ aberto pelo app, o RetroArch não grava a config ao sair: um ajuste feito no
 menu dele nessa hora vale só pra sessão.
 
 **Acessibilidade.** Texto de 100% a 175%, alto contraste (preto, branco e amarelo),
-reduzir animações, títulos sem fonte pixel e a fonte Atkinson Hyperlegible,
-desenhada para baixa visão, em todo o texto corrido. Toda tela é testada com o
-[axe](https://github.com/dequelabs/axe-core) (WCAG 2.1 AA) e toda paleta de console
-tem contraste AA verificado em teste.
+reduzir animações e foco sempre visível. Toda tela é testada com o
+[axe](https://github.com/dequelabs/axe-core) (WCAG 2.1 AA) e as cores do tema
+têm contraste AA verificado em teste.
 
 **Capas e descrições.** Com "Baixar capas" ligado (configurações da biblioteca),
 o app baixa capa, print e tela de título do acervo aberto do RetroArch
@@ -218,11 +218,11 @@ pelo nome do zip (arcade), usando o banco do libretro, e tudo fica em cache em
 `manuals/<nome>.pdf` também entram, e um vídeo em `videos/<nome>.mp4` toca
 mudo no fundo do Início depois de 2 s parado no jogo), assim como os `gamelist.xml` e a
 mídia de uma instalação antiga do ES-DE em `~/ES-DE`, se existir. Sem capa, o app
-desenha o cartucho, disco ou UMD do console com o título.
+desenha um cartaz de cinema com o título, o console e a mídia.
 
 **Protetor de tela.** Depois de alguns minutos parado (5 por padrão, ajustável
-ou desligável), a cobrinha joga sozinha em fósforo verde, ou as capas passam
-como no attract mode de um fliperama. Nunca liga com jogo aberto; qualquer botão,
+ou desligável), aparece o letreiro de "Intervalo": a cobrinha joga sozinha
+num tabuleiro creme, ou as capas passam como cartaz "Em cartaz". Nunca liga com jogo aberto; qualquer botão,
 tecla ou clique só acorda a tela, sem executar a ação.
 
 **Scripts de evento.** Executáveis em
@@ -494,8 +494,9 @@ Smash Bros. Ultimate, via [SmashWiki](https://www.ssbwiki.com); os personagens
 pertencem à Nintendo, Sega, Bandai Namco, Konami, Capcom, Square Enix, SNK e
 Microsoft, e são usados aqui sem fins comerciais.
 
-As fontes do app (Press Start 2P, VT323, Pixelify Sans e Atkinson Hyperlegible) estão sob a SIL Open
-Font License, com o texto da licença em `app/web/public/fonts/`.
+As fontes do app (Limelight, Bevan, Alegreya e Courier Prime, SIL Open Font
+License; Special Elite, Apache 2.0) vêm dos pacotes `@fontsource` e são servidas
+pelo próprio app.
 
 Os arquivos próprios deste repositório ainda não têm uma licença definida.
 
