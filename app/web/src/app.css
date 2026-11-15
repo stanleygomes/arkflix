@@ -206,7 +206,7 @@ p {
 .btn.flat {
   box-shadow: none;
 }
-.btn.flat:hover {
+.btn.flat:not([aria-pressed='true'], [aria-checked='true']):hover {
   transform: none;
   background: color-mix(in srgb, var(--outline) 8%, var(--surface));
 }
@@ -214,6 +214,8 @@ p {
   padding: 0.45rem 0.8rem;
   min-height: 2.6rem;
   font-size: 0.75rem;
+}
+.btn.small:not(.flat) {
   box-shadow: var(--hard-sm);
 }
 .btn[aria-pressed='true'],
@@ -358,6 +360,11 @@ select {
   border-radius: var(--radii-sm);
   padding: 0.3rem 0.7rem;
   transform: rotate(-4deg);
+}
+/* carimbo de novidade: mostarda (o vermelho é só pra erro) */
+.stamp.new {
+  color: var(--accent);
+  border-color: var(--accent);
 }
 
 body.high-contrast {
