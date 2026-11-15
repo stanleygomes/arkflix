@@ -96,7 +96,7 @@
   <legend>Contas vinculadas</legend>
   {#if acc}
     <div class="account">
-      <h3><Icon name="film" /> Jellyfin <span class="muted">filmes e séries</span></h3>
+      <h3><Icon name="film" /> Jellyfin <span class="meta muted">filmes e séries</span></h3>
       {#if acc.jellyfin.connected}
         <p class="status">
           Conectado a <strong>{acc.jellyfin.server || acc.jellyfin.base}</strong> como <strong>{acc.jellyfin.user}</strong>.
@@ -107,11 +107,11 @@
         </div>
       {:else}
         <p class="muted">Cada perfil usa a própria conta. Pro perfil infantil, use uma conta com controle dos pais no Jellyfin.</p>
-        <button class="btn field" data-nav onclick={async () => (host = (await ask('Endereço do Jellyfin', host)) ?? host)}>
-          <span class="muted">Endereço</span> <strong>{host || 'ex.: filmes.duckdns.org'}</strong>
+        <button class="field" data-nav onclick={async () => (host = (await ask('Endereço do Jellyfin', host)) ?? host)}>
+          <span class="field-label">Endereço</span> <span class="value" class:empty={!host}>{host || 'ex.: filmes.duckdns.org'}</span>
         </button>
-        <button class="btn field" data-nav onclick={async () => (user = (await ask('Usuário do Jellyfin', user, 60)) ?? user)}>
-          <span class="muted">Usuário</span> <strong>{user || 'escolher'}</strong>
+        <button class="field" data-nav onclick={async () => (user = (await ask('Usuário do Jellyfin', user, 60)) ?? user)}>
+          <span class="field-label">Usuário</span> <span class="value" class:empty={!user}>{user || 'escolher'}</span>
         </button>
         <div class="row">
           <button class="btn primary" data-nav disabled={busy || !host || !user} onclick={link}><Icon name="film" /> Vincular</button>
@@ -120,7 +120,7 @@
     </div>
 
     <div class="account">
-      <h3><Icon name="cloud" /> RomM <span class="muted">jogos e saves</span></h3>
+      <h3><Icon name="cloud" /> RomM <span class="meta muted">jogos e saves</span></h3>
       {#if !acc.romm.connected}
         <p class="muted">Nenhum servidor RomM ligado no app.</p>
         <div class="row">
@@ -139,30 +139,84 @@
 </fieldset>
 
 <style>
+  /* grupo: sem caixa, régua de 3px em cima; cada conta é um cartão sóbrio */
   .accounts {
     display: flex;
     flex-direction: column;
-    gap: 1.2rem;
+    gap: 1rem;
+    margin: 0;
+    padding: 1rem 0 0;
+    border: none;
+    border-top: var(--edge) solid var(--outline);
+  }
+  legend {
+    float: left;
+    width: 100%;
+    font-family: var(--font-label);
+    font-size: 0.9rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
   }
   .account {
     display: flex;
     flex-direction: column;
-    gap: 0.7rem;
+    gap: 0.75rem;
+    padding: 1rem 1.25rem;
+    background: var(--surface);
+    border: var(--edge) solid var(--outline);
+    border-radius: var(--radii-sm);
+    box-shadow: var(--hard);
   }
   h3 {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    font-size: 1.1rem;
+    font-size: 1.05rem;
   }
-  h3 .muted {
-    font-weight: 400;
-    font-size: 0.9rem;
+  h3 .meta {
+    font-size: 0.85rem;
   }
+  /* campo: rótulo em Bevan em cima, valor numa caixa de texto */
   .field {
-    justify-content: flex-start;
-    gap: 1rem;
-    width: fit-content;
+    display: grid;
+    gap: 0.35rem;
+    width: min(100%, 24rem);
+    padding: 0;
+    font: inherit;
+    color: var(--text);
+    text-align: start;
+    background: none;
+    border: none;
+    cursor: text;
+  }
+  .field-label {
+    font-family: var(--font-label);
+    font-size: 0.78rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  .value {
+    display: block;
+    min-height: 2.9rem;
+    padding: 0.6rem 0.75rem;
+    font-weight: 700;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    background: var(--balloon);
+    border: var(--edge) solid var(--outline);
+    border-radius: var(--radii-sm);
+    box-shadow: var(--hard-sm);
+  }
+  .field:hover .value,
+  .field:focus-visible .value {
+    border-color: var(--focus);
+    box-shadow: 4px 4px 0 var(--focus);
+  }
+  .value.empty {
+    color: var(--muted);
+    font-style: italic;
+    font-weight: 400;
   }
   .row {
     display: flex;

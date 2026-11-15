@@ -43,11 +43,11 @@
 
   {#if u?.available}
     <section class="card new" aria-labelledby="upd-new">
-      <p class="tag pixel">Versão nova</p>
+      <p class="chip warn">Versão nova</p>
       <h3 id="upd-new" class="versions">
         <span class="old">{shortVersion(u.current)}</span>
         <span class="arrow" aria-label="para">→</span>
-        <span class="neu pixel">{u.latest}</span>
+        <span class="neu">{u.latest}</span>
       </h3>
       {#if u.size}<p class="muted small">{bytes(u.size)} pra baixar</p>{/if}
       {#if u.state === 'downloading'}
@@ -56,7 +56,7 @@
           <span style:width={`${Math.floor(u.progress * 20) * 5}%`}></span>
         </div>
       {:else if u.state === 'ready'}
-        <p class="ok"><Icon name="check" /> Já baixou. Reinicie agora ou ela instala quando você fechar o app.</p>
+        <p class="ready"><Icon name="check" /> Já baixou. Reinicie agora ou ela instala quando você fechar o app.</p>
       {/if}
       {#if u.error}<p class="error" role="alert">{u.error}</p>{/if}
       {#if isKids()}
@@ -80,8 +80,8 @@
     </section>
   {:else}
     <section class="card" aria-labelledby="upd-cur">
-      <p class="tag pixel ok-tag">Em dia</p>
-      <h3 id="upd-cur" class="versions"><span class="neu pixel">{shortVersion(u?.current ?? app.version)}</span></h3>
+      <p class="chip ok">Em dia</p>
+      <h3 id="upd-cur" class="versions"><span class="neu">{shortVersion(u?.current ?? app.version)}</span></h3>
       <p class="muted">{u?.error || 'Você está na versão mais nova que encontramos.'}</p>
     </section>
   {/if}
@@ -91,7 +91,9 @@
       <Icon name="resume" /> {checking ? 'Procurando…' : 'Procurar atualizações'}
     </button>
     {#if app.settings && !isKids()}
-      <button class="btn" data-nav role="switch" aria-checked={app.settings.autoUpdate} onclick={toggleAuto}>Baixar sozinho</button>
+      <button class="switch" data-nav role="switch" aria-checked={app.settings.autoUpdate} onclick={toggleAuto}>
+        <span class="knob" aria-hidden="true"></span><span>Baixar sozinho</span>
+      </button>
     {/if}
   </div>
   <p class="muted small">
@@ -104,80 +106,139 @@
   .panel-body {
     display: flex;
     flex-direction: column;
-    gap: 1.1rem;
+    gap: 1.2rem;
   }
   h2 {
     font-size: 1.5rem;
   }
+  /* cartão sóbrio; versão nova ganha a barra mostarda de 8px (destaque) */
   .card {
     display: grid;
-    gap: 0.7rem;
+    gap: 0.75rem;
     justify-items: start;
-    padding: 1.2rem 1.4rem;
-    border: 2px solid color-mix(in srgb, var(--accent-2) 45%, transparent);
+    max-width: 44rem;
+    padding: 1.25rem 1.5rem;
+    background: var(--surface);
+    border: var(--edge) solid var(--outline);
+    border-radius: var(--radii-sm);
+    box-shadow: var(--hard);
   }
   .card.new {
-    border-color: var(--focus);
-    box-shadow: 0 0 14px color-mix(in srgb, var(--focus) 40%, transparent);
+    padding-inline-start: 2rem;
+    box-shadow: var(--hard), inset 8px 0 0 var(--accent);
   }
   .card p {
     margin: 0;
   }
-  .tag {
-    font-size: 0.75rem;
-    color: var(--focus);
-  }
-  .ok-tag {
-    color: #5dc44f;
-  }
   .versions {
     display: flex;
-    align-items: center;
+    align-items: baseline;
     gap: 1rem;
-    font-size: 1.8rem;
     margin: 0;
+    font-family: var(--font-label);
   }
   .old {
-    color: var(--muted);
     font-size: 1.3rem;
+    color: var(--muted);
   }
   .arrow {
-    color: var(--accent-2);
+    font-size: 1.4rem;
+    color: var(--accent);
   }
   .neu {
-    color: #fff;
-    text-shadow: 0 0 10px var(--accent);
+    font-size: clamp(2rem, 4vw, 2.8rem);
+    line-height: 1;
+    color: var(--text);
   }
   .card .energy {
     width: 100%;
   }
-  .ok {
+  .ready {
     display: flex;
     gap: 0.5rem;
     align-items: center;
-    color: #5dc44f;
+    color: var(--accent-2);
+  }
+  .error {
+    color: var(--danger);
   }
   h4 {
     margin: 0.4rem 0 0;
-    font-size: 1rem;
+    font-family: var(--font-label);
+    font-size: 0.78rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
   }
   .notes {
     max-height: 12rem;
     width: 100%;
     overflow-y: auto;
     white-space: pre-wrap;
-    font: inherit;
-    font-size: 0.9rem;
+    font-family: var(--font-mono);
+    font-size: 0.88rem;
     color: var(--muted);
     margin: 0;
+    padding: 0.75rem;
+    background: var(--bg);
+    border: 2px solid color-mix(in srgb, var(--outline) 40%, transparent);
+    border-radius: var(--radii-sm);
   }
   .actions {
     display: flex;
-    gap: 0.6rem;
+    gap: 0.75rem;
+    align-items: center;
     flex-wrap: wrap;
   }
   .small {
     font-size: 0.85rem;
     overflow-wrap: anywhere;
+  }
+  /* interruptor: trilho de 3px, botão que pula pro lado; ligado = verde-azulado */
+  .switch {
+    display: flex;
+    gap: 0.9rem;
+    align-items: center;
+    width: fit-content;
+    min-height: 3rem;
+    padding: 0.3rem 0.5rem;
+    font: inherit;
+    font-weight: 700;
+    color: var(--text);
+    background: none;
+    border: none;
+    border-radius: var(--radii-sm);
+    cursor: pointer;
+  }
+  .knob {
+    position: relative;
+    flex: none;
+    width: 3.4rem;
+    height: 1.8rem;
+    background: var(--balloon);
+    border: var(--edge) solid var(--outline);
+    border-radius: 999px;
+    box-shadow: 2px 2px 0 var(--outline);
+  }
+  .knob::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    inset-inline-start: 0.2rem;
+    width: 1.05rem;
+    height: 1.05rem;
+    translate: 0 -50%;
+    background: var(--outline);
+    border-radius: var(--radii-sm);
+    transition: inset-inline-start 150ms steps(3);
+  }
+  .switch[aria-checked='true'] .knob {
+    background: var(--accent-2);
+  }
+  .switch[aria-checked='true'] .knob::after {
+    inset-inline-start: calc(100% - 1.25rem);
+    background: var(--bg);
+  }
+  .switch:hover .knob {
+    box-shadow: 3px 3px 0 var(--outline);
   }
 </style>

@@ -12,7 +12,6 @@
   import { api } from '../lib/api'
   import { pushHandler } from '../lib/input'
   import { focusDefault } from '../lib/nav'
-  import { applyPalette, highContrastPalette, homePalette } from '../lib/palette'
   import { play } from '../lib/sound'
   import { app, applyBoot, askPIN, back, go, isKids, resetTo, toast } from '../lib/state.svelte'
   import type { Profile } from '../lib/types'
@@ -26,7 +25,6 @@
   const canGoBack = $derived(app.stack.length > 1)
 
   $effect(() => {
-    applyPalette(app.settings?.a11y.highContrast ? highContrastPalette : homePalette)
     tick().then(focusDefault)
     // a lista pode ter mudado no editor
     api.profiles().then((p) => (app.profile = p)).catch(() => {})
@@ -79,7 +77,7 @@
 
 <div class="page">
   <main class="who" aria-labelledby="who-title">
-    <h1 id="who-title" class="pixel">{managing ? 'Gerenciar perfis' : 'Quem vai jogar?'}</h1>
+    <h1 id="who-title">{managing ? 'Gerenciar perfis' : 'Quem vai jogar?'}</h1>
     <ul class="cards">
       {#each list as p (p.id)}
         <li>
@@ -91,21 +89,25 @@
             onclick={() => enter(p)}
           >
             <span class="art">
-              <Avatar avatar={p.avatar} color={p.color} size="8rem" />
+              <Avatar avatar={p.avatar} color={p.color} size="7rem" mark />
               {#if managing}<span class="edit" aria-hidden="true"><Icon name="pencil" /></span>{/if}
             </span>
             <span class="name">
               {#if managing}<span class="sr-only">Editar </span>{/if}{p.name}
             </span>
-            {#if p.hasPIN}<span class="tag"><Icon name="lock" size="0.9em" /> PIN</span>{/if}
-            {#if p.kids}<span class="tag kids">Infantil</span>{/if}
+            {#if p.hasPIN || p.kids}
+              <span class="tags">
+                {#if p.hasPIN}<span class="chip"><Icon name="lock" size="0.9em" /> PIN</span>{/if}
+                {#if p.kids}<span class="chip ok">Infantil</span>{/if}
+              </span>
+            {/if}
           </button>
         </li>
       {/each}
       {#if list.length < MAX && !isKids()}
         <li>
           <button class="card add" data-nav onclick={() => go({ name: 'profile' })}>
-            <span class="art plus" aria-hidden="true"><Icon name="plus" size="3rem" /></span>
+            <span class="art plus" aria-hidden="true"><Icon name="plus" size="2.6rem" /></span>
             <span class="name">Adicionar perfil</span>
           </button>
         </li>
@@ -141,66 +143,93 @@
     overflow-y: auto;
   }
   h1 {
-    font-size: clamp(1.8rem, 4vw, 3rem);
+    font-size: clamp(2.6rem, 6vw, 4.6rem);
     text-align: center;
   }
   .cards {
     list-style: none;
     margin: 0;
-    padding: 0.5rem;
+    padding: 0.75rem;
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
-    gap: 1.6rem;
+    gap: 1.75rem;
   }
+  /* cartão sóbrio: fundo de cartão, borda reta, sombra dura; sobe no foco */
   .card {
     display: grid;
     justify-items: center;
-    gap: 0.6rem;
-    padding: 0.8rem;
-    width: 10.5rem;
+    align-content: start;
+    gap: 0.75rem;
+    width: 11rem;
+    padding: 1.25rem 0.75rem 1rem;
     font: inherit;
     color: var(--text);
-    background: none;
-    border: 3px solid transparent;
+    background: var(--surface);
+    border: var(--edge) solid var(--outline);
+    border-radius: var(--radii-sm);
+    box-shadow: var(--hard);
     cursor: pointer;
+    transition:
+      transform var(--t) var(--ease),
+      box-shadow var(--t) var(--ease);
   }
-  .card:focus-visible,
-  .card:hover {
-    border-color: var(--accent);
+  .card:hover,
+  .card:focus-visible {
+    transform: translate(-2px, -2px);
+    box-shadow: var(--hard-up);
+  }
+  .card:active {
+    transform: translate(4px, 4px);
+    box-shadow: none;
   }
   .art {
     position: relative;
     display: grid;
     place-items: center;
   }
+  .add {
+    background: transparent;
+    border-style: dashed;
+    box-shadow: none;
+  }
   .plus {
-    width: 8rem;
-    height: 8rem;
-    border: 3px dashed color-mix(in srgb, var(--text) 50%, transparent);
-  }
-  .edit {
-    position: absolute;
-    inset: 0;
-    display: grid;
-    place-items: center;
-    font-size: 2rem;
-    background: rgba(0, 0, 0, 0.55);
-    color: #fff;
-  }
-  .name {
-    font-weight: 700;
-    font-size: 1.1rem;
-    text-align: center;
-  }
-  .tag {
-    font-size: 0.8rem;
-    padding: 0.1rem 0.5rem;
-    border: 2px solid currentColor;
+    width: 7rem;
+    height: 7rem;
     color: var(--muted);
   }
-  .tag.kids {
+  .add:hover .plus,
+  .add:focus-visible .plus {
     color: var(--accent);
+  }
+  /* gerenciar: etiqueta de lápis no canto, em mostarda (ação) */
+  .edit {
+    position: absolute;
+    inset-block-start: -0.6rem;
+    inset-inline-end: -0.9rem;
+    display: grid;
+    place-items: center;
+    width: 2.4rem;
+    height: 2.4rem;
+    font-size: 1.2rem;
+    color: var(--on-accent);
+    background: var(--accent);
+    border: var(--edge) solid var(--outline);
+    border-radius: var(--radii-sm);
+    box-shadow: var(--hard-sm);
+  }
+  .name {
+    font-family: var(--font-label);
+    font-size: 1.05rem;
+    letter-spacing: 0.02em;
+    text-align: center;
+    overflow-wrap: anywhere;
+  }
+  .tags {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.4rem;
   }
   .actions {
     display: flex;

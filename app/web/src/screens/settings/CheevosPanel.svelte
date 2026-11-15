@@ -91,10 +91,16 @@
     align-items: center;
     flex-wrap: wrap;
   }
+  .status :global(svg) {
+    color: var(--accent);
+  }
   .facts {
     display: grid;
-    gap: 0.4rem;
-    padding-left: 1.2rem;
+    gap: 0.45rem;
+    padding-inline-start: 1.2rem;
     margin: 0;
+  }
+  .facts li::marker {
+    color: var(--accent-2);
   }
 </style>

@@ -73,7 +73,7 @@
         <span class="meter" role="meter" aria-label={v.label} aria-valuenow={a[v.key]} aria-valuemin="0" aria-valuemax="100">
           {#each Array(10) as _, i (i)}<span class="bar" class:on={a[v.key] > i * 10}></span>{/each}
         </span>
-        <span class="value pixel">{a[v.key]}</span>
+        <span class="level">{a[v.key]}</span>
         <button class="btn small" data-nav aria-label={`Aumentar ${v.label.toLowerCase()}`} onclick={() => set(v.key, Math.min(100, a[v.key] + 10))}>+</button>
       </div>
     </fieldset>
@@ -112,29 +112,70 @@
 <style>
   .saver {
     display: grid;
-    gap: 0.8rem;
+    gap: 0.9rem;
   }
   .panel-body {
     display: flex;
     flex-direction: column;
-    gap: 1.4rem;
+    gap: 1.6rem;
   }
   h2 {
     font-size: 1.5rem;
   }
+  /* grupo: sem caixa, legenda em Bevan */
   fieldset {
     border: none;
     padding: 0;
     margin: 0;
   }
   legend {
-    font-weight: 700;
+    padding: 0;
     margin-bottom: 0.6rem;
+    font-family: var(--font-label);
+    font-size: 0.85rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
   }
-  .segmented,
+  /* grupo de alternância numa peça só (toggle group da noemi-ui) */
+  .segmented {
+    display: flex;
+    flex-wrap: wrap;
+    width: fit-content;
+    max-width: 100%;
+    background: var(--surface);
+    border: var(--edge) solid var(--outline);
+    border-radius: var(--radii-sm);
+    box-shadow: var(--hard-sm);
+    overflow: hidden;
+  }
+  .segmented .btn {
+    border: none;
+    border-inline-end: var(--edge) solid var(--outline);
+    border-radius: 0;
+    box-shadow: none;
+    transform: none;
+    background: none;
+  }
+  .segmented .btn:last-child {
+    border-inline-end: none;
+  }
+  .segmented .btn:hover {
+    background: color-mix(in srgb, var(--outline) 12%, var(--surface));
+  }
+  .segmented .btn[aria-pressed='true'] {
+    background: var(--accent-2);
+    color: var(--bg);
+    box-shadow: inset 3px 3px 0 color-mix(in srgb, var(--outline) 45%, transparent);
+  }
+  .segmented .btn[data-nav]:focus-visible {
+    outline-offset: -7px;
+  }
+  .segmented .btn[aria-pressed='true'][data-nav]:focus-visible {
+    outline-color: var(--bg);
+  }
   .stepper {
     display: flex;
-    gap: 0.6rem;
+    gap: 0.75rem;
     align-items: center;
     flex-wrap: wrap;
   }
@@ -143,64 +184,91 @@
     padding: 0;
     margin: 0;
     display: grid;
-    gap: 1rem;
+    gap: 0.9rem;
   }
+  /* interruptor: trilho de 3px, botão que pula pro lado; ligado = verde-azulado */
   .switch {
+    display: flex;
+    gap: 0.9rem;
+    align-items: center;
+    width: fit-content;
+    min-height: 3rem;
+    padding: 0.3rem 0.5rem;
     font: inherit;
     font-weight: 700;
     color: var(--text);
     background: none;
     border: none;
-    display: flex;
-    gap: 0.9rem;
-    align-items: center;
-    padding: 0.3rem;
+    border-radius: var(--radii-sm);
     cursor: pointer;
   }
   .knob {
-    width: 3.2rem;
-    height: 1.6rem;
-    border: 3px solid color-mix(in srgb, var(--text) 50%, transparent);
-    background: color-mix(in srgb, var(--bg) 70%, #000);
     position: relative;
     flex: none;
+    width: 3.4rem;
+    height: 1.8rem;
+    background: var(--balloon);
+    border: var(--edge) solid var(--outline);
+    border-radius: 999px;
+    box-shadow: 2px 2px 0 var(--outline);
   }
   .knob::after {
     content: '';
     position: absolute;
-    top: 2px;
-    left: 2px;
-    width: 1rem;
-    height: calc(100% - 4px);
-    background: var(--muted);
-    transition: left var(--t) var(--ease);
+    top: 50%;
+    inset-inline-start: 0.2rem;
+    width: 1.05rem;
+    height: 1.05rem;
+    translate: 0 -50%;
+    background: var(--outline);
+    border-radius: var(--radii-sm);
+    transition: inset-inline-start 150ms steps(3);
   }
   .switch[aria-checked='true'] .knob {
-    background: color-mix(in srgb, var(--accent) 40%, #000);
-    border-color: var(--accent);
+    background: var(--accent-2);
   }
   .switch[aria-checked='true'] .knob::after {
-    left: calc(100% - 1rem - 2px);
-    background: var(--accent);
+    inset-inline-start: calc(100% - 1.25rem);
+    background: var(--bg);
+  }
+  .switch:hover .knob {
+    box-shadow: 3px 3px 0 var(--outline);
+  }
+  /* rótulo do interruptor em Alegreya (o .label global é Bevan) */
+  .switch .label {
+    font-family: var(--font-body);
+    font-size: 1.05rem;
+    font-weight: 700;
+    letter-spacing: 0;
+    text-transform: none;
   }
   .help {
-    margin-left: 4.4rem;
+    margin-inline-start: 4.9rem;
     font-size: 0.9rem;
   }
+  /* volume: trilho de 10 degraus; os ligados em mostarda, número escrito do lado */
   .meter {
     display: inline-flex;
     gap: 3px;
+    padding: 3px;
+    background: var(--balloon);
+    border: var(--edge) solid var(--outline);
+    border-radius: 4px 5px 4px 5px;
   }
   .bar {
-    width: 0.7rem;
+    width: 0.8rem;
     height: 1.2rem;
-    background: color-mix(in srgb, var(--text) 18%, transparent);
+    border-radius: 2px;
+    background: color-mix(in srgb, var(--outline) 14%, transparent);
   }
   .bar.on {
     background: var(--accent);
   }
-  .value {
+  .level {
     min-width: 2.5em;
-    text-align: right;
+    font-family: var(--font-mono);
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    text-align: end;
   }
 </style>

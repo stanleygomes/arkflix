@@ -7,7 +7,7 @@
   import { api } from '../../lib/api'
   import { bytes } from '../../lib/format'
   import { focusEl } from '../../lib/nav'
-  import { app, system } from '../../lib/state.svelte'
+  import { app } from '../../lib/state.svelte'
   import type { StorageInfo } from '../../lib/types'
   import MoveDialog from './MoveDialog.svelte'
 
@@ -113,7 +113,7 @@
           {#each info.byConsole as c (c.system)}
             <li>
               <span class="label">{c.name}</span>
-              <span class="track" aria-hidden="true"><span class="fill" style:width={`${(c.bytes / maxConsole) * 100}%`} style:background={system(c.system)?.palette.accent ?? 'var(--accent)'}></span></span>
+              <span class="track" aria-hidden="true"><span class="fill" style:width={`${(c.bytes / maxConsole) * 100}%`}></span></span>
               <span class="value hud">{bytes(c.bytes)}</span>
               <span class="pct muted">{c.count} jogo{c.count === 1 ? '' : 's'}</span>
               {#if canMove}
@@ -160,7 +160,7 @@
   .panel-body {
     display: flex;
     flex-direction: column;
-    gap: 1.6rem;
+    gap: 1.75rem;
   }
   .head {
     display: flex;
@@ -172,33 +172,54 @@
     font-size: 1.5rem;
   }
   h3 {
-    font-size: 1rem;
+    font-family: var(--font-label);
+    font-size: 0.9rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  h3 {
     margin-bottom: 0.8rem;
   }
-  .disk {
-    font-size: 1rem;
+  section + section {
+    padding-top: 1.25rem;
+    border-top: var(--edge) solid var(--outline);
   }
+  .disk {
+    font-family: var(--font-body);
+    font-size: 1.05rem;
+    text-transform: none;
+    letter-spacing: 0;
+  }
+  /* número grande do disco livre: Bevan, o único "alto" da tela */
   .big {
-    font-size: 1.6rem;
-    color: #fff;
+    font-family: var(--font-label);
+    font-size: clamp(2rem, 4vw, 2.8rem);
+    line-height: 1;
+    color: var(--text);
   }
   .path {
+    font-family: var(--font-mono);
     overflow-wrap: anywhere;
   }
   .small {
     font-size: 0.85rem;
   }
+  /* barra do disco: trilho de cartão com borda de 3px, blocos retos */
   .bar {
     display: flex;
-    gap: 2px;
-    height: 1.6rem;
-    margin: 0.8rem 0 1rem;
-    padding: 2px;
-    border: 2px solid var(--accent-2);
-    background: #000;
+    height: 1.8rem;
+    margin: 0.9rem 0 1.1rem;
+    background: var(--bg);
+    border: var(--edge) solid var(--outline);
+    border-radius: var(--radii-sm);
+    box-shadow: var(--hard-sm);
+    overflow: hidden;
   }
   .seg {
     min-width: 3px;
+  }
+  .seg + .seg {
+    border-inline-start: 2px solid var(--bg);
   }
   /* cores por tipo (a legenda escreve nome e tamanho: a cor não é a única pista) */
   .games {
@@ -208,13 +229,13 @@
     background: var(--accent-2);
   }
   .app {
-    background: var(--focus);
+    background: var(--text);
   }
   .others {
-    background: #7a7186;
+    background: var(--muted);
   }
   .free {
-    background: repeating-linear-gradient(45deg, #1d1726 0 4px, #0b0810 4px 8px);
+    background: var(--bg);
   }
   .legend {
     list-style: none;
@@ -229,28 +250,33 @@
     display: grid;
     grid-template-columns: auto 1fr auto auto;
     align-items: center;
-    gap: 0.7rem;
+    gap: 0.75rem;
   }
   .dot {
-    width: 0.9rem;
-    height: 0.9rem;
-    border: 1px solid rgba(255, 255, 255, 0.35);
+    width: 1rem;
+    height: 1rem;
+    border: 2px solid var(--outline);
+    border-radius: 3px;
   }
   .value {
-    font-size: 1.25rem;
-    color: #fff;
-    text-align: right;
+    font-family: var(--font-mono);
+    font-weight: 700;
+    font-size: 1.05rem;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0;
+    color: var(--text);
+    text-align: end;
   }
   .pct {
     min-width: 4.5rem;
-    text-align: right;
+    text-align: end;
   }
   .rows {
     list-style: none;
     margin: 0;
     padding: 0;
     display: grid;
-    gap: 0.55rem;
+    gap: 0.6rem;
   }
   .rows li {
     grid-template-columns: minmax(9rem, 14rem) 1fr auto auto;
@@ -260,28 +286,43 @@
   }
   .rows.plain li {
     grid-template-columns: 1fr auto;
+    padding-bottom: 0.6rem;
+    border-bottom: 2px solid color-mix(in srgb, var(--outline) 25%, transparent);
   }
   .rows .label {
     display: flex;
     flex-direction: column;
+    font-family: var(--font-body);
+    font-size: 1rem;
+    text-transform: none;
+    letter-spacing: 0;
+  }
+  .legend .label {
+    font-family: var(--font-body);
+    font-size: 1rem;
+    text-transform: none;
+    letter-spacing: 0;
   }
   .track {
-    height: 0.8rem;
-    background: #000;
-    border: 1px solid color-mix(in srgb, var(--accent-2) 40%, transparent);
+    height: 1rem;
+    background: var(--bg);
+    border: 2px solid var(--outline);
+    border-radius: 4px 5px 4px 5px;
+    overflow: hidden;
   }
   .fill {
     display: block;
     height: 100%;
     min-width: 2px;
+    background: var(--accent);
   }
   .remote {
     display: flex;
     gap: 0.5rem;
     align-items: center;
-    margin-top: 0.8rem;
+    margin-top: 0.9rem;
   }
   .error {
-    color: #ff9c9c;
+    color: var(--danger);
   }
 </style>

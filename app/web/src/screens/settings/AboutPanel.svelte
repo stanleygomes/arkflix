@@ -16,7 +16,7 @@
   <h2>Sobre</h2>
   <dl class="facts">
     <dt>Versão</dt>
-    <dd class="pixel">{app.version}</dd>
+    <dd class="mono">{app.version}</dd>
     <dt>Modo</dt>
     <dd>{app.mode === 'desktop' ? 'App desktop' : 'Navegador'}</dd>
     <dt>Jogos</dt>
@@ -77,23 +77,36 @@
     font-size: 1.5rem;
   }
   h3 {
-    font-size: 1.1rem;
-    margin-top: 0.5rem;
+    font-family: var(--font-label);
+    font-size: 0.9rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  h3 {
+    margin-top: 0.75rem;
+    padding-top: 0.9rem;
+    border-top: var(--edge) solid var(--outline);
   }
   .facts {
     display: grid;
     grid-template-columns: max-content 1fr;
-    gap: 0.4rem 1.2rem;
+    gap: 0.45rem 1.25rem;
     margin: 0;
   }
   dt {
+    font-family: var(--font-hud);
+    letter-spacing: 0.04em;
     color: var(--muted);
   }
   dd {
     margin: 0;
   }
   code {
-    color: var(--accent-2);
+    padding: 0 0.3rem;
+    font-size: 0.9em;
+    background: var(--balloon);
+    border: 1px solid color-mix(in srgb, var(--outline) 40%, transparent);
+    border-radius: 4px;
     overflow-wrap: anywhere;
   }
   .keys {
@@ -105,7 +118,7 @@
   }
   .keys li {
     display: flex;
-    gap: 0.4rem;
+    gap: 0.45rem;
     align-items: center;
     flex-wrap: wrap;
   }

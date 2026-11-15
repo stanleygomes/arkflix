@@ -30,7 +30,6 @@
   import { api } from '../lib/api'
   import { summarize, type ProfileSummary } from '../lib/profilestats'
   import { bytes, playTime } from '../lib/format'
-  import { applyPalette, highContrastPalette, homePalette } from '../lib/palette'
   import { app, currentProfile, go, isKids, system, type Screen } from '../lib/state.svelte'
   import type { CheevosInfo, EmulatorsInfo, KidsTimeInfo, RemoteInfo, StorageInfo } from '../lib/types'
   import { versionArrow } from '../lib/update'
@@ -48,7 +47,6 @@
   let cheevos = $state<CheevosInfo | null>(null)
 
   $effect(() => {
-    applyPalette(app.settings?.a11y.highContrast ? highContrastPalette : homePalette)
     api.stats('all').then((s) => (summary = summarize(s))).catch(() => {})
     if (isKids()) return
     api.remoteStatus().then((r) => (remote = r)).catch(() => {})
@@ -263,10 +261,10 @@
   <main class="you">
     <nav class="menu" aria-label="Você e configurações">
       <header class="who">
-        {#if me}<Avatar avatar={me.avatar} color={me.color} size="3.2rem" />{/if}
+        {#if me}<Avatar avatar={me.avatar} color={me.color} size="3.4rem" mark />{/if}
         <div>
           <p class="name sub">{me?.name ?? 'Você'}</p>
-          {#if kids}<p class="tag">Perfil infantil</p>{/if}
+          {#if kids}<p class="chip ok">Perfil infantil</p>{/if}
         </div>
       </header>
       <ul>
@@ -282,19 +280,19 @@
               onclick={() => open(g)}
             >
               <Icon name={g.icon} size="1.3em" />
-              <span class="text"><span class="label">{g.label}</span><span class="value muted">{g.value}</span></span>
+              <span class="text"><span class="item-label">{g.label}</span><span class="value meta">{g.value}</span></span>
             </button>
           </li>
         {/each}
       </ul>
-      {#if kids}<p class="muted small">O resto do console quem muda é um adulto.</p>{/if}
+      {#if kids}<p class="muted kids-note">O resto do console quem muda é um adulto.</p>{/if}
     </nav>
 
     <!-- focável: dá pra rolar o painel com o controle mesmo sem botão dentro -->
     <!-- svelte-ignore a11y_no_noninteractive_tabindex -->
     <section class="detail" aria-labelledby="you-title" tabindex={sub.panel ? 0 : undefined} data-panel={sub.panel ? '' : undefined} data-nav={sub.id === 'about' ? '' : undefined}>
-      <p class="crumb muted" aria-hidden="true">Você › {group.label}</p>
-      <h1 id="you-title" class="pixel">{sub.id === 'overview' ? (me?.name ?? 'Você') : group.subs.length > 1 ? sub.label : group.label}</h1>
+      <p class="crumb meta" aria-hidden="true">Você › {group.label}</p>
+      <h1 id="you-title">{sub.id === 'overview' ? (me?.name ?? 'Você') : group.subs.length > 1 ? sub.label : group.label}</h1>
       {#if group.subs.length > 1}
         <div class="subtabs" role="group" aria-label={`Seções de ${group.label}`}>
           {#each group.subs as x (x.id)}
@@ -307,15 +305,15 @@
         <!-- telas inteiras (central, perfil, estatísticas, importar) entram embutidas -->
         {#key sub.id}<sub.panel {...sub.props ?? {}} embedded onclose={() => focusEl(listItem(active))} />{/key}
       {:else if sub.id === 'overview'}
-        <div class="card" style:--profile={me?.color ?? 'var(--accent)'}>
-          {#if me}<Avatar avatar={me.avatar} color={me.color} size="7rem" />{/if}
+        <div class="card">
+          {#if me}<Avatar avatar={me.avatar} color={me.color} size="8rem" variant="cameo" mark />{/if}
       {#if kidsTime?.limited}
         <p class="today">{kidsTime.reason || `Hoje: restam ${playTime(kidsTime.minutesLeft * 60)}`}</p>
       {/if}
       <dl class="facts">
-        <div><dt>horas</dt><dd class="hud">{hours}</dd></div>
-        <div><dt>jogados</dt><dd class="hud">{played}</dd></div>
-        <div><dt>favoritos</dt><dd class="hud">{favs}</dd></div>
+        <div><dt>horas</dt><dd>{hours}</dd></div>
+        <div><dt>jogados</dt><dd>{played}</dd></div>
+        <div><dt>favoritos</dt><dd>{favs}</dd></div>
       </dl>
       {#if summary && (summary.weekSeconds || summary.topGame)}
         {@const max = Math.max(1, ...summary.week.map((d) => d.seconds))}
@@ -370,197 +368,71 @@
     min-height: 0;
     display: grid;
     grid-template-columns: minmax(17rem, 22rem) 1fr;
-    gap: 2.4rem;
+    gap: 2.5rem;
     padding: 0.5rem 2.5rem 1rem;
   }
+  /* menu à esquerda: painel sóbrio do jeito do sidebar da noemi-ui */
   .menu {
+    align-self: start;
+    max-height: 100%;
     overflow-y: auto;
     min-height: 0;
-    padding: 0.3rem 0.6rem 1rem 0.3rem;
+    padding: 0 0 0.75rem;
+    background: var(--surface);
+    border: var(--edge) solid var(--outline);
+    border-radius: var(--radii-sm);
+    box-shadow: var(--hard);
     scrollbar-width: thin;
   }
   .who {
     display: flex;
-    gap: 0.8rem;
+    gap: 0.9rem;
     align-items: center;
+    padding: 1rem 1rem 0.9rem;
     margin-bottom: 0.6rem;
+    border-bottom: var(--edge) solid var(--outline);
   }
   .who p {
     margin: 0;
   }
   .who .name {
     font-size: 1.1rem;
+    margin-bottom: 0.25rem;
   }
   .menu ul {
     list-style: none;
     margin: 0;
-    padding: 0;
+    padding: 0 0.5rem;
     display: grid;
-    gap: 0.35rem;
-  }
-  .item[aria-current='page'] {
-    border-color: var(--accent);
-    background: color-mix(in srgb, var(--accent) 16%, var(--surface));
-  }
-  .detail {
-    overflow-y: auto;
-    min-height: 0;
-    padding: 0.3rem 0.4rem 1.5rem;
-    outline-offset: -4px;
-  }
-  /* o título do item já está no topo: o do painel sairia repetido */
-  .detail :global(.panel-body > h2:first-child),
-  .detail :global(.panel-body > .head > h2) {
-    display: none;
-  }
-  .subtabs {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.6rem;
-    margin: -0.4rem 0 1.4rem;
-  }
-  .subtabs [aria-current='page'] {
-    background: var(--accent-2);
-    color: #050008;
-  }
-  .crumb {
-    margin: 0;
-    font-size: 0.9rem;
-  }
-  .detail > h1 {
-    font-size: 1.8rem;
-    margin: 0.2rem 0 1.2rem;
-  }
-  .preview {
-    display: grid;
-    gap: 1.2rem;
-    justify-items: start;
-  }
-  .big-value {
-    font-size: 1.3rem;
-    margin: 0;
-  }
-  .card {
-    display: grid;
-    justify-items: center;
-    gap: 1rem;
-    padding: 1.8rem 1.4rem;
-    text-align: center;
-    background: color-mix(in srgb, var(--profile) 14%, var(--surface));
-    border: 2px solid var(--profile);
-    box-shadow: 0 0 14px color-mix(in srgb, var(--profile) 55%, transparent), inset 0 0 40px color-mix(in srgb, var(--profile) 18%, transparent);
-  }
-  h1 {
-    font-size: 1.7rem;
-    overflow-wrap: anywhere;
-  }
-  .tag {
-    color: var(--focus);
-    border: 2px solid currentColor;
-    padding: 0.1rem 0.6rem;
-    font-size: 0.85rem;
-  }
-  .today {
-    font-weight: 700;
-  }
-  .facts {
-    margin: 0.3rem 0 0.6rem;
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 0.6rem;
-    width: 100%;
-  }
-  .facts div {
-    display: flex;
-    flex-direction: column-reverse;
-    gap: 0.1rem;
-  }
-  .facts dt {
-    font-size: 0.8rem;
-    color: var(--muted);
-  }
-  .facts dd {
-    margin: 0;
-    font-size: 2rem;
-    color: #fff;
-    line-height: 1;
-  }
-  .week {
-    width: 100%;
-    display: grid;
-    gap: 0.5rem;
-    text-align: left;
-  }
-  .week h2 {
-    font-size: 0.85rem;
-    color: var(--muted);
-    font-family: var(--font-body);
-  }
-  .bars {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    height: 4rem;
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    gap: 0.3rem;
-    align-items: end;
-  }
-  .bars li {
-    height: 100%;
-    display: grid;
-    grid-template-rows: 1fr auto;
-    align-items: end;
-    justify-items: center;
-  }
-  .bar {
-    width: 100%;
-    background: var(--profile);
-    box-shadow: 0 0 6px var(--profile);
-  }
-  .bar.zero {
-    opacity: 0.25;
-    box-shadow: none;
-  }
-  .day {
-    font-size: 0.7rem;
-    color: var(--muted);
-  }
-  .more {
-    margin: 0;
-    display: grid;
-    gap: 0.35rem;
-  }
-  .more div {
-    display: flex;
-    justify-content: space-between;
-    gap: 0.6rem;
-    font-size: 0.85rem;
-  }
-  .more dt {
-    color: var(--muted);
-  }
-  .more dd {
-    margin: 0;
-    text-align: right;
-    overflow-wrap: anywhere;
+    gap: 0.25rem;
   }
   .item {
+    position: relative;
     width: 100%;
     display: grid;
-    grid-template-columns: auto 1fr auto;
+    grid-template-columns: auto 1fr;
     align-items: center;
-    gap: 1rem;
-    padding: 0.9rem 1rem;
+    gap: 0.9rem;
+    min-height: 3.6rem;
+    padding: 0.6rem 0.8rem;
     font: inherit;
     color: var(--text);
-    text-align: left;
-    background: color-mix(in srgb, var(--surface) 85%, transparent);
-    border: 2px solid color-mix(in srgb, var(--accent-2) 45%, transparent);
+    text-align: start;
+    background: none;
+    border: none;
+    border-radius: var(--radii-sm);
     cursor: pointer;
   }
   .item:hover {
-    border-color: var(--accent-2);
+    background: color-mix(in srgb, var(--outline) 8%, transparent);
+  }
+  .item[data-nav]:focus-visible {
+    outline-offset: -3px;
+  }
+  /* atual: mostarda 22% e barra de 4px na borda */
+  .item[aria-current='page'] {
+    background: color-mix(in srgb, var(--accent) 22%, var(--surface));
+    box-shadow: inset 4px 0 0 var(--accent);
   }
   .item :global(svg) {
     color: var(--accent);
@@ -568,21 +440,196 @@
   .text {
     display: flex;
     flex-direction: column;
-    gap: 0.15rem;
+    gap: 0.2rem;
     min-width: 0;
   }
-  .label {
-    font-weight: 700;
-    font-size: 1.05rem;
+  .item-label {
+    font-family: var(--font-label);
+    font-size: 0.85rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
   }
   .value {
-    font-size: 0.9rem;
+    font-size: 0.82rem;
+    color: var(--muted);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
   }
-  .small {
+  .item[aria-current='page'] .value {
+    color: var(--text);
+  }
+
+  .detail {
+    overflow-y: auto;
+    min-height: 0;
+    padding: 0.3rem 0.6rem 1.5rem;
+    outline-offset: -4px;
+  }
+  /* o título do item já está no topo: o do painel sairia repetido */
+  .detail :global(.panel-body > h2:first-child),
+  .detail :global(.panel-body > .head > h2) {
+    display: none;
+  }
+  .crumb {
+    margin: 0;
+    font-size: 0.85rem;
+    color: var(--muted);
+  }
+  .detail > h1 {
+    font-size: clamp(2rem, 3.4vw, 2.8rem);
+    margin: 0.3rem 0 1.25rem;
+    overflow-wrap: anywhere;
+  }
+  /* abas: rótulo em Bevan; a escolhida fica creme sobre a linha do conteúdo */
+  .subtabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin: -0.4rem 0 1.5rem;
+    padding-bottom: 0;
+    border-bottom: var(--edge) solid var(--outline);
+  }
+  .subtabs .btn {
+    min-height: 2.8rem;
+    margin-bottom: calc(var(--edge) * -1);
+    border-radius: 6px 6px 0 0;
+    box-shadow: none;
+    transform: none;
+  }
+  .subtabs .btn:hover {
+    background: color-mix(in srgb, var(--outline) 10%, var(--surface));
+  }
+  .subtabs [aria-current='page'],
+  .subtabs [aria-current='page']:hover {
+    background: var(--text);
+    color: var(--bg);
+  }
+  .preview {
+    display: grid;
+    gap: 1.25rem;
+    justify-items: start;
+  }
+  .big-value {
+    font-size: 1.3rem;
+    margin: 0;
+  }
+  /* resumo: cartão sóbrio com o retrato (cameo) e os números grandes */
+  .card {
+    display: grid;
+    justify-items: center;
+    gap: 1.25rem;
+    max-width: 44rem;
+    padding: 2rem 1.75rem 1.75rem;
+    text-align: center;
+    background: var(--surface);
+    border: var(--edge) solid var(--outline);
+    border-radius: var(--radii-sm);
+    box-shadow: var(--hard);
+  }
+  .today {
+    font-weight: 700;
+  }
+  .facts {
+    margin: 0.25rem 0 0.5rem;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    width: 100%;
+    border-block: var(--edge) solid var(--outline);
+  }
+  .facts div {
+    display: flex;
+    flex-direction: column-reverse;
+    gap: 0.35rem;
+    padding: 0.9rem 0.5rem;
+  }
+  .facts div + div {
+    border-inline-start: var(--edge) solid var(--outline);
+  }
+  .facts dt {
+    font-family: var(--font-hud);
+    font-size: 0.8rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .facts dd {
+    margin: 0;
+    font-family: var(--font-label);
+    font-size: clamp(2rem, 4vw, 2.8rem);
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+    color: var(--text);
+  }
+  .week {
+    width: 100%;
+    display: grid;
+    gap: 0.6rem;
+    text-align: start;
+  }
+  .week h2 {
+    font-family: var(--font-label);
+    font-size: 0.78rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  .bars {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    height: 5rem;
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 0.5rem;
+    align-items: end;
+  }
+  .bars li {
+    height: 100%;
+    display: grid;
+    grid-template-rows: 1fr auto;
+    gap: 0.25rem;
+    align-items: end;
+    justify-items: center;
+  }
+  .bar {
+    width: 100%;
+    background: var(--accent);
+    border: 2px solid var(--outline);
+    border-radius: 3px 3px 0 0;
+  }
+  .bar.zero {
+    background: none;
+    border-style: dashed;
+    border-color: var(--muted);
+  }
+  .day {
+    font-family: var(--font-hud);
+    font-size: 0.75rem;
+    color: var(--muted);
+  }
+  .more {
+    margin: 0;
+    display: grid;
+  }
+  .more div {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 0.45rem 0;
+    font-size: 0.95rem;
+    border-top: 2px solid color-mix(in srgb, var(--outline) 25%, transparent);
+  }
+  .more dt {
+    color: var(--muted);
+  }
+  .more dd {
+    margin: 0;
+    font-weight: 700;
+    text-align: end;
+    overflow-wrap: anywhere;
+  }
+  .kids-note {
     font-size: 0.9rem;
-    margin-top: 0.8rem;
+    margin: 0.8rem 1rem 0;
   }
 </style>
