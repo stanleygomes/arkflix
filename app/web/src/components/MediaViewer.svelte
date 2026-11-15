@@ -59,7 +59,7 @@
 </script>
 
 <div class="viewer" role="dialog" aria-modal="true" aria-labelledby="media-caption" data-nav-scope="">
-  <p class="counter pixel" aria-live="polite">{index + 1} / {items.length}</p>
+  <p class="counter" aria-live="polite">{index + 1} / {items.length}</p>
   <div class="stage">
     {#if item.kind === 'pdf'}
       {#if isDesktop()}
@@ -91,46 +91,62 @@
 </div>
 
 <style>
-  .clip {
-    max-width: 100%;
-    max-height: 100%;
-    background: #000;
-  }
+  /* sala escura: a mídia no meio, numa moldura reta com sombra dura */
   .viewer {
     position: fixed;
     inset: 0;
     z-index: 85;
-    background: rgba(0, 0, 0, 0.92);
+    background: color-mix(in srgb, var(--bg) 96%, transparent);
     display: grid;
     grid-template-rows: auto 1fr auto auto;
-    gap: 0.8rem;
+    gap: 1rem;
     padding: 1.2rem 2rem 1.5rem;
-    color: #fff;
+    color: var(--text);
   }
   .counter {
     justify-self: end;
-    color: var(--accent);
+    font-family: var(--font-mono);
+    font-weight: 700;
+    font-size: 1.1rem;
+    font-variant-numeric: tabular-nums;
+    padding: 0.2rem 0.7rem;
+    border: 2px solid var(--outline);
+    border-radius: 4px;
   }
   .stage {
     min-height: 0;
     display: grid;
     place-items: center;
     overflow: auto;
+    padding: 0.5rem 0.8rem 0.8rem 0.5rem;
   }
   .shot {
     padding: 0;
-    border: 3px solid transparent;
+    border: 0;
     background: none;
     cursor: zoom-in;
     max-width: 100%;
     max-height: 100%;
   }
-  .shot img {
+  .shot img,
+  .clip {
     display: block;
+    border: var(--edge) solid var(--outline);
+    border-radius: var(--radii-sm);
+    box-shadow: 6px 6px 0 var(--outline);
+    background: var(--bg);
+  }
+  /* print de jogo é pequeno: estica até a altura da sala, sem borrar */
+  .shot img {
+    height: 66vh;
+    width: auto;
     max-width: 100%;
-    max-height: 70vh;
+    object-fit: contain;
     image-rendering: pixelated;
-    box-shadow: var(--glow);
+  }
+  .clip {
+    max-width: 100%;
+    max-height: 100%;
   }
   .shot.zoom {
     cursor: zoom-out;
@@ -138,16 +154,16 @@
   .shot.zoom img {
     max-width: none;
     max-height: none;
+    height: auto;
     width: min(200%, 160vw);
-  }
-  .shot:focus-visible {
-    border-color: var(--accent);
   }
   iframe {
     width: min(60rem, 100%);
     height: 100%;
     min-height: 60vh;
-    border: 3px solid var(--accent);
+    border: var(--edge) solid var(--outline);
+    border-radius: var(--radii-sm);
+    box-shadow: 6px 6px 0 var(--outline);
     background: #fff;
   }
   .pdf {
@@ -155,17 +171,30 @@
     gap: 1rem;
     justify-items: center;
     text-align: center;
-    font-size: 1.2rem;
+    font-size: 1.15rem;
+    padding: 2rem 2.5rem;
+    background: var(--surface);
+    border: var(--edge) solid var(--outline);
+    border-radius: var(--radii-sm);
+    box-shadow: var(--hard);
+  }
+  .pdf :global(svg) {
+    width: 3rem;
+    height: 3rem;
+    color: var(--muted);
   }
   .caption {
     text-align: center;
-    font-weight: 700;
+    font-family: var(--font-label);
+    font-size: 1rem;
+    letter-spacing: 0.04em;
   }
   .nav {
     display: flex;
     justify-content: center;
     gap: 1rem;
   }
+  /* troca de mídia: entra em degraus, uma vez */
   @media (prefers-reduced-motion: no-preference) {
     .shot img {
       animation: pop 0.18s steps(3);
@@ -173,7 +202,7 @@
   }
   @keyframes pop {
     from {
-      transform: scale(0.94);
+      transform: translateY(-12px);
       opacity: 0.4;
     }
   }

@@ -15,9 +15,8 @@
   import { pushHandler } from '../lib/input'
   import { burst } from '../lib/motion'
   import { current, focusDefault } from '../lib/nav'
-  import { applyPalette, highContrastPalette, homePalette } from '../lib/palette'
   import { play } from '../lib/sound'
-  import { app, back, confirm, game, isKids, prompt, putGame, system, toast } from '../lib/state.svelte'
+  import { back, confirm, game, isKids, prompt, putGame, system, toast } from '../lib/state.svelte'
   import type { BiosInfo, GameEvent, KidsTimeInfo, Listing, MediaFile, MediaItem, SaveState } from '../lib/types'
 
   let { id }: { id: string } = $props()
@@ -96,11 +95,6 @@
     })
   })
 
-  $effect(() => {
-    if (app.settings?.a11y.highContrast) applyPalette(highContrastPalette)
-    else applyPalette(sys?.palette ?? homePalette)
-  })
-
   const auto = $derived(listing?.states.find((s) => s.slot === -1))
 
   async function launch(state = '') {
@@ -175,14 +169,14 @@
         <GameArt game={g} system={sys} large />
       </div>
       <div class="info">
-        <p class="system pixel">{sys?.name ?? g.system}</p>
-        <h1 class="pixel">{g.name}</h1>
+        <p class="system">{sys?.name ?? g.system}</p>
+        <h1>{g.name}</h1>
         <ul class="facts">
-          {#if g.remote}<li class="chip remote">No servidor</li>{/if}
+          {#if g.remote}<li class="chip ok">No servidor</li>{/if}
           {#if g.hidden}<li class="chip">Oculto</li>{/if}
           {#if g.rating}<li class="chip rating" aria-label={`Nota ${g.rating} de 5`}>{'★'.repeat(g.rating)}</li>{/if}
-          {#if g.completed}<li class="chip done">Completo</li>{/if}
-          {#if g.broken}<li class="chip broken">Quebrado</li>{/if}
+          {#if g.completed}<li class="chip ok">Completo</li>{/if}
+          {#if g.broken}<li class="chip error">Quebrado</li>{/if}
           {#if g.year}<li class="chip">{g.year}</li>{/if}
           {#if g.developer}<li class="chip">{g.developer}</li>{/if}
           {#if g.players}<li class="chip">{g.players} jogador{g.players === '1' ? '' : 'es'}</li>{/if}
@@ -214,7 +208,9 @@
               </button>
             {/if}
           {:else}
-            <button class="btn primary" data-nav data-nav-default={!blocked || undefined} disabled={!!blocked} aria-describedby={blocked ? 'kids-blocked' : undefined} onclick={() => launch()}>
+            <!-- 🎬 bilhete: a ação da tela (contorno à mão só no papel, nunca no texto) -->
+            <button class="ticket" data-nav data-nav-default={!blocked || undefined} disabled={!!blocked} aria-describedby={blocked ? 'kids-blocked' : undefined} onclick={() => launch()}>
+              <span class="paper" aria-hidden="true"><span></span></span>
               <Icon name="play" /> Jogar do início
             </button>
           {/if}
@@ -238,9 +234,9 @@
                 <li>
                   <button class="thumb" data-nav aria-haspopup="dialog" onclick={() => (viewing = i)}>
                     {#if m.kind === 'pdf'}
-                      <span class="nothumb pixel" aria-hidden="true">PDF</span>
+                      <span class="nothumb" aria-hidden="true">PDF</span>
                     {:else if m.kind === 'video'}
-                      <span class="nothumb pixel" aria-hidden="true">VÍDEO</span>
+                      <span class="nothumb" aria-hidden="true">VÍDEO</span>
                     {:else}
                       <img src={m.src} alt="" loading="lazy" />
                     {/if}
@@ -283,10 +279,10 @@
                       {#if st.thumb}
                         <img src={`/media/thumb/${st.id}?v=${stamp}`} alt="" loading="lazy" />
                       {:else}
-                        <span class="nothumb pixel" aria-hidden="true">{st.slot === -1 ? 'AUTO' : `#${st.slot}`}</span>
+                        <span class="nothumb" aria-hidden="true">{st.slot === -1 ? 'AUTO' : `#${st.slot}`}</span>
                       {/if}
                       <span class="state-label"><span class="sr-only">Carregar </span>{st.label}</span>
-                      <span class="state-date muted">{ago(st.modified)}</span>
+                      <span class="state-date">{ago(st.modified)}</span>
                     </button>
                   </li>
                 {/each}
@@ -299,7 +295,7 @@
                   <li>
                     <Icon name="folder" />
                     <span>{f.name}</span>
-                    <span class="muted">{bytes(f.size)} · {ago(f.modified)}{f.shared ? ' · compartilhado entre jogos' : ''}</span>
+                    <span class="meta muted">{bytes(f.size)} · {ago(f.modified)}{f.shared ? ' · compartilhado entre jogos' : ''}</span>
                   </li>
                 {/each}
               </ul>
@@ -371,52 +367,19 @@
 {/if}
 
 <style>
-  .note-box {
-    display: grid;
-    gap: 0.5rem;
-    justify-items: start;
-  }
-  .note-text {
-    margin: 0;
-    white-space: pre-line;
-    padding: 0.7rem 0.9rem;
-    border-left: 4px solid var(--focus);
-    background: color-mix(in srgb, var(--surface) 80%, transparent);
-  }
-  .bios-warn {
-    display: flex;
-    gap: 0.6rem;
-    align-items: flex-start;
-    margin: 0;
-    padding: 0.5rem 0.8rem;
-    border-left: 3px solid var(--focus);
-    font-size: 0.9rem;
-  }
-  .bios-warn :global(svg) {
-    color: var(--focus);
-    flex: none;
-    margin-top: 0.2rem;
-  }
-  .bios-warn .path {
-    overflow-wrap: anywhere;
-    font-family: monospace;
-  }
-  .blocked {
-    font-weight: 700;
-    color: var(--focus);
-  }
   .page {
     height: 100%;
     display: flex;
     flex-direction: column;
   }
+  /* capa do jogo ao fundo, desbotada em sépia: dá clima sem pintar a tela */
   .backdrop {
     position: fixed;
     inset: 0;
     background-size: cover;
     background-position: center;
-    filter: blur(14px) saturate(1.2);
-    opacity: 0.22;
+    filter: blur(16px) grayscale(1) sepia(0.5);
+    opacity: 0.1;
     z-index: -1;
   }
   .layout {
@@ -432,16 +395,20 @@
   .info {
     display: flex;
     flex-direction: column;
-    gap: 1rem;
+    gap: 1.25rem;
     min-width: 0;
   }
   .system {
-    color: var(--accent-2);
+    font-family: var(--font-hud);
+    font-size: 0.9rem;
     letter-spacing: 0.12em;
     text-transform: uppercase;
+    color: var(--muted);
   }
   h1 {
-    font-size: clamp(2rem, 4vw, 3.2rem);
+    font-size: clamp(2.6rem, 5vw, 4.2rem);
+    margin-top: -0.6rem;
+    overflow-wrap: anywhere;
   }
   .facts {
     list-style: none;
@@ -451,121 +418,246 @@
     flex-wrap: wrap;
     gap: 0.5rem;
   }
-  .chip.rating,
-  .chip.done {
+  .chip.rating {
     color: var(--accent);
-    border-color: currentColor;
   }
-  .chip.remote {
+  .summary {
+    max-width: 48rem;
+    font-size: 1.05rem;
+  }
+
+  /* aviso (alerta sóbrio): caixa de cartão com barra de informação */
+  .bios-warn {
+    display: flex;
+    gap: 0.75rem;
+    align-items: flex-start;
+    max-width: 48rem;
+    padding: 0.75rem 1rem;
+    background: var(--surface);
+    border: var(--edge) solid var(--outline);
+    border-inline-start: 8px solid var(--accent-2);
+    border-radius: var(--radii-sm);
+    box-shadow: var(--hard-sm);
+    font-size: 0.95rem;
+  }
+  .bios-warn :global(svg) {
     color: var(--accent-2);
-    border-color: currentColor;
+    flex: none;
+    margin-top: 0.2rem;
+  }
+  .bios-warn .path {
+    overflow-wrap: anywhere;
+    font-family: var(--font-mono);
+  }
+  .blocked {
+    font-weight: 700;
+    color: var(--accent-2);
+  }
+
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 1rem 1.25rem;
   }
   .downloading {
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
-    font-weight: 700;
-    color: var(--accent);
-  }
-  .chip.broken {
-    color: #ffb4b4;
-    border-color: currentColor;
-  }
-  .summary {
-    max-width: 48rem;
-  }
-  .actions {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.9rem;
-  }
-  .media h2 {
-    font-size: 1.4rem;
-  }
-  .strip {
-    list-style: none;
-    padding: 0.4rem;
-    margin: 0.6rem 0 0;
-    display: flex;
-    gap: 1rem;
-    overflow-x: auto;
-  }
-  .thumb {
-    width: 10rem;
-    display: flex;
-    flex-direction: column;
-    gap: 0.4rem;
-    padding: 0.4rem;
-    font: inherit;
+    font-family: var(--font-hud);
     color: var(--text);
-    background: #000;
-    border: 2px solid color-mix(in srgb, var(--accent-2) 70%, transparent);
-    box-shadow: var(--glow-2);
+  }
+
+  /* 🎬 Bilhete de cinema: retângulo com um entalhe em cada lado. O papel
+     (mostarda) leva a máscara; o contorno à mão e a sombra dura moram no
+     pai dele (a máscara cortaria os dois). O texto fica fora do filtro. */
+  .ticket {
+    position: relative;
+    isolation: isolate;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    min-height: 3.75rem;
+    padding: 0 2.1rem;
+    font-family: var(--font-label);
+    font-size: 1.05rem;
+    line-height: 1;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--on-accent);
+    background: none;
+    border: 0;
+    border-radius: var(--radii-sm);
     cursor: pointer;
+    transition: transform var(--t) var(--ease);
   }
-  .thumb img,
-  .thumb .nothumb {
-    width: 100%;
-    aspect-ratio: 4 / 3;
-    object-fit: cover;
-    image-rendering: pixelated;
-    background: #000;
+  .ticket :global(svg) {
+    width: 1.25rem;
+    height: 1.25rem;
   }
-  .thumb-label {
-    font-weight: 700;
-    text-align: left;
+  .paper {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    filter: drop-shadow(3px 0 0 var(--outline)) drop-shadow(-3px 0 0 var(--outline)) drop-shadow(0 3px 0 var(--outline))
+      drop-shadow(0 -3px 0 var(--outline)) url(#sketch) drop-shadow(3px 4px 0 var(--outline));
+    transition: filter var(--t) var(--ease);
   }
-  .saves {
-    margin-top: 1rem;
-    display: flex;
-    flex-direction: column;
-    gap: 0.8rem;
+  .paper > span {
+    position: absolute;
+    inset: 0;
+    background: var(--accent);
+    border-radius: var(--radii-sm);
+    -webkit-mask:
+      radial-gradient(circle at 0 50%, #0000 10px, #000 11px) left / 51% 100% no-repeat,
+      radial-gradient(circle at 100% 50%, #0000 10px, #000 11px) right / 51% 100% no-repeat;
+    mask:
+      radial-gradient(circle at 0 50%, #0000 10px, #000 11px) left / 51% 100% no-repeat,
+      radial-gradient(circle at 100% 50%, #0000 10px, #000 11px) right / 51% 100% no-repeat;
   }
-  .saves h2 {
-    font-size: 1.4rem;
+  .ticket:hover:not(:disabled),
+  .ticket:focus-visible:not(:disabled) {
+    transform: translate(-2px, -2px);
+  }
+  .ticket:hover:not(:disabled) .paper,
+  .ticket:focus-visible:not(:disabled) .paper {
+    filter: drop-shadow(3px 0 0 var(--outline)) drop-shadow(-3px 0 0 var(--outline)) drop-shadow(0 3px 0 var(--outline))
+      drop-shadow(0 -3px 0 var(--outline)) url(#sketch) drop-shadow(5px 6px 0 var(--outline));
+  }
+  .ticket:active:not(:disabled) {
+    transform: translate(3px, 4px);
+  }
+  .ticket:active:not(:disabled) .paper {
+    filter: drop-shadow(3px 0 0 var(--outline)) drop-shadow(-3px 0 0 var(--outline)) drop-shadow(0 3px 0 var(--outline))
+      drop-shadow(0 -3px 0 var(--outline)) url(#sketch);
+  }
+  .ticket:disabled {
+    color: var(--muted);
+    cursor: not-allowed;
+  }
+  .ticket:disabled .paper {
+    filter: drop-shadow(3px 0 0 var(--muted)) drop-shadow(-3px 0 0 var(--muted)) drop-shadow(0 3px 0 var(--muted))
+      drop-shadow(0 -3px 0 var(--muted)) url(#sketch);
+  }
+  .ticket:disabled .paper > span {
+    background: var(--surface);
+  }
+  :global(body.high-contrast) .paper {
+    filter: drop-shadow(3px 0 0 var(--outline)) drop-shadow(-3px 0 0 var(--outline)) drop-shadow(0 3px 0 var(--outline))
+      drop-shadow(0 -3px 0 var(--outline));
+  }
+
+  /* seções: título em Bevan sobre um fio reto */
+  section h2 {
+    font-size: 1.15rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    padding-top: 0.9rem;
+    border-top: var(--edge) solid color-mix(in srgb, var(--outline) 35%, transparent);
   }
   .sub {
-    font-size: 1.05rem;
+    font-size: 0.95rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
     margin-top: 0.5rem;
+  }
+
+  /* cartão de imagem (mídia e pontos salvos): imagem no topo, fio, legenda */
+  .strip {
+    list-style: none;
+    padding: 0.4rem 0.6rem 0.8rem 0.4rem;
+    margin: 0.6rem 0 0;
+    display: flex;
+    gap: 1.1rem;
+    overflow-x: auto;
   }
   .states {
     list-style: none;
-    padding: 0.4rem;
+    padding: 0.4rem 0.6rem 0.8rem 0.4rem;
     margin: 0;
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(12rem, 1fr));
-    gap: 1rem;
+    gap: 1.1rem;
+  }
+  .strip li {
+    display: flex;
+  }
+  .thumb {
+    width: 10.5rem;
   }
   .state {
     width: 100%;
+  }
+  .thumb,
+  .state {
     display: flex;
     flex-direction: column;
-    gap: 0.4rem;
-    padding: 0.5rem;
+    padding: 0;
     font: inherit;
     color: var(--text);
-    text-align: left;
-    background: #000;
-    border: 2px solid color-mix(in srgb, var(--accent-2) 70%, transparent);
-    box-shadow: var(--glow-2);
+    text-align: start;
+    background: var(--surface);
+    border: var(--edge) solid var(--outline);
+    border-radius: var(--radii-sm);
+    box-shadow: var(--hard);
+    overflow: hidden;
     cursor: pointer;
+    transition:
+      transform var(--t) var(--ease),
+      box-shadow var(--t) var(--ease);
   }
+  .thumb:hover,
+  .thumb:focus-visible,
+  .state:hover,
+  .state:focus-visible {
+    transform: translate(-2px, -2px);
+    box-shadow: var(--hard-up);
+  }
+  .thumb:active,
+  .state:active {
+    transform: translate(4px, 4px);
+    box-shadow: none;
+  }
+  .thumb img,
   .state img,
   .nothumb {
+    display: block;
     width: 100%;
     aspect-ratio: 4 / 3;
     object-fit: cover;
     image-rendering: pixelated;
-    background: #000;
+    background: var(--bg);
+    border-bottom: var(--edge) solid var(--outline);
   }
   .nothumb {
     display: grid;
     place-items: center;
+    font-family: var(--font-label);
+    font-size: 1.4rem;
+    letter-spacing: 0.06em;
     color: var(--accent);
-    font-size: 1.6rem;
   }
+  .thumb-label,
   .state-label {
+    padding: 0.5rem 0.7rem 0;
     font-weight: 700;
+    line-height: 1.3;
+  }
+  .thumb-label {
+    padding-bottom: 0.6rem;
+  }
+  .state-date {
+    padding: 0.15rem 0.7rem 0.6rem;
+    font-family: var(--font-hud);
+    font-size: 0.8rem;
+    color: var(--muted);
+  }
+
+  .saves {
+    margin-top: 0.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
   }
   .files {
     list-style: none;
@@ -573,6 +665,8 @@
     margin: 0;
     display: grid;
     gap: 0.4rem;
+    font-family: var(--font-mono);
+    font-size: 0.9rem;
   }
   .files li {
     display: flex;
@@ -580,10 +674,27 @@
     align-items: center;
     flex-wrap: wrap;
   }
+  .files .meta {
+    font-size: 0.8rem;
+  }
   .error {
-    color: #ff8a8a;
+    color: var(--danger);
   }
   .note {
     font-style: italic;
+  }
+
+  .note-box {
+    display: grid;
+    gap: 0.75rem;
+    justify-items: start;
+  }
+  .note-text {
+    white-space: pre-line;
+    max-width: 48rem;
+    padding: 0.75rem 1rem;
+    background: var(--balloon);
+    border: var(--edge) solid var(--outline);
+    border-radius: var(--radii-sm);
   }
 </style>
