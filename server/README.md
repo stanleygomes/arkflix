@@ -8,13 +8,15 @@ jogos.
 
 Escopo: **consumir** o que já está no disco. Você continua mandando mídia pras
 pastas (o `noah_dev` faz isso); o servidor escaneia, lista, toca, baixa e
-sincroniza saves. Sem provedor de metadados (TMDB/IGDB), sem upload de mídia e
-sem painel de admin.
+sincroniza saves. Com `--writable`, o painel de admin do app também envia
+arquivo e esconde item.
 
 ## Convivência com os três atuais
 
 Ele lê as **mesmas pastas, só leitura**, e escreve só na pasta de dados dele
-(`--data`). Dá pra rodar do lado do Jellyfin/Navidrome/RomM até o phase-out,
+(`--data`). `--writable` (ou `ARKFLIX_SERVER_WRITABLE=1`) libera o envio de
+arquivo e o "esconder" (move pra `--hidden`, padrão `<pai dos filmes>/escondidos`):
+ligue só depois do phase-out. Dá pra rodar do lado do Jellyfin/Navidrome/RomM até o phase-out,
 apontando um domínio novo pra porta 8097 (veja `compose.example.yml`). No dia
 da troca, o Caddy aponta os três domínios de hoje pra cá.
 
@@ -22,6 +24,7 @@ da troca, o Caddy aponta os três domínios de hoje pra cá.
 | --- | --- |
 | `/rest/*` | Subsonic / OpenSubsonic (Navidrome) |
 | `/api/*`, `/assets/romm/*` | RomM |
+| `/arkflix/api/*` | API própria: status, usuários, envio, listas ([contrato](internal/api/admin/API.md)) |
 | `/health` | saúde, sem login |
 | o resto | Jellyfin |
 
@@ -53,7 +56,9 @@ Na 1ª subida em contêiner: `ARKFLIX_SERVER_ADMIN_USER`/`_PASSWORD` criam o adm
 Toda flag tem um `ARKFLIX_SERVER_*` equivalente (`--addr` → `ARKFLIX_SERVER_ADDR`).
 
 Estado compartilhado: estrela no Subsonic = favorito no Jellyfin; onde parou e
-"assistido/ouvido" valem pra todos os clientes.
+"assistido/ouvido" valem pra todos os clientes. Listas (`internal/lists`)
+guardam qualquer tipo de item e aparecem em todo cliente: Playlist no
+Jellyfin, coleção no RomM (só as ROMs), playlist no Subsonic (só as faixas).
 
 ## O que cada API cobre
 
@@ -69,10 +74,14 @@ Estado compartilhado: estrela no Subsonic = favorito no Jellyfin; onde parou e
 - **RomM** (anuncia 4.8.0): OAuth2 (senha/refresh), Basic, client tokens
   `rmm_`, consoles, ROMs com filtros, download (multidisco vira zip com `.m3u`),
   BIOS, capas, saves/states/screenshots por usuário em
-  `<data>/romm/...`, props do jogo.
+  `<data>/romm/...`, props do jogo, coleções (= listas).
+- **arkflix** (`/arkflix/api`): info, status (bibliotecas, scan, metadados,
+  sessões), usuários, envio de arquivo, esconder, listas, capas. Aceita o
+  token do Jellyfin ou do RomM.
 
-Fora: HLS de áudio, cliente web embutido do Jellyfin, coleções do RomM,
-podcasts/rádio/compartilhamento do Subsonic, controle remoto pelo websocket.
+Fora: HLS de áudio, cliente web embutido do Jellyfin, coleções virtuais e
+inteligentes do RomM, podcasts/rádio/compartilhamento do Subsonic, controle
+remoto pelo websocket.
 
 ## Migração (ainda não feita)
 
