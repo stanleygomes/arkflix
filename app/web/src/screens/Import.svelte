@@ -6,7 +6,6 @@
   import { api } from '../lib/api'
   import { bytes } from '../lib/format'
   import { focusDefault, focusWithin } from '../lib/nav'
-  import { applyPalette, highContrastPalette, homePalette } from '../lib/palette'
   import { play } from '../lib/sound'
   import { app, system, toast } from '../lib/state.svelte'
   import type { ImportItem, ImportResult } from '../lib/types'
@@ -17,7 +16,6 @@
   let busy = $state(false)
 
   $effect(() => {
-    applyPalette(app.settings?.a11y.highContrast ? highContrastPalette : homePalette)
     if (!embedded) tick().then(focusDefault)
   })
 
@@ -93,15 +91,15 @@
 <div class="page" class:embedded bind:this={root}>
   {#if !embedded}<TopBar actions={false} />{/if}
   <main class="body">
-    {#if !embedded}<h1 class="pixel">Importar jogos</h1>{/if}
-    <p class="muted">Os jogos são copiados pra <code>{app.settings?.importDir}</code>, numa pasta por console. Zip com disco vira pasta; o resto vai como está.</p>
+    {#if !embedded}<h1>Importar jogos</h1>{/if}
+    <p class="intro">Os jogos são copiados pra <code>{app.settings?.importDir}</code>, numa pasta por console. Zip com disco vira pasta; o resto vai como está.</p>
 
     <div class="sources panel">
       {#if app.mode === 'desktop'}
         <button class="btn primary" data-nav data-nav-default disabled={busy} onclick={pick}><Icon name="folder" /> Escolher arquivos</button>
       {/if}
       <form class="path" onsubmit={addPath}>
-        <label for="import-path">Caminho de um arquivo ou pasta</label>
+        <label class="label" for="import-path">Caminho de um arquivo ou pasta</label>
         <div class="row">
           <input id="import-path" type="text" data-nav data-nav-default={app.mode === 'web' ? '' : undefined} bind:value={path} placeholder="~/Downloads/Super Mario World.zip" autocomplete="off" spellcheck="false" />
           <button class="btn" data-nav type="submit" disabled={busy || !path.trim()}><Icon name="plus" /> Adicionar</button>
@@ -115,11 +113,11 @@
         <ul class="items">
           {#each items as it, i (it.source)}
             {@const sys = system(it.system)}
-            <li class="item panel" class:bad={!!it.problem}>
+            <li class="item" class:bad={!!it.problem}>
               <div class="what">
                 <strong>{it.title}</strong>
-                <span class="muted file">{it.source}</span>
-                <span class="muted">{bytes(it.size)}{it.extract ? ' · vira pasta' : ''}</span>
+                <span class="file">{it.source}</span>
+                <span class="meta muted">{bytes(it.size)}{it.extract ? ' · vira pasta' : ''}</span>
                 {#if it.problem}<span class="problem"><Icon name="warn" /> {it.problem}</span>{/if}
               </div>
               <button
@@ -149,9 +147,9 @@
         <ul class="results">
           {#each results as r (r.source)}
             <li class:ok={r.ok}>
-              <Icon name={r.ok ? 'check' : 'warn'} />
-              <span>{r.title}</span>
-              <span class="muted">{r.ok ? `em ${system(r.system)?.name}` : r.problem}</span>
+              <span class="lead"><Icon name={r.ok ? 'check' : 'warn'} /></span>
+              <strong>{r.title}</strong>
+              <span class="why">{r.ok ? `em ${system(r.system)?.name}` : r.problem}</span>
             </li>
           {/each}
         </ul>
@@ -183,48 +181,75 @@
     padding: 0.5rem 2.5rem 2rem 3.5rem;
     display: flex;
     flex-direction: column;
-    gap: 1.2rem;
+    gap: 1.25rem;
     max-width: 70rem;
   }
   h1 {
-    font-size: 2.4rem;
+    font-size: clamp(2.4rem, 4vw, 3.2rem);
   }
   h2 {
-    font-size: 1.3rem;
-    margin-bottom: 0.6rem;
+    font-size: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 0.8rem;
+  }
+  .intro {
+    max-width: 48rem;
+    color: var(--muted);
   }
   code {
-    color: var(--accent-2);
+    color: var(--text);
+    font-size: 0.9em;
+    padding: 0 0.3rem;
+    background: var(--balloon);
+    border-radius: 4px;
   }
   .sources {
     display: flex;
     flex-direction: column;
-    gap: 1rem;
+    align-items: flex-start;
+    gap: 1.25rem;
   }
-  .path label {
-    display: block;
-    margin-bottom: 0.4rem;
+  /* campo: rótulo em Bevan em cima, controle e botão na mesma linha */
+  .path {
+    display: grid;
+    gap: 0.5rem;
+    width: 100%;
   }
   .row {
     display: flex;
     gap: 0.8rem;
+    align-items: center;
   }
+  .row input {
+    min-height: 3.2rem;
+    font-size: 1.05rem;
+  }
+  /* lista de itens: moldura reta, linhas separadas por fio */
   .items,
   .results {
     list-style: none;
     padding: 0;
     margin: 0;
-    display: grid;
-    gap: 0.8rem;
+    background: var(--surface);
+    border: var(--edge) solid var(--outline);
+  }
+  .item,
+  .results li {
+    border-bottom: 2px solid color-mix(in srgb, var(--outline) 25%, transparent);
+  }
+  .item:last-child,
+  .results li:last-child {
+    border-bottom: 0;
   }
   .item {
     display: flex;
     gap: 1rem;
     align-items: center;
-    padding: 0.8rem 1rem;
+    padding: 0.9rem 1rem;
   }
   .item.bad {
-    border-color: #ff6b6b;
+    box-shadow: inset 6px 0 0 var(--danger);
   }
   .what {
     flex: 1;
@@ -235,10 +260,15 @@
   }
   .file {
     overflow-wrap: anywhere;
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    color: var(--muted);
+  }
+  .meta {
     font-size: 0.85rem;
   }
   .problem {
-    color: #ffb4b4;
+    color: var(--danger);
     display: inline-flex;
     gap: 0.4rem;
     align-items: center;
@@ -249,20 +279,33 @@
   }
   .go {
     display: flex;
-    gap: 1rem;
-    margin-top: 1rem;
+    gap: 0.75rem;
+    margin-top: 1.25rem;
+    padding-top: 1.25rem;
+    border-top: var(--edge) solid var(--outline);
   }
   .results li {
-    display: flex;
-    gap: 0.6rem;
+    display: grid;
+    grid-template-columns: auto auto 1fr;
+    gap: 0.75rem;
     align-items: center;
-    color: #ffb4b4;
+    padding: 0.75rem 1rem;
   }
-  .results li.ok {
-    color: #9fe39a;
+  .lead {
+    display: grid;
+    place-items: center;
+    width: 2.4rem;
+    height: 2.4rem;
+    color: var(--danger);
+    background: var(--bg);
+    border: var(--edge) solid var(--danger);
+    border-radius: var(--radii-sm);
   }
-  .btn:disabled {
-    opacity: 0.45;
-    cursor: not-allowed;
+  .results li.ok .lead {
+    color: var(--accent-2);
+    border-color: var(--outline);
+  }
+  .why {
+    color: var(--muted);
   }
 </style>

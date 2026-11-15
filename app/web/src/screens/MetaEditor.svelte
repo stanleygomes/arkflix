@@ -7,9 +7,8 @@
   import TopBar from '../components/TopBar.svelte'
   import { api } from '../lib/api'
   import { focusDefault } from '../lib/nav'
-  import { applyPalette, highContrastPalette, homePalette } from '../lib/palette'
   import { play } from '../lib/sound'
-  import { app, back, confirm, game, prompt, putGame, system, toast } from '../lib/state.svelte'
+  import { app, back, confirm, game, prompt, putGame, toast } from '../lib/state.svelte'
   import type { MetaEdit, MetaInfo } from '../lib/types'
 
   let { id }: { id: string } = $props()
@@ -24,10 +23,6 @@
         tick().then(focusDefault)
       })
       .catch((err) => toast((err as Error).message, 'error'))
-  })
-  $effect(() => {
-    const sys = g ? system(g.system) : undefined
-    applyPalette(app.settings?.a11y.highContrast ? highContrastPalette : (sys?.palette ?? homePalette))
   })
 
   type TextKey = 'name' | 'developer' | 'year' | 'players' | 'genres' | 'summary'
@@ -164,7 +159,7 @@
 <div class="page">
   <TopBar actions={false} />
   <main class="body">
-    <h1 class="pixel">Editar: {g?.name ?? ''}</h1>
+    <h1>Editar: {g?.name ?? ''}</h1>
     {#if info}
       <ul class="fields">
         {#each fields as f, i (f.key)}
@@ -172,10 +167,10 @@
             <button class="value" data-nav data-nav-default={i === 0 ? '' : undefined} onclick={() => editField(f)}>
               <span class="label">{f.label}</span>
               <span class="text" class:empty={!value(f.key)}>{value(f.key) || 'vazio'}</span>
-              <span class="tag" class:on={edited(f.key)}>{edited(f.key) ? 'editado' : 'automático'}</span>
+              <span class="chip" class:warn={edited(f.key)}>{edited(f.key) ? 'editado' : 'automático'}</span>
             </button>
             {#if edited(f.key)}
-              <button class="btn small" data-nav aria-label={`Restaurar ${f.label.toLowerCase()} automático`} onclick={() => resetField(f.key)}>
+              <button class="btn small flat" data-nav aria-label={`Restaurar ${f.label.toLowerCase()} automático`} onclick={() => resetField(f.key)}>
                 <Icon name="resume" /> Restaurar
               </button>
             {/if}
@@ -189,7 +184,7 @@
             <button class="btn" data-nav disabled={fetching} aria-describedby="web-help" onclick={fetchWeb}>
               <Icon name="globe" /> {fetching ? 'Buscando…' : 'Buscar na internet'}
             </button>
-            <span id="web-help" class="muted">Descrição, ano e gêneros da Wikipedia, só nos campos vazios.</span>
+            <span id="web-help" class="help">Descrição, ano e gêneros da Wikipedia, só nos campos vazios.</span>
           {/if}
           {#if source}
             <p class="muted" role="status">Fonte: {source.replace(/^https?:\/\//, '')}</p>
@@ -201,28 +196,31 @@
         <legend>Nota</legend>
         <div class="stars" role="radiogroup" aria-label="Nota">
           {#each [0, 1, 2, 3, 4, 5] as n (n)}
-            <button class="star" role="radio" aria-checked={info.edit.rating === n} data-nav onclick={() => set('rating', n)}>
+            <button class="btn small" role="radio" aria-checked={info.edit.rating === n} data-nav onclick={() => set('rating', n)}>
               {n === 0 ? 'Sem nota' : '★'.repeat(n)}
             </button>
           {/each}
         </div>
       </fieldset>
 
-      <div class="switches">
-        <button class="btn" data-nav role="switch" aria-checked={info.edit.completed} onclick={() => set('completed', !info!.edit.completed)}>
-          <Icon name="check" /> Completo: {info.edit.completed ? 'sim' : 'não'}
-        </button>
-        <button class="btn" data-nav role="switch" aria-checked={info.edit.broken} onclick={() => set('broken', !info!.edit.broken)}>
-          <Icon name="warn" /> Quebrado (não abre direito): {info.edit.broken ? 'sim' : 'não'}
-        </button>
-        <button class="btn" data-nav role="switch" aria-checked={!!info.edit.kidsOk} onclick={() => set('kidsOk', !info!.edit.kidsOk)}>
-          <Icon name="star" /> Liberado no perfil infantil: {info.edit.kidsOk ? 'sim' : 'não'}
-        </button>
-      </div>
+      <fieldset>
+        <legend>Situação</legend>
+        <div class="toggles">
+          <button class="switch" data-nav role="switch" aria-checked={info.edit.completed} onclick={() => set('completed', !info!.edit.completed)}>
+            <span class="track" aria-hidden="true"></span><span>Completo</span><span class="state">{info.edit.completed ? 'sim' : 'não'}</span>
+          </button>
+          <button class="switch" data-nav role="switch" aria-checked={info.edit.broken} onclick={() => set('broken', !info!.edit.broken)}>
+            <span class="track" aria-hidden="true"></span><span>Quebrado (não abre direito)</span><span class="state">{info.edit.broken ? 'sim' : 'não'}</span>
+          </button>
+          <button class="switch" data-nav role="switch" aria-checked={!!info.edit.kidsOk} onclick={() => set('kidsOk', !info!.edit.kidsOk)}>
+            <span class="track" aria-hidden="true"></span><span>Liberado no perfil infantil</span><span class="state">{info.edit.kidsOk ? 'sim' : 'não'}</span>
+          </button>
+        </div>
+      </fieldset>
 
       <fieldset>
         <legend>Capa</legend>
-        <p class="muted">{info.edit.cover ? `Escolhida: ${info.edit.cover}` : info.autoCover ? 'Automática (ES-DE, pasta covers/ ou libretro)' : 'Sem capa: o app desenha a mídia do console'}</p>
+        <p class="help">{info.edit.cover ? `Escolhida: ${info.edit.cover}` : info.autoCover ? 'Automática (ES-DE, pasta covers/ ou libretro)' : 'Sem capa: o app desenha a mídia do console'}</p>
         <div class="switches">
           <button class="btn" data-nav onclick={chooseCover}><Icon name="folder" /> Escolher imagem</button>
           {#if info.edit.cover}
@@ -253,41 +251,56 @@
     padding: 0.5rem 2.5rem 1.5rem 3.5rem;
     display: flex;
     flex-direction: column;
-    gap: 1.3rem;
+    gap: 1.5rem;
     max-width: 64rem;
   }
   h1 {
-    font-size: 2rem;
+    font-size: clamp(2.2rem, 4vw, 3rem);
+    overflow-wrap: anywhere;
   }
+  /* campos como lista de itens: moldura reta, linhas separadas por fio;
+     a linha inteira é o botão que abre a edição */
   .fields {
     list-style: none;
-    padding: 0.3rem;
+    padding: 0;
     margin: 0;
-    display: grid;
-    gap: 0.6rem;
+    background: var(--surface);
+    border: var(--edge) solid var(--outline);
   }
   .field {
     display: flex;
     gap: 0.6rem;
     align-items: center;
+    padding-inline-end: 0.75rem;
+    border-bottom: 2px solid color-mix(in srgb, var(--outline) 25%, transparent);
+  }
+  .field:last-child {
+    border-bottom: 0;
   }
   .value {
     flex: 1;
     font: inherit;
     color: var(--text);
-    text-align: left;
-    background: #000;
-    border: 2px solid color-mix(in srgb, var(--accent-2) 70%, transparent);
-    padding: 0.6rem 0.9rem;
+    text-align: start;
+    background: none;
+    border: 0;
+    min-height: 3.6rem;
+    padding: 0.6rem 1rem;
     display: grid;
-    grid-template-columns: 10rem 1fr auto;
+    grid-template-columns: 11rem 1fr auto;
     gap: 1rem;
     align-items: center;
     cursor: pointer;
     min-width: 0;
   }
+  .value:hover {
+    background: color-mix(in srgb, var(--accent) 14%, transparent);
+  }
+  .value:focus {
+    outline-offset: -4px;
+  }
   .label {
-    font-weight: 700;
+    color: var(--muted);
   }
   .text {
     overflow: hidden;
@@ -298,40 +311,91 @@
     color: var(--muted);
     font-style: italic;
   }
-  .tag {
-    font-size: 0.8rem;
-    color: var(--muted);
-    border: 2px solid currentColor;
-    padding: 0 0.4rem;
-  }
-  .tag.on {
-    color: var(--accent);
-  }
   fieldset {
     border: none;
-    padding: 0;
     margin: 0;
+    padding: 1rem 0 0;
+    border-top: var(--edge) solid color-mix(in srgb, var(--outline) 35%, transparent);
+    display: grid;
+    gap: 0.75rem;
   }
   legend {
-    font-weight: 700;
-    margin-bottom: 0.5rem;
+    font-family: var(--font-label);
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    padding: 0 0.5rem 0 0;
   }
   .stars {
     display: flex;
-    gap: 0.4rem;
+    gap: 0.75rem;
     flex-wrap: wrap;
   }
-  .star {
+  .stars .btn {
+    min-width: 3.4rem;
+    justify-content: center;
+    font-size: 0.95rem;
+  }
+  .toggles {
+    display: grid;
+    gap: 0.15rem;
+    justify-items: start;
+  }
+  /* interruptor: trilho com botãozinho, a linha toda clica */
+  .switch {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    min-height: 3rem;
+    padding: 0.4rem 0.8rem;
+    margin-inline-start: -0.8rem;
     font: inherit;
+    font-size: 1.05rem;
+    text-align: start;
     color: var(--text);
-    background: var(--surface);
-    border: 3px solid transparent;
-    padding: 0.4rem 0.7rem;
+    background: none;
+    border: 0;
+    border-radius: 4px;
     cursor: pointer;
   }
-  .star[aria-checked='true'] {
-    border-color: var(--accent);
-    color: var(--accent);
+  .switch:hover {
+    background: color-mix(in srgb, var(--accent) 14%, transparent);
+  }
+  .state {
+    font-family: var(--font-hud);
+    font-size: 0.85rem;
+    color: var(--muted);
+  }
+  .track {
+    flex: none;
+    position: relative;
+    width: 44px;
+    height: 24px;
+    background: var(--balloon);
+    border: var(--edge) solid var(--outline);
+    border-radius: 999px;
+    box-shadow: 2px 2px 0 var(--outline);
+  }
+  .track::after {
+    content: '';
+    position: absolute;
+    top: 2px;
+    inset-inline-start: 2px;
+    width: 14px;
+    height: 14px;
+    background: var(--outline);
+    border-radius: var(--radii-sm);
+    transition: inset-inline-start 150ms steps(3);
+  }
+  [aria-checked='true'] > .track {
+    background: var(--accent-2);
+  }
+  [aria-checked='true'] > .track::after {
+    inset-inline-start: 22px;
+  }
+  .help {
+    color: var(--muted);
+    font-size: 0.95rem;
   }
   .switches {
     display: flex;
@@ -342,14 +406,15 @@
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    gap: 0.8rem;
+    gap: 0.8rem 1rem;
   }
   .web p {
     flex-basis: 100%;
-    margin: 0;
     overflow-wrap: anywhere;
   }
   .switches.end {
     justify-content: flex-end;
+    padding-top: 1.25rem;
+    border-top: var(--edge) solid var(--outline);
   }
 </style>
