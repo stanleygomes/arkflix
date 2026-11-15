@@ -9,7 +9,8 @@ import (
 	"github.com/stanleygomes/arkflix/server/internal/store"
 )
 
-// Tabelas só do Subsonic: playlists, fila de reprodução e marcadores.
+// Tabelas só do Subsonic: fila de reprodução e marcadores. As playlists
+// moraram aqui até a 004, que passou tudo pra internal/lists (mesmo id).
 func init() {
 	store.Register(store.Migration{Name: "subsonic/001-playlists", SQL: `
 CREATE TABLE subsonic_playlists (
@@ -44,7 +45,15 @@ CREATE TABLE subsonic_bookmarks (
   created_at TEXT NOT NULL,
   changed_at TEXT NOT NULL,
   PRIMARY KEY (user_id, item_id)
-);`})
+);`}, store.Migration{Name: "subsonic/004-lists", SQL: `
+INSERT OR IGNORE INTO lists (id, user_id, name, comment, public, created_at, updated_at)
+  SELECT id, user_id, name, comment, public, created_at, changed_at FROM subsonic_playlists ORDER BY created_at, id;
+INSERT INTO lists_items (entry, list_id, pos, item_id, added_at)
+  SELECT lower(hex(randomblob(16))), pi.playlist_id, pi.pos, pi.item_id, p.changed_at
+  FROM subsonic_playlist_items pi JOIN subsonic_playlists p ON p.id = pi.playlist_id
+  WHERE pi.playlist_id IN (SELECT id FROM lists);
+DROP TABLE subsonic_playlist_items;
+DROP TABLE subsonic_playlists;`})
 }
 
 // extra acrescenta colunas depois das de ItemColumns no Scan.
@@ -319,7 +328,7 @@ func (a *API) kindOf(ctx context.Context, id string) string {
 	err := a.d.Store.DB.QueryRowContext(ctx, `SELECT kind FROM items WHERE id = ?`, cleanID(id)).Scan(&k)
 	if err == sql.ErrNoRows {
 		var n int
-		a.d.Store.DB.QueryRowContext(ctx, `SELECT COUNT(*) FROM subsonic_playlists WHERE id = ?`, cleanID(id)).Scan(&n)
+		a.d.Store.DB.QueryRowContext(ctx, `SELECT COUNT(*) FROM lists WHERE id = ?`, cleanID(id)).Scan(&n)
 		if n > 0 {
 			return "playlist"
 		}

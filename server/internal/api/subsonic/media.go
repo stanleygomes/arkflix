@@ -173,11 +173,11 @@ func (a *API) download(c *call) (*resp, error) {
 		if err != nil {
 			return nil, err
 		}
-		ids, err := a.plItemIDs(c.ctx, p.id)
+		ids, err := a.plItemIDs(c.ctx, p.ID)
 		if err != nil {
 			return nil, err
 		}
-		name = p.name
+		name = p.Name
 		if ts, err = a.tracksByIDs(c.ctx, c.user.ID, ids); err != nil {
 			return nil, err
 		}

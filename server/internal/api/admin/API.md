@@ -2,7 +2,8 @@
 
 API própria do arkflix-server, além das três compatíveis. O app arkflix usa
 pra administrar o servidor e pras listas. JSON em camelCase, datas RFC 3339
-(UTC). Erro: status HTTP + `{"error": "mensagem em português"}`.
+(UTC; `""` = nunca/sem data). Erro: status HTTP + `{"error": "mensagem em
+português"}`.
 
 ## Login
 
@@ -10,6 +11,7 @@ Qualquer token que o servidor já emite vale aqui:
 
 - `Authorization: MediaBrowser ..., Token="<token>"` ou `X-Emby-Token` (token do Jellyfin)
 - `Authorization: Bearer <token>` (access token ou client token `rmm_...` do RomM)
+- `?api_key=<token>` (pra `<img src>`; qualquer um dos acima)
 
 Sem token válido: `401`. Rota de admin com usuário comum: `403`.
 
@@ -59,7 +61,8 @@ pelo `status`).
 
 - `GET /arkflix/api/users` → `[{ "id", "rid", "name", "admin", "createdAt", "lastLogin" }]`
 - `POST /arkflix/api/users` `{ "name", "password", "admin" }` → `201` usuário
-- `PATCH /arkflix/api/users/{id}` `{ "password"?, "admin"? }` → usuário
+- `PATCH /arkflix/api/users/{id}` `{ "password"?, "admin"? }` → usuário (tirar o
+  admin do último administrador: `409`)
 - `DELETE /arkflix/api/users/{id}` → `204` (não apaga a si mesmo nem o último admin: `409`)
 
 ### Enviar arquivo (precisa de `writable`)
@@ -76,21 +79,35 @@ e os campos de destino:
 | `bios` | `platform` (slug) | `<games>/bios/<slug>/<arquivo>` |
 | `subtitle` | `item` (id do filme/episódio), `lang`? | ao lado do vídeo, `<base>[.<lang>].<ext>` |
 
-Grava em `.part` e renomeia no fim; não sobrescreve (nome repetido: `409`).
-Nome de arquivo e campos limpos (sem `/`, `..`, controle). Depois dispara o
-scan. Resposta `201 { "saved": ["Movies/Nome (2020)/Nome (2020).mkv"] }`.
+Mande os campos **antes** dos arquivos: aí cada arquivo vai direto pro
+destino, sem passar pela memória (tamanho livre). Arquivo que chega antes
+de `kind` espera em `<data>/uploads` e é movido no fim. `folder` da música
+pode ter subpasta (`Artista/Álbum`). `movie`/`episode` só aceitam vídeo;
+`subtitle`, `srt|vtt|ass|ssa|sub`.
+
+Grava em `.<nome>.part` (oculto, o scan pula) e renomeia no fim; não
+sobrescreve (nome repetido: `409`). Nome de arquivo e campos limpos (sem `/`,
+`..`, controle). Campo faltando ou inválido: `400`. Depois dispara o scan.
+Resposta `201 { "saved": ["Movies/Nome (2020)/Nome (2020).mkv"] }`.
 Somente leitura: `403 { "error": "servidor em modo só leitura" }`.
 
 ### Esconder item (precisa de `writable`)
 
 `POST /arkflix/api/items/{id}/hide` → move o arquivo (ou a pasta da ROM
-multidisco, a temporada, a série) pra `<hidden>/<mesmo caminho relativo>` e
-tira do acervo. `204`. Desfazer = mover de volta à mão.
+multidisco, a temporada, a série) pra `<hidden>/<pasta da biblioteca>/<mesmo
+caminho relativo>` (ex.: `escondidos/Movies/Nome (2020)/...`) e tira do
+acervo. `204`. Desfazer = mover de volta à mão.
+
+- Filme na pasta dele vai com a pasta (pôster, legendas); arquivo solto vai
+  com o que tiver o mesmo nome ao lado (legenda, `.nfo`). Álbum = as faixas.
+- Artista e console: `400`. Já existe em escondidos ou sem `--hidden`: `409`.
+- `{id}` aceita `rom:<rid>`.
 
 ### Metadados
 
 `POST /arkflix/api/items/{id}/refresh` → busca de novo os metadados do item
-(`202`).
+(`202`; por enquanto roda o `metadata` em segundo plano, que completa o que
+falta).
 
 ## Listas (qualquer usuário, as dele)
 
@@ -98,15 +115,22 @@ Uma lista guarda itens de qualquer tipo (filme, série, episódio, ROM, álbum,
 faixa). Aparecem também como Playlist no Jellyfin, coleção no RomM (só as
 ROMs) e playlist no Subsonic (só as faixas).
 
-- `GET /arkflix/api/lists` → `[{ "id": "32hex", "rid": 3, "name", "count", "kinds": ["movie","rom"], "updatedAt", "cover": "<item id ou vazio>" }]`
+- `GET /arkflix/api/lists` → `[{ "id": "32hex", "rid": 3, "name", "count", "kinds": ["movie","rom"], "createdAt", "updatedAt", "cover": "<item id ou vazio>" }]`
 - `POST /arkflix/api/lists` `{ "name" }` → `201` lista
 - `GET /arkflix/api/lists/{id}` → lista + `"items": [Item]`
 - `PATCH /arkflix/api/lists/{id}` `{ "name" }` → lista
 - `DELETE /arkflix/api/lists/{id}` → `204`
-- `POST /arkflix/api/lists/{id}/items` `{ "ids": ["32hex" | "rom:<rid>"] }` → lista (repetido é ignorado)
-- `DELETE /arkflix/api/lists/{id}/items/{itemId}` → `204`
-- `PUT /arkflix/api/lists/{id}/order` `{ "ids": [...] }` → reordena
+- `POST /arkflix/api/lists/{id}/items` `{ "ids": ["32hex" | "rom:<rid>"] }` → lista (repetido é ignorado; item que não existe ou de outro tipo: `400`)
+- `DELETE /arkflix/api/lists/{id}/items/{itemId}` → `204` (aceita `rom:<rid>`)
+- `PUT /arkflix/api/lists/{id}/order` `{ "ids": [...] }` → lista + `items` (os que não vieram ficam no fim)
 
-`Item` = `{ "id": "32hex", "rid": 42, "kind": "movie|series|episode|rom|album|track", "name", "year", "platform"?, "seriesName"?, "image": "/arkflix/api/items/{id}/image" ou "" }`.
+Lista de outro usuário: `404`. `count`/`kinds`/`items` contam só o que ainda
+está no acervo. Nos outros clientes aparecem as listas do usuário e as
+públicas (Subsonic `public=true`) que têm algo daquele cliente ou estão
+vazias.
 
-`GET /arkflix/api/items/{id}/image?maxWidth=` → a capa (mesma do Jellyfin/RomM), sem login? Não: com login.
+`Item` = `{ "id": "32hex", "rid": 42, "kind": "movie|series|episode|rom|album|track", "name", "year", "platform"? (slug), "seriesName"?, "image": "/arkflix/api/items/{id}/image" ou "" }`.
+
+`GET /arkflix/api/items/{id}/image?maxWidth=&maxHeight=` → a capa (mesma do
+Jellyfin/RomM: a do item, da série, do álbum ou um quadro do vídeo), com
+login. Sem imagem: `404`.

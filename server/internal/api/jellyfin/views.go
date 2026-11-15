@@ -77,10 +77,16 @@ func (c *rc) rootDto() itemDto {
 }
 
 // GET /Users/{userId}/Views e /UserViews
-func (s *Server) userViews(c *rc) {
+func (s *Server) userViews(c *rc) { s.viewList(c, true) }
+
+func (s *Server) viewList(c *rc, withPlaylists bool) {
 	out := []itemDto{}
 	for _, v := range s.views() {
 		out = append(out, c.viewDto(v))
+	}
+	// a pasta de playlists só aparece se tiver alguma
+	if ps, err := c.playlists(); withPlaylists && err == nil && len(ps) > 0 {
+		out = append(out, c.playlistsViewDto(len(ps)))
 	}
 	c.json(result(out, len(out), 0))
 }
@@ -105,7 +111,7 @@ func (s *Server) virtualFolders(c *rc) {
 }
 
 // GET /Library/MediaFolders
-func (s *Server) mediaFolders(c *rc) { s.userViews(c) }
+func (s *Server) mediaFolders(c *rc) { s.viewList(c, false) }
 
 // queryResult é o BaseItemDtoQueryResult.
 type queryResult struct {
