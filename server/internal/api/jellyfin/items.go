@@ -125,7 +125,7 @@ func (s *Server) resume(c *rc) {
 		}
 	}
 	if t := c.qs("SearchTerm"); t != "" {
-		q.and("i.name LIKE ?", "%"+t+"%")
+		q.and("fold(i.name) LIKE ?", "%"+store.Fold(t)+"%")
 	}
 	q.order = []string{"u.last_played DESC"}
 	rows, total, err := c.run(q)
@@ -389,7 +389,7 @@ func (c *rc) genreList(music bool) ([]string, error) {
 		}
 	}
 	if t := c.qs("SearchTerm"); t != "" {
-		q.and("g.value LIKE ?", "%"+t+"%")
+		q.and("fold(g.value) LIKE ?", "%"+store.Fold(t)+"%")
 	}
 	if t := c.qs("NameStartsWith"); t != "" {
 		q.and("g.value LIKE ?", t+"%")

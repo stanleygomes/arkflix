@@ -41,6 +41,8 @@ func TestItemsFilters(t *testing.T) {
 	eq(t, "start", l.StartIndex, 1)
 	l = e.list(base + "Recursive=true&IncludeItemTypes=Movie,Series&SearchTerm=pixel")
 	eq(t, "busca", joined(names(l.Items)), "Curta Pixel")
+	l = e.list(base + "Recursive=true&IncludeItemTypes=Movie,Series&SearchTerm=SERIE")
+	eq(t, "busca sem acento nem caixa", joined(names(l.Items)), "Série de Teste")
 	l = e.list(base + "Recursive=true&IncludeItemTypes=Movie&Years=2019,2021&SortBy=SortName")
 	eq(t, "anos", joined(names(l.Items)), "Curta Pixel|O Grande Teste")
 	l = e.list(base + "Recursive=true&IncludeItemTypes=Movie&NameStartsWith=f")

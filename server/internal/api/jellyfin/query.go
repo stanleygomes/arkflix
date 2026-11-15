@@ -182,10 +182,10 @@ func (c *rc) filters(q *query) {
 	uid := c.uid()
 	if t := strings.TrimSpace(c.qs("SearchTerm")); t != "" {
 		like := "%" + t + "%"
-		q.and("i.name LIKE ? OR i.sort_name LIKE ?", like, strings.ToLower(like))
+		q.and("fold(i.name) LIKE ? OR fold(i.sort_name) LIKE ?", store.Fold(like), store.Fold(like))
 	}
 	if t := c.qs("NameStartsWith"); t != "" {
-		q.and("i.sort_name LIKE ?", strings.ToLower(t)+"%")
+		q.and("fold(i.sort_name) LIKE ?", store.Fold(t)+"%")
 	}
 	if t := c.qs("NameStartsWithOrGreater"); t != "" {
 		q.and("i.sort_name >= ?", strings.ToLower(t))
