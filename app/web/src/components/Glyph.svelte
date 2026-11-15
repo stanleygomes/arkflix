@@ -5,40 +5,32 @@
 
   let { button, family }: { button: string; family: Family } = $props()
   const text = $derived(glyph(button, family))
-  const ps = $derived(family === 'playstation' && ['south', 'east', 'west', 'north'].includes(button))
 </script>
 
-<kbd class="glyph {family} {button}" class:round={['south', 'east', 'west', 'north'].includes(button) && family !== 'keyboard'} class:ps>{text}</kbd>
+<kbd class="glyph {family} {button}" class:round={['south', 'east', 'west', 'north'].includes(button) && family !== 'keyboard'}>{text}</kbd>
 
 <style>
+  /* Tecla/botão (kbd da noemi-ui): papel claro, borda de 2px, sombrinha
+     dura, letra datilografada. Botões de face do controle ficam redondos.
+     Sem cor por controle: o símbolo já diz qual é. */
   .glyph {
-    font-family: var(--font-title);
+    font-family: var(--font-mono);
     font-weight: 700;
-    font-size: 0.8rem;
-    min-width: 1.7em;
-    height: 1.7em;
-    padding: 0 0.35em;
+    font-size: 0.82rem;
+    line-height: 1;
+    min-width: 1.8em;
+    height: 1.8em;
+    padding: 0 0.4em;
     display: inline-grid;
     place-items: center;
-    background: #000;
-    color: var(--accent-2);
-    border: 2px solid currentColor;
-    box-shadow: 0 0 6px color-mix(in srgb, currentColor 60%, transparent);
+    background: var(--balloon);
+    color: var(--text);
+    border: 2px solid var(--outline);
+    border-radius: 4px 5px 4px 5px;
+    box-shadow: 2px 2px 0 var(--outline);
   }
   .round {
     border-radius: 50%;
     padding: 0;
-  }
-  .xbox.south { color: #5dff4f; }
-  .xbox.east { color: #ff5a6a; }
-  .xbox.west { color: #5c9dff; }
-  .xbox.north { color: #ffe600; }
-  .ps.south { color: #3b82f6; background: #111; }
-  .ps.east { color: #e5484d; background: #111; }
-  .ps.west { color: #e879b8; background: #111; }
-  .ps.north { color: #2fbf9a; background: #111; }
-  :global(body.high-contrast) .glyph {
-    background: #fff !important;
-    color: #000 !important;
   }
 </style>
