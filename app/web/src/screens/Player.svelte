@@ -16,6 +16,7 @@
   import { current, focusEl } from '../lib/nav'
   import { pauseMusic, play } from '../lib/sound'
   import { app, back } from '../lib/state.svelte'
+  import { tubeMoment } from '../lib/tube.svelte'
   import type { WatchStream } from '../lib/types'
   import { clock, displayName, episodeTag, resumeAt } from '../lib/watch'
 
@@ -35,6 +36,7 @@
 
   let hls: Hls | null = null
   let reported = false // o servidor já sabe que começou (esta sessão)
+  let lit = false // o tubo já ligou neste filme (só na abertura, não ao trocar o áudio)
   let hideTimer = 0
   let tickTimer = 0
   let countTimer = 0
@@ -77,6 +79,11 @@
       const s = await api.watchPlay(id, audio, at)
       stream = s
       subtitle = -1
+      if (!lit) {
+        lit = true
+        // começa o filme: o momento curto do tubo ligando, com o nome
+        tubeMoment('on', displayName(s.item))
+      }
       await tick()
       const from = at >= 0 ? at : resumeAt(s.start, s.duration)
       attach(s, from)
@@ -298,11 +305,14 @@
     {/each}
   </video>
 
-  {#if buffering && !failed}<p class="spin pixel" role="status">Carregando…</p>{/if}
+  {#if buffering && !failed}
+    <p class="spin" role="status"><span class="ring" aria-hidden="true"></span> <span class="meta">Carregando…</span></p>
+  {/if}
 
   {#if failed}
     <section class="error panel" role="alert">
-      <h2 class="pixel">Sem sinal</h2>
+      <span class="chip error">Erro</span>
+      <h2>Sem sinal</h2>
       <p>{failed}</p>
       <button class="btn primary" data-nav data-nav-default onclick={() => back()}><Icon name="back" /> Voltar</button>
     </section>
@@ -311,14 +321,14 @@
   <header class="head">
     <button class="btn" data-nav aria-label="Sair do vídeo" onclick={() => back()}><Icon name="back" /> Sair</button>
     <div class="names">
-      <h1 class="pixel" id="player-title">{heading}</h1>
-      {#if sub}<p class="muted">{sub}</p>{/if}
+      <h1 id="player-title">{heading}</h1>
+      {#if sub}<p class="meta">{sub}</p>{/if}
     </div>
   </header>
 
   {#if countdown}
     <section class="up-next panel" aria-live="polite">
-      <p>Próximo episódio em <strong>{countdown}</strong> s: {stream?.next ? `${episodeTag(stream.next)} · ${stream.next.name}` : ''}</p>
+      <p>Próximo episódio em <strong class="mono">{countdown}</strong> s: {stream?.next ? `${episodeTag(stream.next)} · ${stream.next.name}` : ''}</p>
       <div class="row">
         <button class="btn primary" data-nav data-next onclick={playNext}><Icon name="next" /> Assistir agora</button>
         <button class="btn" data-nav onclick={cancelNext}>Ficar aqui</button>
@@ -328,7 +338,8 @@
 
   <footer class="controls" role="group" aria-label="Controles do vídeo">
     <div class="timeline">
-      <span class="time">{clock(time)}</span>
+      <span class="time mono">{clock(time)}</span>
+      <!-- 🎬 rolo de filme: trilho com furos de engrenagem, mostarda o que já passou -->
       <div
         class="bar"
         data-nav
@@ -349,22 +360,23 @@
         }}
       >
         <span class="fill" style:width={`${pct}%`}></span>
+        <span class="holes" aria-hidden="true"></span>
         <span class="knob" style:left={`${pct}%`}></span>
       </div>
-      <span class="time">{clock(duration)}</span>
+      <span class="time mono">{clock(duration)}</span>
     </div>
     <div class="buttons">
-      <button class="cbtn" data-nav aria-label="Voltar 10 segundos" onclick={() => seek(-10)}><Icon name="rewind" /></button>
-      <button class="cbtn big" data-nav data-play data-nav-default aria-label={paused ? 'Tocar' : 'Pausar'} onclick={togglePlay}>
+      <button class="btn cbtn" data-nav aria-label="Voltar 10 segundos" onclick={() => seek(-10)}><Icon name="rewind" /></button>
+      <button class="btn primary cbtn big" data-nav data-play data-nav-default aria-label={paused ? 'Tocar' : 'Pausar'} onclick={togglePlay}>
         <Icon name={paused ? 'play' : 'pause'} size="1.5em" />
       </button>
-      <button class="cbtn" data-nav aria-label="Avançar 10 segundos" onclick={() => seek(10)}><Icon name="forward" /></button>
+      <button class="btn cbtn" data-nav aria-label="Avançar 10 segundos" onclick={() => seek(10)}><Icon name="forward" /></button>
       <span class="gap"></span>
-      <button class="cbtn wide" data-nav aria-label="Áudio e legendas" aria-expanded={panel} onclick={() => openPanel(!panel)}>
+      <button class="btn cbtn wide" data-nav aria-label="Áudio e legendas" aria-expanded={panel} onclick={() => openPanel(!panel)}>
         <Icon name="cc" /> <span>Áudio e legendas</span>
       </button>
       {#if stream?.next}
-        <button class="cbtn wide" data-nav onclick={playNext}><Icon name="next" /> <span>Próximo episódio</span></button>
+        <button class="btn cbtn wide" data-nav onclick={playNext}><Icon name="next" /> <span>Próximo episódio</span></button>
       {/if}
     </div>
   </footer>
@@ -372,7 +384,7 @@
   {#if panel && stream}
     <div class="tracks panel" data-nav-scope role="dialog" aria-modal="true" aria-label="Áudio e legendas">
       <div class="col">
-        <h2 class="pixel"><Icon name="audio" /> Áudio</h2>
+        <h2><Icon name="audio" /> Áudio</h2>
         <div role="radiogroup" aria-label="Áudio">
           {#each stream.audio as t (t.index)}
             <button class="opt" data-nav role="radio" aria-checked={t.index === stream.audioIndex} onclick={() => setAudio(t.index)}>{t.label || t.language || `Faixa ${t.index}`}</button>
@@ -382,7 +394,7 @@
         </div>
       </div>
       <div class="col">
-        <h2 class="pixel"><Icon name="cc" /> Legendas</h2>
+        <h2><Icon name="cc" /> Legendas</h2>
         <div role="radiogroup" aria-label="Legendas">
           <button class="opt" data-nav role="radio" aria-checked={subtitle === -1} onclick={() => setSubtitle(-1)}>Desligadas</button>
           {#each stream.subtitles as t, i (t.index)}
@@ -408,12 +420,14 @@
 </main>
 
 <style>
+  /* Sem tubo e sem linhas aqui: o CRT só aparece no momento de abrir
+     (tubeMoment). O filme e os controles ficam limpos. */
   .player {
     position: fixed;
     inset: 0;
     z-index: 5;
     background: #000;
-    color: #fff;
+    color: var(--text);
     overflow: hidden;
   }
   .player.hide {
@@ -436,8 +450,7 @@
   .controls,
   .help {
     position: absolute;
-    left: 0;
-    right: 0;
+    inset-inline: 0;
     transition: opacity 200ms steps(4);
   }
   .hide .head,
@@ -452,26 +465,34 @@
     align-items: center;
     gap: 1.5rem;
     padding: 1.5rem 2.5rem 3rem;
-    background: linear-gradient(to bottom, rgb(0 0 0 / 0.85), transparent);
+    background: linear-gradient(to bottom, color-mix(in srgb, var(--bg) 92%, transparent), transparent);
+  }
+  .names {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
   }
   .names h1 {
-    font-size: 1.4rem;
-    line-height: 1.3;
+    font-size: 1.9rem;
+    -webkit-text-stroke-width: 1px;
+    text-shadow: 2px 2px 0 var(--outline);
   }
-  .names .muted {
-    color: #ddd;
+  .names .meta {
+    color: var(--text);
+    font-size: 1rem;
   }
   .controls {
     bottom: 3.2rem;
-    padding: 3rem 2.5rem 0.5rem;
+    padding: 3rem 2.5rem 0.75rem;
     display: flex;
     flex-direction: column;
-    gap: 0.9rem;
-    background: linear-gradient(to top, rgb(0 0 0 / 0.9), transparent);
+    gap: 1rem;
+    background: linear-gradient(to top, color-mix(in srgb, var(--bg) 95%, transparent) 55%, transparent);
   }
   .help {
     bottom: 0;
-    background: rgb(0 0 0 / 0.9);
+    background: var(--bg);
+    border-top: var(--edge) solid var(--outline);
   }
   .timeline {
     display: flex;
@@ -480,80 +501,107 @@
   }
   .time {
     font-variant-numeric: tabular-nums;
+    font-weight: 700;
     font-size: 1.05rem;
     min-width: 4.5rem;
     text-align: center;
   }
-  /* fita: barra grossa de pixel, o foco acende a borda */
+  /* 🎬 rolo de filme: trilho escuro de película (cor do texto, como no
+     componente), furos de engrenagem em cima e embaixo, mostarda o que já
+     passou; a cabeça de leitura é um retângulo com sombra dura */
   .bar {
     position: relative;
     flex: 1;
-    height: 0.9rem;
-    background: rgb(255 255 255 / 0.22);
-    border: 2px solid #000;
-    box-shadow: 3px 3px 0 #000;
+    height: 1.6rem;
+    background: var(--text);
+    border: var(--edge) solid var(--outline);
+    border-radius: 4px;
+    box-shadow: var(--hard-sm);
     cursor: pointer;
   }
+  .bar:focus,
   .bar:focus-visible {
     outline: 3px solid var(--focus);
-    outline-offset: 3px;
+    outline-offset: 4px;
   }
   .fill {
     position: absolute;
-    inset: 0 auto 0 0;
+    inset-block: 0;
+    inset-inline-start: 0;
     background: var(--accent);
+  }
+  .holes {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background:
+      linear-gradient(var(--bg), var(--bg)) 0 3px / 100% 6px repeat-x,
+      linear-gradient(var(--bg), var(--bg)) 0 calc(100% - 3px) / 100% 6px repeat-x;
+    -webkit-mask: repeating-linear-gradient(90deg, #000 0 6px, transparent 6px 16px);
+    mask: repeating-linear-gradient(90deg, #000 0 6px, transparent 6px 16px);
   }
   .knob {
     position: absolute;
     top: 50%;
-    width: 1.3rem;
-    height: 1.3rem;
+    width: 0.9rem;
+    height: 2.4rem;
     transform: translate(-50%, -50%);
-    background: #fff;
-    border: 3px solid #000;
+    background: var(--bg);
+    border: var(--edge) solid var(--outline);
+    border-radius: 3px;
+    box-shadow: var(--hard-sm);
+  }
+  .bar:focus .knob {
+    border-color: var(--focus);
   }
   .buttons {
     display: flex;
     align-items: center;
-    gap: 0.9rem;
+    gap: 1rem;
   }
   .gap {
     flex: 1;
   }
   .cbtn {
-    min-width: 3.2rem;
-    height: 3.2rem;
-    display: inline-flex;
-    align-items: center;
+    min-width: 3.4rem;
+    min-height: 3.4rem;
     justify-content: center;
-    gap: 0.5rem;
-    padding: 0 0.7rem;
-    font: inherit;
-    font-weight: 700;
-    color: #fff;
-    background: rgb(20 18 30 / 0.85);
-    border: 2px solid rgb(255 255 255 / 0.35);
-    box-shadow: 3px 3px 0 #000;
-    cursor: pointer;
+    padding: 0 0.9rem;
   }
   .cbtn.big {
-    min-width: 4.2rem;
-    height: 4.2rem;
-    color: var(--on-accent);
-    background: var(--accent);
-    border-color: #000;
+    min-width: 4.4rem;
+    min-height: 4.4rem;
   }
-  .cbtn:hover {
-    border-color: var(--accent);
+  .cbtn:focus {
+    transform: translate(-2px, -2px);
+    box-shadow: var(--hard-up);
   }
+  /* painel aberto: o botão fica afundado */
+  .cbtn[aria-expanded='true'] {
+    transform: translate(4px, 4px);
+    box-shadow: none;
+  }
+  /* carregando: anel sóbrio parado + texto (nada gira em loop) */
   .spin {
     position: absolute;
     left: 50%;
     top: 50%;
     transform: translate(-50%, -50%);
-    font-size: 1.3rem;
-    animation: blink 1s steps(2) infinite;
-    text-shadow: 3px 3px 0 #000;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.6rem 1rem;
+    background: var(--bg);
+    border: var(--edge) solid var(--outline);
+    border-radius: var(--radii-sm);
+    box-shadow: var(--hard-sm);
+  }
+  .ring {
+    width: 1.5rem;
+    height: 1.5rem;
+    border-radius: 50%;
+    border: 3px solid color-mix(in srgb, var(--outline) 25%, transparent);
+    border-top-color: var(--outline);
   }
   .error,
   .up-next {
@@ -563,31 +611,45 @@
     transform: translate(-50%, -50%);
     display: flex;
     flex-direction: column;
+    align-items: flex-start;
     gap: 1rem;
     max-width: 34rem;
     z-index: 2;
   }
+  .error {
+    border-color: var(--danger);
+    box-shadow: 4px 4px 0 var(--danger);
+  }
+  .error h2 {
+    font-size: 1.25rem;
+  }
   .up-next {
     top: auto;
     left: auto;
-    right: 2.5rem;
-    bottom: 12rem;
+    inset-inline-end: 2.5rem;
+    bottom: 13rem;
     transform: none;
+  }
+  .up-next strong {
+    color: var(--accent);
+    font-size: 1.15em;
   }
   .row {
     display: flex;
-    gap: 0.8rem;
+    gap: 1rem;
     flex-wrap: wrap;
   }
+  /* áudio e legendas: painel sóbrio sobre o filme, sombra dura maior */
   .tracks {
     position: absolute;
-    right: 2.5rem;
-    bottom: 12rem;
+    inset-inline-end: 2.5rem;
+    bottom: 13rem;
     z-index: 3;
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 1rem 2rem;
-    min-width: 30rem;
+    gap: 1.25rem 2rem;
+    min-width: 32rem;
+    box-shadow: 8px 8px 0 var(--outline);
   }
   .tracks .btn {
     grid-column: 1 / -1;
@@ -596,34 +658,60 @@
   .col {
     display: flex;
     flex-direction: column;
-    gap: 0.6rem;
+    gap: 0.75rem;
   }
   .col h2 {
-    font-size: 1rem;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
     display: flex;
     gap: 0.5rem;
     align-items: center;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid color-mix(in srgb, var(--outline) 25%, transparent);
   }
   [role='radiogroup'] {
     display: flex;
     flex-direction: column;
     gap: 0.4rem;
   }
+  /* opção: bolinha que enche de mostarda quando escolhida */
   .opt {
-    text-align: left;
-    padding: 0.5rem 0.8rem;
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    min-height: 2.8rem;
+    text-align: start;
+    padding: 0.4rem 0.8rem;
     font: inherit;
     color: var(--text);
     background: none;
     border: 2px solid transparent;
+    border-radius: var(--radii-sm);
     cursor: pointer;
   }
+  .opt::before {
+    content: '';
+    flex: none;
+    width: 1.1rem;
+    height: 1.1rem;
+    border-radius: 50%;
+    border: var(--edge) solid var(--outline);
+    background: var(--bg);
+  }
   .opt[aria-checked='true'] {
-    color: var(--on-accent);
+    font-weight: 700;
+    background: color-mix(in srgb, var(--accent) 18%, transparent);
+  }
+  .opt[aria-checked='true']::before {
     background: var(--accent);
+    box-shadow: inset 0 0 0 2px var(--bg);
   }
   .opt:hover {
-    border-color: var(--accent);
+    border-color: var(--outline);
+  }
+  .opt:focus {
+    outline-offset: 0;
   }
   :global(.reduce-motion) .head,
   :global(.reduce-motion) .controls,
