@@ -59,7 +59,10 @@ func (m *Media) ServeFile(w http.ResponseWriter, r *http.Request, path string) {
 		http.NotFound(w, r)
 		return
 	}
-	w.Header().Set("Content-Type", MimeType(path))
+	// quem chamou pode já ter decidido o tipo (o RomM manda tudo como binário)
+	if w.Header().Get("Content-Type") == "" {
+		w.Header().Set("Content-Type", MimeType(path))
+	}
 	w.Header().Set("Accept-Ranges", "bytes")
 	http.ServeContent(w, r, fi.Name(), fi.ModTime(), f)
 }
