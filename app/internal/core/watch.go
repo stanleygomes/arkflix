@@ -89,6 +89,7 @@ func (s *Service) WatchStatus() WatchInfo { return watchInfo(s.watchLinkOf(s.cur
 // Accounts são as contas online vinculadas a um perfil.
 type Accounts struct {
 	Jellyfin WatchInfo `json:"jellyfin"`
+	Music    MusicInfo `json:"music"`
 	// RomM: um servidor pro app todo; Mine = é este perfil que sincroniza os saves.
 	RomM struct {
 		Connected bool   `json:"connected"`
@@ -106,6 +107,7 @@ func (s *Service) ProfileAccounts(profile string) (Accounts, error) {
 	}
 	var out Accounts
 	out.Jellyfin = watchInfo(s.watchLinkOf(profile))
+	out.Music = musicInfo(s.musicLinkOf(profile))
 	if conn, _ := s.remote.snapshot(); conn != nil {
 		out.RomM.Connected, out.RomM.Base, out.RomM.User, out.RomM.Mine = true, conn.Base, conn.User, conn.Owner == profile
 		if p, err := s.profiles.Get(conn.Owner); err == nil {

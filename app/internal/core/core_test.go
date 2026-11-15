@@ -72,7 +72,7 @@ func setup(t *testing.T) harness {
 	runner := &hooks.Runner{Dir: filepath.Join(env.Data, "scripts"), Log: filepath.Join(env.Data, "logs", "scripts.log")}
 	t.Cleanup(runner.Wait)
 	svc, err := core.New(core.Options{Version: "test", Mode: "web", Store: store, Emitter: rec, Pads: pads, Hooks: runner, MinPlay: -1,
-		Emulators: launcher.Spec{Bin: env.Bin, Cores: env.Cores}, Bluetooth: bt.NewFake()})
+		Emulators: launcher.Spec{Bin: env.Bin, Cores: env.Cores}, Bluetooth: bt.NewFake(), MusicDir: filepath.Join(env.Home, "Music", "arkflix")})
 	if err != nil {
 		t.Fatal(err)
 	}

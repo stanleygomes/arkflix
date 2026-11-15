@@ -80,3 +80,6 @@ func SetDownloadClock(s *Service, now func() time.Time) {
 
 // SetArkScanPoll encurta a espera entre as conferências do scan.
 func SetArkScanPoll(d time.Duration) { arkScanPoll = d }
+
+// SetMusicScanPoll encurta a espera entre as conferências do scan de músicas.
+func SetMusicScanPoll(d time.Duration) { musicScanPoll = d }

@@ -447,22 +447,28 @@ func (f *FakeArk) upload(w http.ResponseWriter, r *http.Request) {
 }
 
 // FakeArkServer é um arkflix-server falso inteiro: a API própria
-// (/arkflix/api), a do Jellyfin e a do RomM no mesmo endereço.
+// (/arkflix/api), a do Jellyfin, a do RomM e a do Subsonic (/rest) no mesmo
+// endereço.
 type FakeArkServer struct {
 	Ark      *FakeArk
 	Jellyfin *FakeJellyfin
 	RomM     *FakeRomM
+	Subsonic *FakeSubsonic
 }
 
 // NewFakeArkServer junta os três falsos.
 func NewFakeArkServer() *FakeArkServer {
-	return &FakeArkServer{Ark: NewFakeArk(), Jellyfin: NewFakeJellyfin(), RomM: NewFakeRomM()}
+	sub := NewFakeSubsonic()
+	sub.Type = "arkflix" // o que o ping do arkflix-server diz
+	return &FakeArkServer{Ark: NewFakeArk(), Jellyfin: NewFakeJellyfin(), RomM: NewFakeRomM(), Subsonic: sub}
 }
 
 func (f *FakeArkServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	switch p := r.URL.Path; {
 	case strings.HasPrefix(p, "/arkflix/"):
 		f.Ark.ServeHTTP(w, r)
+	case strings.HasPrefix(p, "/rest/"):
+		f.Subsonic.ServeHTTP(w, r)
 	case strings.HasPrefix(p, "/api/"), strings.HasPrefix(p, "/assets/"):
 		f.RomM.ServeHTTP(w, r)
 	default:

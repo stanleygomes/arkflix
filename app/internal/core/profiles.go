@@ -217,6 +217,7 @@ func (s *Service) DeleteProfile(id, pin string) error {
 		return err
 	}
 	s.forgetWatch(id)
+	s.forgetMusic(id)
 	return nil
 }
 

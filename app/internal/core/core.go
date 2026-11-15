@@ -169,6 +169,8 @@ type Options struct {
 	Bluetooth bt.Backend
 	// Update: atualização automática. Zero = não olha sozinho (testes).
 	Update UpdateOptions
+	// MusicDir: onde ficam as músicas baixadas. Vazio = ~/Music/arkflix.
+	MusicDir string
 	// Now: relógio (testes do limite infantil). Vazio = time.Now.
 	Now func() time.Time
 }
@@ -198,6 +200,7 @@ type Service struct {
 	wiki     *wikiState
 	watch    *watchState // filmes e séries (Jellyfin) por perfil
 	ark      *arkState   // arkflix-server: /info em cache por endereço
+	music    *musicState // músicas (Subsonic/Navidrome) por perfil
 
 	umu    sync.RWMutex
 	u      *user // perfil em uso
@@ -269,6 +272,7 @@ func New(opt Options) (*Service, error) {
 	s.wiki = newWikiState(opt.Cache, opt.Version)
 	s.watch = newWatchState(s)
 	s.ark = newArkState()
+	s.music = newMusicState(s)
 	if opt.Pads != nil {
 		opt.Pads.Subscribe(func(e gamepad.Event) { s.opt.Emitter.Emit("pad", e) })
 		opt.Pads.OnPadsChanged(func(p []gamepad.Pad) { s.opt.Emitter.Emit("pads", p) })
@@ -398,6 +402,8 @@ type Boot struct {
 	Platform   string `json:"platform"`
 	// Watch: o perfil tem conta do Jellyfin (filmes e séries).
 	Watch WatchInfo `json:"watch"`
+	// Music: o perfil tem conta de músicas (Navidrome/Subsonic).
+	Music MusicInfo `json:"music"`
 }
 
 // Bootstrap devolve o estado inicial.
@@ -408,7 +414,7 @@ func (s *Service) Bootstrap() (Boot, error) {
 		Version: s.opt.Version, Mode: s.opt.Mode, Systems: catalog.Systems,
 		Games: s.views(), Settings: s.GetSettings(), Input: m, RetroPad: input.RetroPad,
 		Pads: s.Pads(), Running: s.Running(), NativePads: gamepad.Native && !s.opt.BrowserPads, Platform: runtime.GOOS,
-		Watch: s.WatchStatus(),
+		Watch: s.WatchStatus(), Music: s.MusicStatus(),
 	}
 	var err error
 	if b.Lists, err = u.lists.All(); err != nil {

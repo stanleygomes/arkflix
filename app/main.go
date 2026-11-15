@@ -163,7 +163,7 @@ func main() {
 	if f.web != "" {
 		broker := httpapi.NewBroker()
 		svc, err := core.New(core.Options{Version: version, Mode: "web", Store: store, Pads: pads, Emitter: broker, MinPlay: minPlay(f), Cache: cacheDir(f), Emulators: emu,
-			BrowserPads: f.fixture != "" && os.Getenv("ARKFLIX_FIXTURE_BROWSER_PADS") == "1", Bluetooth: bluetooth(f), Update: fixtureUpdate(f)})
+			BrowserPads: f.fixture != "" && os.Getenv("ARKFLIX_FIXTURE_BROWSER_PADS") == "1", Bluetooth: bluetooth(f), Update: fixtureUpdate(f), MusicDir: musicDir(f)})
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -182,6 +182,8 @@ func main() {
 			// arkflix-server falso: Jellyfin, RomM e a API própria (/arkflix/api)
 			// no mesmo endereço; stanley (admin) / senha123
 			mux.Handle("/fake-arkflix/", http.StripPrefix("/fake-arkflix", fixture.NewFakeArkServer()))
+			// Navidrome falso (Subsonic): stanley (admin) e ana / senha123
+			mux.Handle("/fake-navidrome/", http.StripPrefix("/fake-navidrome", fixture.NewFakeSubsonic()))
 			// RetroAchievements falso: stanley / senha123, Super Mario World
 			ra := fixture.NewFakeRA()
 			ra.Prefix = "/fake-ra"
@@ -206,6 +208,14 @@ func bluetooth(f flags) bt.Backend {
 		return bt.NewFake()
 	}
 	return bt.New()
+}
+
+// musicDir: músicas baixadas (~/Music/arkflix); no ambiente falso, dentro dele.
+func musicDir(f flags) string {
+	if f.fixture != "" {
+		return filepath.Join(f.fixture, "home", "Music", "arkflix") // a pasta pessoal do fixture.Env
+	}
+	return ""
 }
 
 // cacheDir: capas baixadas e bancos do libretro (~/.cache/arkflix no
