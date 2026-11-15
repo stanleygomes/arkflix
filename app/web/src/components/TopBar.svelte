@@ -51,7 +51,7 @@
       <span aria-hidden="true"><Glyph button="east" family={glyphFamily()} /></span>
     </button>
   {/if}
-  <div class="brand pixel" aria-hidden="true">ARK<span>FLIX</span></div>
+  <div class="brand" aria-hidden="true">Ark<span>flix</span></div>
   <div class="middle">{@render children?.()}</div>
   <div class="right">
     {#if app.update?.available && !isKids()}
@@ -71,7 +71,7 @@
       </button>
       {#if me}
         <!-- o perfil abre "Você": perfil, configurações, estatísticas, energia -->
-        <button class="profile-btn" data-nav aria-label={`Você: ${me.name} (perfil e configurações)`} style:--profile={me.color} onclick={() => go({ name: 'you' })}>
+        <button class="profile-btn" data-nav aria-label={`Você: ${me.name} (perfil e configurações)`} onclick={() => go({ name: 'you' })}>
           <Avatar avatar={me.avatar} color={me.color} size="2.4rem" />
           <span class="who sub">{me.name}</span>
         </button>
@@ -80,7 +80,7 @@
     {/if}
     <span class="status" class:on={app.pads.length > 0} role="img" aria-label={padLabel} title={padLabel}>
       <Icon name="pad" size="1.3em" />
-      {#if app.pads.length}<span class="count hud">{app.pads.length}</span>{/if}
+      {#if app.pads.length}<span class="count">{app.pads.length}</span>{/if}
     </span>
     {#if app.mode === 'desktop'}
       <!-- energia sempre à mão: minimizar, tela cheia, fechar -->
@@ -97,114 +97,32 @@
 </header>
 
 <style>
-  /* fonte de texto: versão é número pequeno, em pixel não dava pra ler */
-  .upd-btn {
-    display: inline-flex;
-    gap: 0.6rem;
-    align-items: center;
-    height: 3rem;
-    padding: 0 1rem;
-    font: inherit;
-    font-weight: 700;
-    font-size: 1rem;
-    color: #000;
-    background: var(--focus);
-    border: 3px solid var(--focus);
-    box-shadow: 0 0 12px var(--focus);
-    cursor: pointer;
-    animation: upd-pulse 2s steps(2) infinite;
-  }
-  .upd-btn .ver {
-    font-weight: 400;
-  }
-  .upd-btn:focus-visible,
-  .upd-btn:hover {
-    border-color: #fff;
-  }
-  @keyframes upd-pulse {
-    50% {
-      box-shadow: 0 0 2px var(--focus);
-    }
-  }
-  :global(.reduce-motion) .upd-btn {
-    animation: none;
-  }
-  .dot {
-    position: absolute;
-    top: 0.25rem;
-    right: 0.25rem;
-    width: 0.6rem;
-    height: 0.6rem;
-    background: var(--focus);
-  }
-  /* blocos iguais, como as caixas dos consoles */
-  .icon-btn {
-    position: relative;
-    width: 3rem;
-    height: 3rem;
-    display: grid;
-    place-items: center;
-    color: var(--text);
-    background: color-mix(in srgb, var(--surface) 70%, transparent);
-    border: 2px solid color-mix(in srgb, var(--text) 18%, transparent);
-    cursor: pointer;
-  }
-  .icon-btn:hover,
-  .profile-btn:hover {
-    border-color: var(--accent);
-  }
-  .profile-btn {
-    position: relative;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.7rem;
-    height: 3rem;
-    padding: 0 1rem 0 0.25rem;
-    font: inherit;
-    color: #fff;
-    background: color-mix(in srgb, var(--profile) 22%, var(--surface));
-    border: 2px solid color-mix(in srgb, var(--profile) 70%, transparent);
-    cursor: pointer;
-  }
-  .who {
-    font-size: 1.05rem;
-    max-width: 9rem;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-  .power {
-    color: #ff6b81;
-  }
-  .sep {
-    width: 2px;
-    height: 2rem;
-    background: color-mix(in srgb, var(--text) 18%, transparent);
-  }
   /* arrasta a janela pela barra (desktop sem moldura); o que é clicável não */
   .top {
     --wails-draggable: drag;
     display: flex;
     align-items: center;
     gap: 1.5rem;
-    padding: 1rem 2.5rem;
+    padding: 1rem 2.5rem 0.9rem;
     min-height: 4.5rem;
-  }
-  .brand {
-    font-family: var(--font-title);
-    font-size: 1.9rem;
-    font-size-adjust: 0.42;
-    letter-spacing: 0.08em;
-    color: #fff;
-    text-shadow: 0 0 6px var(--accent), 0 0 16px var(--accent), 3px 3px 0 #000;
-  }
-  .brand span {
-    color: var(--accent);
+    border-bottom: var(--edge) solid color-mix(in srgb, var(--outline) 22%, transparent);
   }
   .top :global(button),
   .top :global(a),
   .top :global(input) {
     --wails-draggable: no-drag;
+  }
+  /* marca: letra de cartaz, sem brilho */
+  .brand {
+    font-family: var(--font-title);
+    font-size: 1.8rem;
+    line-height: 1;
+    white-space: nowrap;
+    letter-spacing: 0.02em;
+    color: var(--text);
+  }
+  .brand span {
+    color: var(--accent);
   }
   .middle {
     flex: 1;
@@ -213,49 +131,144 @@
   .right {
     display: flex;
     align-items: center;
-    gap: 0.8rem;
+    gap: 0.9rem;
+  }
+  /* botões da barra: sóbrios (cartão, borda reta, sombra dura pequena) */
+  .icon-btn,
+  .back-btn,
+  .profile-btn,
+  .upd-btn {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+    height: 3rem;
+    font-family: var(--font-label);
+    font-size: 0.85rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    line-height: 1;
+    color: var(--text);
+    background: var(--surface);
+    border: var(--edge) solid var(--outline);
+    border-radius: var(--radii-sm);
+    box-shadow: var(--hard-sm);
+    cursor: pointer;
+    transition:
+      transform var(--t) var(--ease),
+      box-shadow var(--t) var(--ease);
+  }
+  .icon-btn:hover,
+  .back-btn:hover,
+  .profile-btn:hover,
+  .upd-btn:hover,
+  .top [data-nav]:focus {
+    transform: translate(-2px, -2px);
+    box-shadow: var(--hard-up);
+  }
+  .icon-btn:active,
+  .back-btn:active,
+  .profile-btn:active,
+  .upd-btn:active {
+    transform: translate(3px, 3px);
+    box-shadow: none;
+  }
+  .icon-btn {
+    width: 3rem;
+    padding: 0;
+  }
+  .back-btn {
+    padding: 0 0.9rem;
+  }
+  /* tecla do atalho (kbd da noemi-ui), sem a cor do botão do controle */
+  .back-btn :global(kbd.glyph) {
+    font-family: var(--font-mono);
+    font-weight: 700;
+    font-size: 0.75rem;
+    line-height: 1;
+    min-width: 1.6rem;
+    height: 1.6rem;
+    padding: 0 0.35rem;
+    color: var(--text);
+    background: var(--balloon);
+    border: 2px solid var(--outline);
+    border-radius: 4px 5px 4px 5px;
+    box-shadow: 1px 1px 0 var(--outline);
+  }
+  .back-btn :global(kbd.glyph.round) {
+    padding: 0;
+    width: 1.6rem;
+    border-radius: 50%;
+  }
+  .profile-btn {
+    padding: 0 1rem 0 0.25rem;
+  }
+  /* versão nova = ação: mostarda, parado (nada pisca em loop) */
+  .upd-btn {
+    padding: 0 1rem;
+    color: var(--on-accent);
+    background: var(--accent);
+  }
+  .upd-btn .ver {
+    font-family: var(--font-mono);
+    font-weight: 700;
+    text-transform: none;
+    letter-spacing: 0;
+  }
+  /* aviso novo na Central: ponto mostarda no canto */
+  .dot {
+    position: absolute;
+    top: -0.45rem;
+    inset-inline-end: -0.45rem;
+    width: 0.9rem;
+    height: 0.9rem;
+    background: var(--accent);
+    border: 2px solid var(--bg);
+    border-radius: 50%;
+  }
+  .who {
+    font-size: 0.85rem;
+    max-width: 9rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .sep {
+    width: var(--edge);
+    height: 2rem;
+    background: color-mix(in srgb, var(--outline) 22%, transparent);
   }
   .status {
     display: inline-flex;
     align-items: center;
     gap: 0.35rem;
-    color: color-mix(in srgb, var(--text) 45%, transparent);
+    color: var(--muted);
   }
-  /* controle conectado acende */
+  /* controle conectado = ok (verde-azulado) */
   .status.on {
-    color: #5dc44f;
+    color: var(--accent-2);
   }
   .count {
-    font-size: 1.2rem;
+    font-family: var(--font-mono);
+    font-weight: 700;
+    font-size: 1.1rem;
   }
   .when {
     display: grid;
     justify-items: end;
     line-height: 1;
-    gap: 0.25rem;
+    gap: 0.3rem;
   }
   .clock {
-    font-size: 1.55rem;
-    color: #fff;
+    font-size: 1.45rem;
+    font-variant-numeric: tabular-nums;
+    color: var(--text);
   }
   .date {
+    font-family: var(--font-hud);
     font-size: 0.8rem;
+    letter-spacing: 0.04em;
     color: var(--muted);
-  }
-  .back-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.6rem;
-    height: 3rem;
-    padding: 0 0.9rem;
-    font: inherit;
-    font-size: 1.05rem;
-    color: #fff;
-    background: color-mix(in srgb, var(--surface) 70%, transparent);
-    border: 2px solid color-mix(in srgb, var(--text) 18%, transparent);
-    cursor: pointer;
-  }
-  .back-btn:hover {
-    border-color: var(--accent);
   }
 </style>

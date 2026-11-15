@@ -24,36 +24,37 @@
 </nav>
 
 <style>
+  /* nav sóbria: rótulos em Bevan, a seção atual com o traço mostarda embaixo */
   .sections {
     display: inline-flex;
-    gap: 0.3rem;
-    padding: 0.25rem;
-    background: color-mix(in srgb, var(--surface) 75%, transparent);
-    border: 2px solid color-mix(in srgb, var(--text) 18%, transparent);
-    box-shadow: 3px 3px 0 #000;
+    gap: 0.4rem;
   }
-  /* fonte de texto: nome curto precisa ser lido de longe */
   .section {
-    font-family: var(--font-body);
-    font-weight: 700;
-    font-size: 1.05rem;
-    letter-spacing: 0.03em;
-    color: #d8cfe6;
+    font-family: var(--font-label);
+    font-size: 0.85rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--muted);
     background: none;
-    border: 2px solid transparent;
-    padding: 0.35rem 0.8rem;
+    border: none;
+    border-bottom: var(--edge) solid transparent;
+    border-radius: 0;
+    padding: 0.55rem 0.55rem 0.45rem;
     display: inline-flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: 0.55rem;
     cursor: pointer;
     white-space: nowrap;
+    transition:
+      color var(--t) var(--ease),
+      border-color var(--t) var(--ease);
   }
   .section:hover {
-    border-color: var(--accent);
+    color: var(--text);
+    border-bottom-color: var(--outline);
   }
-  /* a seção atual vira a "fita" acesa */
   .section[aria-current='page'] {
-    color: var(--on-accent);
-    background: var(--accent);
+    color: var(--text);
+    border-bottom-color: var(--accent);
   }
 </style>
